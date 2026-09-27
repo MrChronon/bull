@@ -1,0 +1,47 @@
+BULL v0.24.0.0 — Benchmarking & Usage of Local LLMs
+=========================================
+
+Релиз BULL Registry добавляет безопасные versioned benchmark packs. Стандартный
+CHAT Core загружается из bull_chat_core@1.0.0 без изменения prompts и scorers.
+Исправлен запуск через штатный Windows PowerShell 5.1.
+
+УСТАНОВКА
+---------
+
+  Install-BULL-v0.24.0.0.cmd
+
+Основной клиент:
+
+  BULL-v0.24.0.0.cmd
+
+Benchmark Lab:
+
+  BULL-Benchmark-Lab-v0.24.0.0.cmd
+
+Agent Lab:
+
+  BULL-Agent-Lab-v0.24.0.0.cmd
+
+В релизе используются только launchers с именем BULL; старые алиасы удалены.
+Подробности: Docs\MIGRATION_TO_BULL.md.
+
+ПРОВЕРКА
+--------
+
+  Run-Tests.ps1
+  Test-Public-Release.ps1 -AuditReleaseCandidatesOnly
+
+Benchmark prompts, scorers, runtime pipeline и legacy schema identifiers в этом
+релизе не изменены. Chats, Runtime, Benchmarks, Exports, Workspace, ключи и
+client_debug.log нельзя публиковать.
+
+Исходный код BULL распространяется по лицензии MIT. Полный текст: LICENSE.
+Модели, движки и внешние benchmark packs сохраняют собственные лицензии.
+
+Документация:
+
+  Docs\USER_GUIDE.md
+  Docs\RELEASE_NOTES_0.24.0.0.md
+  Docs\BENCHMARK_PACK_AUTHORING.md
+  Docs\SECURITY.md
+  Docs\AI_CONTEXT.yaml

@@ -1,0 +1,30 @@
+# Runtime data: never publish
+Chats/
+Benchmarks/
+Exports/
+Workspace/
+Runtime/
+__pycache__/
+*.py[cod]
+client_debug.log
+ui_settings.json
+
+# Credentials and local connection material
+.env
+.env.*
+*.pem
+*.key
+*.ppk
+id_rsa
+id_rsa.*
+id_ed25519
+id_ed25519.*
+known_hosts
+connections.json
+*.llm-access*
+connection*.private.json
+
+# Local release artifacts
+*.zip
+*.sha256.txt
+

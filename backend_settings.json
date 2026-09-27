@@ -1,0 +1,82 @@
+{
+  "version": 3,
+  "active": "ollama",
+  "target_mode": "local",
+  "remote_access": {
+    "mode": "manual",
+    "connect_timeout": 4,
+    "selected_connection_id": "",
+    "profiles": {
+      "lan": {
+        "enabled": false,
+        "kind": "lan",
+        "host": "",
+        "port": 22,
+        "user": "",
+        "identity_file": "",
+        "description": "Локальная сеть / SSH alias"
+      },
+      "vpn": {
+        "enabled": false,
+        "kind": "vpn",
+        "host": "",
+        "port": 22,
+        "user": "",
+        "identity_file": "",
+        "description": "Удалённый узел через Tailscale/WireGuard/VPN"
+      },
+      "direct": {
+        "enabled": false,
+        "kind": "direct_ssh",
+        "host": "",
+        "port": 22,
+        "user": "",
+        "identity_file": "",
+        "description": "Прямой SSH через публичный IP и проброс порта; только key/agent auth"
+      }
+    },
+    "auto_order": [
+      "lan",
+      "vpn",
+      "direct"
+    ],
+    "last_working_profile": ""
+  },
+  "ollama": {
+    "transport": "local",
+    "base_url": "http://127.0.0.1:11434",
+    "ssh_host": "",
+    "local_port": 11435,
+    "remote_port": 11434,
+    "auto_tunnel": false
+  },
+  "llama_cpp": {
+    "enabled": false,
+    "transport": "external",
+    "ssh_host": "",
+    "local_port": 18080,
+    "remote_port": 8080,
+    "base_url": "http://127.0.0.1:8080",
+    "server_path": "",
+    "models_dir": "",
+    "models_max": 1,
+    "autoload": true,
+    "n_gpu_layers": "auto",
+    "flash_attn": "auto",
+    "parallel": 1,
+    "batch_size": 2048,
+    "ubatch_size": 512,
+    "cache_type_k": "f16",
+    "cache_type_v": "f16",
+    "spec_type": "none",
+    "spec_draft_n_max": 3,
+    "spec_draft_p_min": 0.0,
+    "backend_sampling": false,
+    "reasoning_format": "deepseek",
+    "reasoning_budget": -1,
+    "allow_insecure_external": false,
+    "allow_unauthenticated_external": false,
+    "api_key_env": "BULL_LLAMA_API_KEY",
+    "extra_args": []
+  }
+}

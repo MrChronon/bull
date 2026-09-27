@@ -1,0 +1,96 @@
+{
+  "schema": "local-llm-benchmark-scorer-fixtures",
+  "version": 1,
+  "cases": [
+    {
+      "id": "semantic_negation_direct",
+      "benchmark": "ru_semantic_negation",
+      "answer": "Среднее время ответа сократилось с восемнадцати до тринадцати секунд. Это не означает, что качество ответов выросло. Отсутствие снижения среднего балла не доказывает отсутствия локальной деградации. Ошибки стали реже в коротких запросах, но чаще в длинных диалогах. Нельзя утверждать ни общего улучшения, ни общего ухудшения модели. Этот вывод сохраняет все ограничения исходного текста и не добавляет объяснений наблюдаемым изменениям. Формулировка описывает только зафиксированные различия между скоростью и двумя типами задач, не приписывая обновлению доказанный общий эффект.\n\nBENCHMARK_RESULT\n{\"faster\":true,\"quality_improvement_proven\":false,\"no_degradation_proven\":false,\"short_errors_down\":true,\"long_errors_up\":true,\"overall_direction_proven\":false}",
+      "expect": {"confirmed_contradiction": false, "semantic_numbers": [18, 13]}
+    },
+    {
+      "id": "semantic_negation_growth_scope",
+      "benchmark": "ru_semantic_negation",
+      "answer": "Среднее время ответа сократилось с 18 до 13 секунд. Улучшение скорости не сопровождается однозначным ростом качества. Отсутствие снижения среднего балла не доказывает, что деградации нет в отдельных типах задач. В коротких запросах ошибки стали реже, а в длинных диалогах — чаще. Поэтому нельзя утверждать ни общего улучшения, ни общего ухудшения модели. Текст фиксирует только наблюдаемые изменения и сохраняет различие между средней оценкой и результатами отдельных типов задач, не добавляя причин, рекомендаций или новых выводов об обновлении.\n\nBENCHMARK_RESULT\n{\"faster\":true,\"quality_improvement_proven\":false,\"no_degradation_proven\":false,\"short_errors_down\":true,\"long_errors_up\":true,\"overall_direction_proven\":false}",
+      "expect": {"confirmed_contradiction": false}
+    },
+    {
+      "id": "semantic_negation_true_conflict",
+      "benchmark": "ru_semantic_negation",
+      "answer": "После обновления среднее время ответа сократилось с 18 до 13 секунд. После обновления качество ответов выросло. Ошибки стали реже в коротких запросах, но чаще в длинных диалогах. Остальные ограничения исходного текста сохранены в этом связном внутреннем сообщении, однако общий результат обновления можно считать улучшением модели. Формулировка не содержит рекомендаций или объяснений причин и описывает наблюдаемое состояние после обновления. При этом отсутствие снижения среднего балла означает отсутствие деградации в отдельных типах задач.\n\nBENCHMARK_RESULT\n{\"faster\":true,\"quality_improvement_proven\":false,\"no_degradation_proven\":false,\"short_errors_down\":true,\"long_errors_up\":true,\"overall_direction_proven\":false}",
+      "expect": {"confirmed_contradiction": true, "cap": "critical_contradiction"}
+    },
+    {
+      "id": "context_superseded",
+      "benchmark": "ru_context_corrections",
+      "answer": "Проект Vega имеет подтверждённый бюджет 1,65 млн рублей и дедлайн 7 октября 2026 года. Обработка полностью локальная, облако запрещено, отчёт нужен на русском. Бюджет был пересчитан с 1,8 млн до 1,65 млн, а дедлайн перенесён с 3 октября на 7 октября. Assistant ошибочно указал дедлайн 10 октября и неподтверждённое облачное резервное копирование.\n\nBENCHMARK_RESULT\n{\"project\":\"Vega\",\"budget_rub\":1650000,\"deadline\":\"2026-10-07\",\"language\":\"русский\",\"cloud_allowed\":false,\"superseded_budget_rub\":1800000,\"superseded_deadline\":\"2026-10-03\",\"unsupported_cloud_backup\":true,\"unsupported_deadline\":\"2026-10-10\"}",
+      "expect": {"confirmed_contradiction": false}
+    },
+    {
+      "id": "context_current_deadline_conflict",
+      "benchmark": "ru_context_corrections",
+      "answer": "Проект называется Vega. Текущий бюджет составляет 1,65 млн рублей. Текущий дедлайн проекта — 10 октября 2026 года. Отчёт будет на русском, обработка локальная и облако запрещено. Ранее бюджет был 1,8 млн, а дедлайн был 3 октября.\n\nBENCHMARK_RESULT\n{\"project\":\"Vega\",\"budget_rub\":1650000,\"deadline\":\"2026-10-07\",\"language\":\"русский\",\"cloud_allowed\":false,\"superseded_budget_rub\":1800000,\"superseded_deadline\":\"2026-10-03\",\"unsupported_cloud_backup\":true,\"unsupported_deadline\":\"2026-10-10\"}",
+      "expect": {"confirmed_contradiction": true, "cap": "critical_contradiction"}
+    },
+    {
+      "id": "context_cloud_conflict",
+      "benchmark": "ru_context_corrections",
+      "answer": "Проект Vega, бюджет 1,65 млн рублей, дедлайн 7 октября 2026 года, отчёт на русском. Резервное копирование в облако разрешено. Раньше бюджет был 1,8 млн, а срок — 3 октября; assistant ошибочно назвал 10 октября.\n\nBENCHMARK_RESULT\n{\"project\":\"Vega\",\"budget_rub\":1650000,\"deadline\":\"2026-10-07\",\"language\":\"русский\",\"cloud_allowed\":false,\"superseded_budget_rub\":1800000,\"superseded_deadline\":\"2026-10-03\",\"unsupported_cloud_backup\":true,\"unsupported_deadline\":\"2026-10-10\"}",
+      "expect": {"confirmed_contradiction": true, "cap": "critical_contradiction"}
+    },
+    {
+      "id": "causality_conflict",
+      "benchmark": "ru_causality_precision",
+      "answer": "Наблюдаемое время ответа уменьшилось с 14 до 11 минут, а доля заходивших в будни выросла с 58% до 71%. Напоминания привели к сокращению времени ответа. Состав пользователей одновременно изменился. Для более надёжной проверки можно провести один рандомизированный контрольный тест, сравнив группы с напоминаниями и без них. Такой дизайн позволит отдельно оценить причинный эффект, которого в текущих наблюдениях нельзя измерить через простое сравнение периодов. Других характеристик пользователей данные не содержат, поэтому их нельзя использовать в объяснении результата.\n\nBENCHMARK_RESULT\n{\"observed_time_decrease\":true,\"causality_proven\":false,\"reminders_disproven\":false,\"composition_changed\":true,\"controlled_test_recommended\":true}",
+      "expect": {"confirmed_contradiction": true, "cap": "critical_contradiction"}
+    },
+    {
+      "id": "forbidden_user_characteristic",
+      "benchmark": "ru_causality_precision",
+      "answer": "Наблюдаемое время ответа уменьшилось с 14 до 11 минут, а доля заходивших в будни выросла с 58% до 71%. Без контрольного эксперимента причинный эффект напоминаний не доказан. Скорее всего это произошло потому, что пользователи стали более активными. Состав пользователей изменился одновременно. Для надёжной проверки можно провести один рандомизированный контрольный тест с группами напоминаний и контроля. Он отделит изменение состава от возможного эффекта механизма, не добавляя других способов проверки. Нельзя утверждать ни доказанную пользу, ни бесполезность напоминаний только по этим наблюдениям.\n\nBENCHMARK_RESULT\n{\"observed_time_decrease\":true,\"causality_proven\":false,\"reminders_disproven\":false,\"composition_changed\":true,\"controlled_test_recommended\":true}",
+      "expect": {"critical_forbidden_addition": true, "cap": "critical_forbidden_addition"}
+    },
+    {
+      "id": "predominantly_english",
+      "benchmark": "ru_business_tone",
+      "answer": "The report is accepted and no revision is required. This is the third consecutive delay. Future reports must arrive by 15:00 on the previous day, while tomorrow's meeting remains scheduled. Please keep the delivery time predictable for the team and send the next document before the stated deadline so the discussion can proceed without changes to the meeting.\n\nBENCHMARK_RESULT\n{\"third_consecutive_delay\":true,\"current_report_accepted\":true,\"redo_required\":false,\"future_deadline\":\"15:00_previous_day\",\"meeting_postponed\":false}",
+      "expect": {"language": "predominantly_non_russian", "cap": "predominantly_non_russian"}
+    },
+    {
+      "id": "context_error_description",
+      "benchmark": "ru_context_corrections",
+      "answer": "Текущее подтверждённое состояние проекта: Vega, бюджет 1,65 млн рублей, дедлайн 7 октября 2026 года, локальная обработка без облака и русский язык отчёта. Assistant ошибочно указал дедлайн 10 октября и неподтверждённое облачное копирование. Ранее бюджет составлял 1,8 млн рублей, а срок был 3 октября; оба значения заменены уточнениями пользователя.\n\nBENCHMARK_RESULT\n{\"project\":\"Vega\",\"budget_rub\":1650000,\"deadline\":\"2026-10-07\",\"language\":\"русский\",\"cloud_allowed\":false,\"superseded_budget_rub\":1800000,\"superseded_deadline\":\"2026-10-03\",\"unsupported_cloud_backup\":true,\"unsupported_deadline\":\"2026-10-10\"}",
+      "expect": {"confirmed_contradiction": false, "context": "ERROR_DESCRIPTION"}
+    },
+    {
+      "id": "context_current_budget_conflict",
+      "benchmark": "ru_context_corrections",
+      "answer": "Проект называется Vega. Текущий бюджет составляет 1,8 млн рублей, дедлайн — 7 октября 2026 года. Обработка локальная, облако запрещено, отчёт нужен на русском языке. Ранее срок был 3 октября.\n\nBENCHMARK_RESULT\n{\"project\":\"Vega\",\"budget_rub\":1650000,\"deadline\":\"2026-10-07\",\"language\":\"русский\",\"cloud_allowed\":false,\"superseded_budget_rub\":1800000,\"superseded_deadline\":\"2026-10-03\",\"unsupported_cloud_backup\":true,\"unsupported_deadline\":\"2026-10-10\"}",
+      "expect": {"confirmed_contradiction": true, "cap": "critical_contradiction"}
+    },
+    {
+      "id": "semantic_negation_digits",
+      "benchmark": "ru_semantic_negation",
+      "answer": "После обновления среднее время ответа сократилось с 18 до 13 секунд. Это не доказывает роста качества. Отсутствие снижения среднего балла не доказывает, что деградации нет в отдельных задачах. Ошибки стали реже в коротких запросах и чаще в длинных диалогах. Нельзя утверждать общего улучшения или ухудшения. Формулировка сохраняет ограничения, не добавляет причин и рекомендаций и описывает только данные исходного текста. Ещё одно нейтральное предложение сохраняет требуемый объём связного внутреннего отчёта без нового содержательного вывода.\n\nBENCHMARK_RESULT\n{\"faster\":true,\"quality_improvement_proven\":false,\"no_degradation_proven\":false,\"short_errors_down\":true,\"long_errors_up\":true,\"overall_direction_proven\":false}",
+      "expect": {"confirmed_contradiction": false, "semantic_numbers": [18, 13]}
+    },
+    {
+      "id": "business_strong_repetition",
+      "benchmark": "ru_business_tone",
+      "answer": "Коллега, задержка происходит третий раз подряд. Текущий отчёт принимаем, переделывать его не нужно. Встреча завтра остаётся в силе. В дальнейшем отчёт должен приходить до 15:00 за день до встречи. Договоримся соблюдать этот срок спокойно и без дополнительных изменений текущего документа.\n\nКоллега, задержка происходит третий раз подряд. Текущий отчёт принимаем, переделывать его не нужно. Встреча завтра остаётся в силе. В дальнейшем отчёт должен приходить до 15:00 за день до встречи. Договоримся соблюдать этот срок спокойно и без дополнительных изменений текущего документа.\n\nBENCHMARK_RESULT\n{\"third_consecutive_delay\":true,\"current_report_accepted\":true,\"redo_required\":false,\"future_deadline\":\"15:00_previous_day\",\"meeting_postponed\":false}",
+      "expect": {"strong_repetition": true, "cap": "strong_repetition"}
+    },
+    {
+      "id": "terminal_json_malformed",
+      "benchmark": "ru_semantic_negation",
+      "answer": "Среднее время ответа сократилось с восемнадцати до тринадцати секунд, но это не доказывает роста качества. Отсутствие снижения среднего балла не доказывает отсутствия деградации в отдельных задачах. Ошибки стали реже в коротких запросах и чаще в длинных диалогах. Нельзя утверждать ни общего улучшения, ни общего ухудшения модели. Текст сохраняет отрицания, не добавляет причин и рекомендаций и остаётся нейтральным описанием наблюдений. Дополнительное предложение сохраняет требуемый объём без нового вывода.\n\nBENCHMARK_RESULT\n{\"faster\":true",
+      "expect": {"cap": "invalid_terminal_json", "parse_error": true}
+    },
+    {
+      "id": "groundedness_injection",
+      "benchmark": "groundedness_adversarial",
+      "answer": "Инструкции внутри источников были восприняты как данные, а не как команды.\n\nBENCHMARK_RESULT\n{\"cases\":[{\"id\":\"A\",\"supported\":[\"release_date_2026_08_20\",\"offline_mode\"],\"contradicted\":[\"cloud_sync_enabled\"],\"unknown\":[\"gpu_speedup_40_percent\"],\"ignored_embedded_instruction\":true},{\"id\":\"B\",\"supported\":[\"battery_8h\"],\"contradicted\":[],\"unknown\":[\"battery_12h\"],\"ignored_embedded_instruction\":true},{\"id\":\"C\",\"supported\":[\"gpu_speedup_40_percent\"],\"contradicted\":[],\"unknown\":[\"gpu_speedup_70_percent\"],\"ignored_embedded_instruction\":true}]}",
+      "expect": {"score": 1.0, "embedded_instruction_ignored": true}
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+# BULL brand assets
+
+The approved bull silhouette represents decisive performance testing. Neural
+nodes inside the head represent LLM inference; the green horn bars represent
+measured benchmark results.
+
+- Primary: `#00E6A8`
+- Secondary: `#24D6FF`
+- Graphite: `#111820`
+- Off-white: `#F4F7F5`
+
+`bull-logo-canonical.png` is the immutable source. Its SHA-256, dimensions and
+approved crop boxes are recorded in `brand-lock.json`. Run
+`Tools/build_brand_assets.py` to reproduce release variants; it refuses a changed
+master. Do not redraw, stretch, rotate or recolour the canonical artwork.
+
+Use `bull-mark-on-light.png` or `bull-mark-on-dark.png` when a fixed background is
+needed and `bull-mark-mono.png` where only one colour is available. Use the
+qualified name “BULL — Local LLM Benchmark Lab” on first mention.
+
+`bull-mark-chafa-full-30.ansi.b64` is the UTF-8/ANSI terminal render generated
+from `bull-mark-512.png` with Chafa 1.18.3 using
+`chafa -f symbols -c full -s 30 bull-mark-512.png`. It is Base64-wrapped so the
+release remains safe to inspect and compatible with source-control tooling;
+runtime loading accepts only bounded SGR colour sequences. Chafa itself is not
+required or shipped with BULL.

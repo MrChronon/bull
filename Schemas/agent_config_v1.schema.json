@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BULL Agent configuration v1 (private)",
+  "type": "object",
+  "required": ["schema", "schema_version", "config"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {"const": "local-llm-agent-config"},
+    "schema_version": {"const": 1},
+    "config": {
+      "type": "object",
+      "required": ["model", "backend_context", "agent_context", "sampling"],
+      "properties": {
+        "model": {"type": "string", "minLength": 1, "maxLength": 200},
+        "name": {"type": "string", "maxLength": 160},
+        "backend_context": {"type": "integer", "minimum": 2048, "maximum": 1048576},
+        "agent_context": {"type": "integer", "minimum": 1024, "maximum": 1048576},
+        "sampling": {
+          "type": "object",
+          "required": ["temperature", "top_p", "top_k", "min_p", "repeat_penalty", "num_predict", "seed"],
+          "additionalProperties": false,
+          "properties": {
+            "temperature": {"type": "number", "minimum": 0, "maximum": 2},
+            "top_p": {"type": "number", "minimum": 0, "maximum": 1},
+            "top_k": {"type": "integer", "minimum": 0, "maximum": 1000},
+            "min_p": {"type": "number", "minimum": 0, "maximum": 1},
+            "repeat_penalty": {"type": "number", "minimum": 0.1, "maximum": 3},
+            "num_predict": {"type": "integer", "minimum": 1, "maximum": 32768},
+            "seed": {"type": "integer", "minimum": 0, "maximum": 2147483647}
+          }
+        },
+        "system_prompt": {"type": "string", "maxLength": 100000},
+        "instructions": {"type": "string", "maxLength": 100000},
+        "project_rules": {"type": "string", "maxLength": 100000},
+        "tool_safety_rules": {"type": "string", "maxLength": 100000},
+        "rules_name": {"type": "string", "maxLength": 160},
+        "rules_version": {"type": "string", "maxLength": 160},
+        "context_strategy": {"enum": ["compact", "stop"]},
+        "compaction_keep_turns": {"type": "integer", "minimum": 1, "maximum": 10},
+        "max_steps": {"type": "integer", "minimum": 1, "maximum": 200},
+        "timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 7200},
+        "request_timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 1800},
+        "loop_limit": {"type": "integer", "minimum": 2, "maximum": 20}
+      },
+      "additionalProperties": false,
+      "$comment": "Runtime additionally requires backend_context-agent_context >= num_predict and finite numbers."
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "compiled_sha256": "fac104c63a9471e34188ddbca8804511557331578b9a0767a4902ba85a5a2349",
+  "content_sha256": "f8d4c9d628382c6ddd45d4a736c9b8061e60f93ef5c8e2a55f79a29c965be383",
+  "gold_sha256": "e371ab6c7554e0303a246730f07d153a54772c160e81490f8aa1e1e556560ac3",
+  "manifest_sha256": "9705c19559bda6e3bb4bb32e8a00eca6984ef58625ddb66659589e10cb2941b3",
+  "pack": {
+    "id": "bull_chat_core",
+    "version": "1.0.0"
+  },
+  "schema": "bull-benchmark-pack-lock",
+  "schema_version": 1
+}

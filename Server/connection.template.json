@@ -1,0 +1,19 @@
+{
+  "schema": "local-llm-connection",
+  "version": 1,
+  "id": "my-lab",
+  "name": "My BULL Lab",
+  "route": "overlay",
+  "transport": "ssh",
+  "endpoint": {
+    "host": "replace-with-vpn-ip-or-dns",
+    "port": 22,
+    "user": "replace-with-windows-user"
+  },
+  "backend": {
+    "type": "ollama",
+    "remote_port": 11434
+  },
+  "host_public_key": "replace-with-server-host-public-key",
+  "host_key_fingerprint": "SHA256:replace-with-server-host-key-fingerprint"
+}

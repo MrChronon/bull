@@ -1,0 +1,769 @@
+schema: bull-llm-ai-context
+schema_version: 1
+document_version: 0.24.0.0
+client_version: v0.24.0.0
+documentation_version: v0.24.0.0
+updated: 2026-09-27
+language: ru
+
+project:
+  name: BULL
+  qualified_name: BULL — Benchmark Lab
+  legacy_name: Local LLM
+  release: v0.24.0.0
+  frozen_stable_baseline: v17.3.2
+  platform:
+    primary: Windows 11
+    runtimes:
+      - Python 3
+      - PowerShell
+      - Ollama
+      - llama.cpp HTTP server
+  purpose:
+    - local and remote LLM chat client
+    - reproducible Benchmark Lab
+    - versioned transfer of tested profiles from Lab to Client
+  license_status: MIT
+
+agent_rules:
+  mandatory_reads:
+    - AGENTS.md
+    - Docs/AI_CONTEXT.yaml
+    - Docs/USER_GUIDE.md
+  constraints:
+    - no big-bang rewrite
+    - preserve behavior with regression tests before extraction
+    - do not change benchmark prompts, scorers, and runtime pipeline in one change
+    - keep native model metrics separate from client recovery metrics
+    - run Run-Tests.ps1 after changes
+    - update USER_GUIDE and AI_CONTEXT for a release
+    - verify manifest, cp1251, startup integration, and ZIP
+    - never release Chats, Runtime, Benchmarks, keys, or local secrets
+    - prefer small verifiable commits in a clean repository
+
+release_layout:
+  bundle: BULL-v0.24.0.0-Bundle
+  core: bull_client_v0.24.0.0.py
+  launchers:
+    client: BULL-v0.24.0.0.cmd
+    benchmark_lab: BULL-Benchmark-Lab-v0.24.0.0.cmd
+    agent_lab: BULL-Agent-Lab-v0.24.0.0.cmd
+  apps:
+    client: Apps/bull_client_app_v0_24_0_0.py
+    benchmark_lab: Apps/benchmark_lab_v0_24_0_0.py
+    agent_lab: Apps/agent_benchmark_v0_24_0_0.py
+  public_namespace: Shared/bull_llm
+  shared_package: Shared/bull_llm
+  schemas_directory: Schemas
+  tests: Tests/benchmark_regression.py
+  test_entrypoint: Run-Tests.ps1
+  release_entrypoint: Build-Release.ps1
+  public_gate: Test-Public-Release.ps1
+
+architecture:
+  client:
+    responsibility:
+      - chat sessions
+      - FAST, THINK, and ULTIMATE workflows
+      - explicit import of tested profiles
+      - local export controlled by user
+    must_not:
+      - silently import benchmark settings
+      - assume a private remote server
+  benchmark_lab:
+    responsibility:
+      - benchmark catalog and user prompt workflow
+      - deterministic run matrix and balanced order
+      - scoring, checkpoint, resume, summary, and visual report
+      - versioned tested profile artifact
+  shared:
+    responsibility:
+      - schema constants
+      - tested profile validation
+      - stable fingerprints
+      - typed backend, evaluation, telemetry, artifact, report, and migration contracts
+    public_modules:
+      - Shared.bull_llm.core
+      - Shared.bull_llm.runtime
+      - Shared.bull_llm.evaluation
+      - Shared.bull_llm.evaluation.registry
+      - Shared.bull_llm.reports
+      - Shared.bull_llm.schemas
+      - Shared.bull_llm.profiles
+      - Shared.bull_llm.telemetry
+      - Shared.bull_llm.backends
+      - Shared.bull_llm.compatibility
+    compatibility_policy:
+      - bull_llm is the only runtime and public Python namespace
+      - historical artifact schemas remain readable through bull_llm.compatibility
+      - production runtime remains on the established path until incremental parity migration
+      - legacy schema identifiers remain unchanged in the T2 release
+      - legacy artifacts are read-only and never silently migrated
+  core_t2:
+    contracts:
+      - BackendAdapter
+      - BenchmarkPack
+      - Runner
+      - Scorer
+      - Verifier
+      - TelemetryProvider
+      - ArtifactStore
+      - ReportRenderer
+      - SchemaMigration
+    invariants:
+      - model discovery has no UI dependency
+      - inference events contain no terminal rendering
+      - evaluation imports no runtime transport
+      - reports do not recalculate scores
+      - artifact writes are rooted bounded finite-json and atomic
+      - ollama and llama_cpp adapters share one contract suite
+      - current benchmark prompts scorers recovery and runtime options are unchanged
+  brand:
+    canonical_master: Assets/Brand/bull-logo-canonical.png
+    lock: Assets/Brand/brand-lock.json
+    canonical_sha256: 60d91a700b9cd91ad3fd6ad598287a8e2cccd067f2ab0ed7515dd52af44b2269
+    derivation: crop_resize_only_no_redraw
+  backend_boundary:
+    supported:
+      - ollama
+      - llama_cpp
+    local_default: true
+    remote_preferred_transport: pinned SSH tunnel
+    inference_api_remote_bind: loopback_only
+
+public_defaults:
+  backend: ollama
+  target_mode: local
+  automatic_private_connection: false
+  bundled_endpoint: false
+  bundled_username: false
+  bundled_key: false
+  bundled_token: false
+  fresh_launch_opens_ssh: false
+
+offline_first_startup:
+  main_menu_requires_backend: false
+  offline_available:
+    - backend configuration
+    - help and diagnostics
+    - saved benchmark HTML reports
+  runtime_guarded_actions:
+    - new chat
+    - new benchmark inference
+  selected_backend_auto_fallback: false
+  connection_selection_applies_immediately: true
+
+connection_model:
+  public_connection_bundle:
+    contains:
+      - connection kind
+      - host placeholder or user-provided host
+      - SSH port
+      - host fingerprint
+      - backend kind
+    must_not_contain:
+      - private key bytes
+      - password
+      - API token
+  client_private_state:
+    path: Runtime/connections.json
+    release_excluded: true
+    private_key_selected_by_user: true
+  security_controls:
+    - SSH batch mode and key-only client path
+    - host and option-injection validation
+    - external plain HTTP rejected by default
+    - redirects blocked before forwarding Bearer authorization
+    - local inference does not open SSH
+    - SSH TCP keepalive and bounded ServerAlive failure detection
+  direct_internet:
+    public_surface: one router TCP forward to Windows OpenSSH only
+    mapping: "PUBLIC_HOST:EXTERNAL_SSH_PORT -> SERVER_LAN_IP:22"
+    router_automation: forbidden
+    upnp: forbidden
+    dmz: forbidden
+    inference_ports_exposed: false
+    required_external_test: mobile or other non-home network
+
+ssh_alias_onboarding:
+  menu_path: connections > ssh alias
+  input: bounded OpenSSH Host alias
+  resolver: ssh -G -- ALIAS without shell
+  imported_fields:
+    - HostName
+    - User
+    - Port
+    - first existing private IdentityFile
+    - UserKnownHostsFile paths
+  trust:
+    known_hosts_exact_match: reuses existing OpenSSH trust including hashed hosts
+    no_match: requires independently verified SHA256 fingerprint
+    installed_connection: writes a separate pinned per-connection known_hosts
+  rejected:
+    - option-like or whitespace alias
+    - ProxyCommand
+    - ProxyJump
+    - unresolved tokenized paths
+    - missing IdentityFile
+  private_key_bytes_read: false
+  guide: Docs/SSH_QUICKSTART.md
+
+terminal_brand:
+  startup_mark: pre-rendered Chafa 1.18.3 full-color pixel bull at width 30
+  display_count: once per process
+  source_asset: Assets/Brand/bull-mark-512.png
+  render_asset: Assets/Brand/bull-mark-chafa-full-30.ansi.b64
+  runtime_chafa_dependency: false
+  terminal_escape_policy: SGR color only with bounded monochrome fallback
+  encoding: UTF-8 console bootstrap with forced-cp1251 release regression
+  benchmark_behavior_changed: false
+
+localization:
+  startup_selector: English or Russian before backend initialization
+  default_language: en
+  persisted_in: ui_settings.json
+  english_catalog: Assets/Localization/ui.en.json
+  excluded_from_translation:
+    - benchmark prompts
+    - scorers and reference answers
+    - model responses
+    - raw benchmark artifacts
+
+ui_theme:
+  default: bull_brand
+  brand_colors:
+    primary: '#00E6A8'
+    action: '#24D6FF'
+    graphite: '#111820'
+    text: '#F4F7F5'
+
+benchmark:
+  frozen_policy:
+    first_stage_prompt_changes: forbidden
+    scorer_and_runtime_same_change: forbidden
+  recommended_chat_preset:
+    suite: chat_final
+    tests: 12
+    seeds:
+      - 42
+      - 43
+      - 44
+    pipeline: native
+    reasoning: false
+    fair_compare: true
+    order_policy: balanced
+    execution_plan:
+      unit: job-level counterbalanced waves
+      model_order: rotated across waves
+      test_order: rotated across models and waves
+      seeds: latin-square distributed across early middle and late test positions
+      model_loads: once per model per wave
+      legacy_checkpoint: preserves its original execution_layout on resume
+  chat_core_tests:
+    - russian_editing
+    - dialogue_state
+    - groundedness
+    - groundedness_adversarial
+    - instruction
+    - ru_context_corrections
+    - ru_causality_precision
+    - ru_semantic_negation
+    - ru_business_tone
+    - ru_debureaucratize
+    - logic_constraints
+    - simpson
+  category_weights:
+    russian_language_style: 0.30
+    dialogue_context: 0.20
+    groundedness: 0.20
+    instruction_semantic_precision: 0.15
+    general_reasoning: 0.15
+
+benchmark_sampling:
+  default_source: benchmark_override
+  supported_sources:
+    benchmark_override:
+      behavior: sampling parameters are resolved by the benchmark and sent through the API
+      backward_compatible: true
+    model_profile:
+      backend: ollama
+      profile_endpoint: /api/show
+      behavior: Modelfile sampling parameters are recorded but omitted from request options
+      unresolved_parameter: backend_default_unresolved
+    per_model:
+      behavior: model_sampling values are explicit request options with per_model_override provenance
+  profile_snapshot:
+    identity:
+      - model name
+      - model digest
+      - Ollama version
+    invalidated_when:
+      - digest changes
+      - Ollama version changes
+    fields:
+      - architecture
+      - quantization
+      - parsed parameters
+      - template
+      - capabilities
+      - retrieved_at
+  tracked_layers:
+    - resolved configuration
+    - sent runtime options
+    - parameter provenance
+  strict_fair_compare:
+    experimental_parameters_are_allowed_to_differ: true
+    all_other_runtime_fields_must_match: true
+  preflight_errors:
+    SAMPLING_EXPERIMENT_HAS_NO_VARIATION: declared sampling experiment has no effective variation
+    MODEL_PROFILE_SAMPLING_OVERRIDDEN: profile mode leaked sampling fields into API options
+  profile_ctx_source: current Ollama profile num_ctx when available
+  old_invalid_run_rescoreable: false
+
+benchmark_prompt_policy:
+  visible_prompts_changed_in_v0_21_0_0: false
+  custom_prompt_store:
+    index: Benchmarks/prompts.json
+    immutable_versions: Benchmarks/Prompts
+    edit_behavior: create_new_version
+    checkpoint_snapshot: exact_version_and_sha256
+
+scorer_revision:
+  scope:
+    - groundedness_adversarial
+    - ru_context_corrections
+    - instruction
+  groundedness_adversarial:
+    scorer_version: 2
+    terminal_json_roots:
+      - object
+      - array
+    markdown_json_fence: accepted
+    trailing_text_after_terminal_json: rejected
+    semantic_case_id_normalization:
+      examples:
+        - A
+        - CASE A
+      affects_exact_schema: false
+    wrong_envelope_behavior: content_credit_preserved_but_schema_penalized
+    prose_json_consistency: scored_separately
+    weights:
+      semantic: 0.75
+      terminal_json: 0.10
+      exact_schema: 0.10
+      prose_consistency: 0.05
+  ru_context_corrections:
+    claim_context_revision: 4
+    neutral_reported_value:
+      - утверждение о
+      - утверждение об
+    rule: reported or rebutted obsolete values are not current assertions
+  instruction:
+    scorer_revision: 2
+    required_prefixes:
+      - "Преимущество:"
+      - "Риск:"
+    line_numbering: optional
+    latin_language_check: independent
+  critical_reason_policy:
+    groundedness_embedded_instruction_failure: only_when_embedded_instruction_was_followed
+    prose_contradiction_reason: groundedness_prose_contradiction
+
+completion_semantics:
+  record_schema_version: 12
+  summary_schema_version: 11
+  facets:
+    generation_completed:
+      meaning: backend produced a nonempty answer without technical truncation or interruption
+    structural_completion:
+      meaning: mandatory result or code blocks are present and parseable
+    terminal_json_valid:
+      meaning: terminal BENCHMARK_RESULT JSON is syntactically valid when required
+    schema_exact:
+      meaning: structured value uses the exact required envelope and fields
+    task_completed:
+      formula: generation_completed and structural_completion is not false and schema_exact is not false
+  compatibility:
+    completed_field_v11: alias of generation_completed
+    old_record_reading: preserve historical completed when no explicit v11 facet exists
+    offline_rescore: writes explicit v11 facets without inference
+  recovery_trigger: task_completed_is_false
+  score_adjustments:
+    completion_adjusted: uses generation_completed
+    task_adjusted: uses task_completed
+  terminal_columns:
+    GEN: native_generation_completion_rate
+    TASK: native_task_completion_rate
+    REC.USED: recovery_rate
+
+quality_attribution:
+  native_model_quality:
+    source: primary answer before recovery
+    headline_field: headline_model_score
+  final_system_quality:
+    source: selected answer after allowed recovery or finalizer
+    headline_field: headline_assisted_score
+  forbidden_merge: true
+  client_transport_retries_in_model_score: false
+
+tested_profile_handoff:
+  canonical_identity: importable client profile plus model digest and backend
+  deduplicates_benchmark_specific_fingerprints: true
+  evidence_provenance: plural effective_profile_fingerprints retained
+  seed_policy: seeds remain evidence and are not imported into working chat
+  selection_status: tested_not_ranked
+  automatic_model_recommendation: false
+
+native_recovery_provenance:
+  requested_enabled: preserved from the selected benchmark profile
+  effective_enabled: false for native unless a required final answer is explicit
+  suppressed_reason: native_pipeline
+  model_quality_effect: none
+
+statistics:
+  reported:
+    - mean
+    - sample SD
+    - min
+    - max
+    - worst seed
+    - rank stability
+    - 95 percent confidence intervals
+  warm_definition: actual load duration classification
+  pareto:
+    uncertainty_aware: true
+    insufficient_samples_status: explicit
+  quality_speed_combination:
+    headline: false
+    diagnostic_only: true
+
+terminal_analytics:
+  generated_after_benchmark: true
+  table:
+    - Native score
+    - Final system score
+    - critical count
+    - GEN
+    - TASK
+    - REC.USED
+    - warm tok per second
+    - VRAM
+  details:
+    - full worst test name
+    - SD, min, max, and worst seed
+    - localized critical reasons
+    - hidden critical count after first five
+  comparative_insights:
+    - observed Native leader and margin
+    - uncertainty interval overlap
+    - observed warm speed leader
+    - lowest seed SD
+    - average generation and task completion
+    - recovery, structure, and schema diagnostics
+    - category leaders
+  mandatory_caveat: descriptive current-run comparison, not general superiority proof
+
+visual_report:
+  filename: "*_report.html"
+  offline: true
+  javascript: false
+  external_urls: false
+  embeds_prompts: false
+  embeds_raw_answers: false
+  escapes_model_and_test_labels: true
+  shows:
+    - Native and Final system quality separately
+    - Generation and Task contract separately
+    - warm speed
+    - category table
+    - per-test summary
+    - uncertainty warnings
+
+resume:
+  checkpoint_schema_version: 9
+  atomic_write: true
+  on_transport_failure: pause_suite
+  resume_sequence:
+    - stop stale transport
+    - clear endpoint cache
+    - bounded reconnect
+    - validate model catalog
+    - replay only unfinished active run from its start
+    - preserve completed records
+  finalization_only_requires_backend: false
+  audit_events:
+    - resume_requested
+    - reconnect_failed
+    - connection_restored
+    - resumed_job_completed
+  diagnostics_sanitized:
+    - URLs
+    - SSH usernames
+    - home paths
+
+artifacts:
+  benchmark_outputs:
+    - raw JSON
+    - raw CSV
+    - summary JSON
+    - summary CSV
+    - checkpoint JSON
+    - tested profiles JSON
+    - offline HTML report
+  raw_json_share_safe_by_default: false
+  html_contains_metrics_only: true
+  rescore:
+    inference_rerun: false
+    source_integrity: SHA256_checked_before_and_after
+    portable_source_metadata: basename_only
+
+privacy_release_policy:
+  forbidden_paths:
+    - Chats
+    - Runtime
+    - Benchmarks
+    - Exports
+  forbidden_files:
+    - client_debug.log
+    - ui_settings.json
+    - .env
+    - known_hosts
+  forbidden_content:
+    - private keys
+    - API tokens
+    - passwords
+    - real endpoints
+    - personal usernames
+    - home-directory paths
+    - e-mail addresses
+    - private model paths
+    - raw private benchmark results
+  clean_repository_rule: publish audited extracted ZIP as a new repository, not private development history
+
+schemas:
+  benchmark_config: 3
+  benchmark_spec: 9
+  benchmark_record: 12
+  benchmark_summary: 11
+  benchmark_checkpoint: 9
+  tested_profile: 1
+  prompt_index: 2
+  user_benchmark: 1
+
+verification:
+  current_offline_regression: 349/349
+  clean_python_no_site_packages: pass
+  runtime_third_party_python_dependencies: none_on_windows
+  scorer_gold_set: 15/15
+  real_run_offline_audit:
+    records: 216
+    target_records: 54
+    target_generation_completed: 54
+    target_task_completed: 31
+    target_schema_mismatch: 15
+    inference_rerun: false
+    source_sha256_unchanged: true
+  required_release_gates:
+    - Python compile
+    - Run-Tests.ps1 in UTF-8
+    - forced cp1251 startup and tests
+    - PowerShell parse
+    - public source audit
+    - staged release audit
+    - manifest hash verification
+    - ZIP content and hash verification
+
+startup_regression_hotfix:
+  symptom: configured installations could fail closed before backend connection
+  root_cause: runtime regression compared mutable backend_settings.json with the immutable public release template
+  correction:
+    - startup regression validates code defaults without requiring user settings to remain factory defaults
+    - Build-Release.ps1 and Test-Public-Release.ps1 remain authoritative for the clean public template
+    - terminal failure output is a bounded root-cause excerpt
+    - complete regression output is written only to local client_debug.log
+  benchmark_prompts_changed: false
+  scorers_changed: false
+  runtime_inference_pipeline_changed: false
+
+packaging_and_brand_cleanup_hotfix:
+  symptoms:
+    - clean ZIP failed to import Shared.bull_llm.runtime
+    - Client installer role failed inside the shortcut script on Windows PowerShell 5.1
+  root_causes:
+    - release exclusion matched every directory named Runtime instead of only the private root Runtime
+    - shortcut script contained non-ASCII text without a UTF-8 BOM
+  corrections:
+    - root private data exclusions are distinct from anywhere cache exclusions
+    - Shared/bull_llm/runtime is mandatory and verified in the ZIP
+    - all shipped PowerShell scripts are ASCII-only or UTF-8 BOM and parse-checked
+    - Client installer has an isolated shortcut integration regression
+    - duplicate legacy launchers and the old runtime Python package are removed
+    - Shared.bull_llm is the only executable Python namespace
+  preserved_compatibility:
+    - historical JSON schema identifiers remain readable
+    - benchmark prompts and scorers are unchanged
+    - inference and recovery pipeline is unchanged
+
+known_limits:
+  - Agent Benchmark MVP is Ollama tools only with a versioned restricted Python repair fixture
+  - Agent Tuning automated matrices and arbitrary isolated build environments are deferred
+  - Agent context before requests and after tools is estimated; measured prompt counts remain separate
+  - Agent results are local metrics; private configurations and workspaces must never be published
+  - automatic scorers do not replace expert review
+  - one run cannot establish general model quality
+  - rank stability and uncertainty require multiple comparable seeds
+  - remote security depends on correct OS, SSH or VPN, and firewall configuration
+  - ULTIMATE is bounded and may still fail a task contract
+  - repository source is distributed under MIT; third-party models, engines, and packs retain their own licenses
+
+agent_benchmark:
+  maturity: MVP
+  module: Shared/bull_llm/agent_benchmark
+  guide: Docs/AGENT_BENCHMARK.md
+  entrypoint: Apps/agent_benchmark_v0_24_0_0.py
+  launcher: BULL-Agent-Lab-v0.24.0.0.cmd
+  menu_path: home > tests (2) > agent (5)
+  config_schema: local-llm-agent-config
+  run_schema: local-llm-agent-run
+  schema_version: 1
+  agent_version: 1.0.0
+  task_id: PYTHON_CART_FIX_001
+  task_version: 1
+  verifier_version: 1
+  fixture_checks: 12
+  execution: restricted AST interpreter in an isolated trusted verifier process
+  arbitrary_generated_python_execution: false
+  allowed_tools: [list_files, read_file, write_file, run_tests]
+  writable_task_files: [pricing.py]
+  tool_payload_logging: false
+  hidden_reasoning_logging: false
+  telemetry_store: Benchmarks/Agents
+  private_config: Runtime/agent_configuration.json
+  runtime_options: explicit sampling plus num_ctx
+  instruction_footprint: estimated tokens plus exact SHA256 of rules
+  measured_context: Ollama prompt_eval_count after each request
+  other_context_points: estimated and explicitly labeled
+  compaction: deterministic bounded complete-cycle history pruning
+  resource_scopes: [client, backend, client_and_backend]
+  unavailable_resource: null
+  retry: counted human intervention
+  crash_recovery: new clean attempt with parent_run_id; no mid-task automatic resume
+  comparison: independent metrics; no universal score or automatic best configuration
+  tests: Tests/agent_benchmark_regression.py
+  startup_gate: full suite; cache includes all Shared, Apps, Tests Python/JSON paths and hashes
+
+hardening_audit:
+  version: v0.19.0.1 (retained)
+  report: Docs/AUDIT_v0.24.0.0.md
+  new_tests: Tests/hardening_regression.py
+  benchmark_prompts_changed: false
+  scorer_functions_changed: false
+  agent_fixture_verifier_changed: false
+  generation_options_changed: false
+  http_transport_changed: true
+  incomplete_stream_policy: raise ConnectionResetError; existing checkpoint pauses and replays unfinished run
+  redirects: blocked
+  http_limits_bytes: {json: 16777216, line: 1048576, stream: 67108864}
+  total_deadline_scope: body after headers; connection uses urllib idle timeout
+  sampler: asynchronous; no synchronous final probe; discard samples after stop
+  resource_finish: last observed sample, not an exact completion-time observation
+  storage: unique temporary file, fsync, atomic replace; no interprocess run lock
+  public_package: exact manifest set; every ZIP entry hash verified
+  high_remaining_risk: legacy executable CODE scorers and chat python_exec are not OS sandboxed
+  confirmed_static_gap: retention AST gate permits numpy.lib.format.open_memmap; candidate was not executed
+  required_followup: isolated executor in a separate migration; preserve prompt and scoring contracts
+  live_backend_and_wan_validation: not performed
+
+ux_v0_20_0_0:
+  modules: [Shared.bull_llm.terminal_ui, Shared.bull_llm.connections_ui]
+  home: {1: chat, 2: tests, 3: connections, 4: settings_and_help, 5: commands, 0: exit}
+  command_entry: slash commands accepted directly at home; preserve argument case
+  menu_alias: /menu and /home share one surface
+  colors: {action: cyan, body: white, success: green, warning: yellow, error: red}
+  statuses_without_color: explicit text labels
+  advanced: backend lifecycle, legacy routes, benchmark expert operations, agent sampling and instructions
+  ssh_wizard:
+    steps: [endpoint, private_key_path, independent_host_fingerprint, preview_and_confirm]
+    authentication: existing authorized private key; encrypted keys require ssh-agent
+    host_scan: untrusted Ed25519 key via ssh-keyscan; never accept without independent fingerprint
+    local_ollama_required: false
+    changes_server_or_router: false
+    remember_policy: explicit opt-in; never copy key bytes; no auto-selection in fresh build
+    windows_vault: '%LOCALAPPDATA%/BULL/connections/<id>.json'
+    vault_privacy: user-profile metadata, not encrypted; never publish; not inside release
+    old_bundle_import: Runtime/connections.json or manually configured remote_access profiles; preview first
+    mismatched_existing_id: reject overwrite
+  agent_summary: intermediate build_test_failure is separate from application/transport events; null sensors stay unknown
+  unchanged: [benchmark prompts, scorers, runtime pipeline, generation options, Agent runner and task verifier]
+  tests: Tests/ux_regression.py
+
+gpu_lab:
+  maturity: experimental v1
+  guide: Docs/GPU_LAB.md
+  menu: home > tests > 7
+  command: /gpu
+  module: Shared/bull_llm/gpu_lab
+  server: Server/Gpu-Lab-Worker.ps1
+  platform: Windows + Ollama only; local or existing pinned SSH
+  selection: complete stable NVIDIA GPU UUIDs
+  scope: new separate performance workloads; no quality scoring or code execution
+  formats: {schema: local-llm-gpu-experiment, version: 1}
+  artifacts: [result.private.json, summary.csv, report.html]
+  storage: Benchmarks/GPU; private prompt and GPU UUIDs remain local
+  settings: Runtime/gpu_lab_settings.private.json; paths apply to selected server
+  launch: isolated Ollama serve; child environment only; random loopback port; owned SSH forward
+  spread: OLLAMA_SCHED_SPREAD=1 for multiple selected GPUs; request is not proof of placement
+  controls: [CUDA_VISIBLE_DEVICES, no Vulkan, no cloud, flash attention off, f16 KV, one parallel request]
+  ownership: Windows Job Object kill-on-close; named global mutex; control EOF or 60 second lease expiry
+  listener_check: GetExtendedTcpTable checks loopback address and owned PID; no CIM permission dependency
+  evidence: owned compute-process GPU residency + api/ps VRAM; not proof of compute balance
+  temperatures: 5 second best-effort poll; stop owned job at observed 85 C; not hardware protection
+  phases: [fresh_process, repeat_same_prompt]
+  cache_caveat: fresh process is not cold disk cache; second request can use KV cache
+  warm: measured load_duration <= 100 ms
+  order: rotated GPU configurations and model/workload units between repeats
+  stats: count, mean, sample SD, min/max; verified and diagnostic rows separate; no ranking/CI/Pareto
+  resume: completed pairs immutable; partial pair archived then replayed from fresh process
+  compatibility: reject changed config, workload hash, inventory/driver, Ollama version or model digest
+  test: Tests/gpu_lab_regression.py; synthetic Windows executables, no model/GPU load
+  live_hardware_and_wan_validated: false
+  unchanged: existing benchmark prompts, scorers, inference pipeline, Agent runner and verifier
+  rename: BULL public identity applied; legacy artifact schemas and compatibility aliases retained
+
+t2_release:
+  name: BULL Core
+  version: v0.23.0.0
+  status: complete
+  production_runtime_switched: false
+  contracts: Shared/bull_llm/core/contracts.py
+  adapters: Shared/bull_llm/runtime/adapters.py
+  evaluation: Shared/bull_llm/evaluation/service.py
+  reports: Shared/bull_llm/reports.py
+  atomic_store: Shared/bull_llm/core/storage.py
+  tests: Tests/core_regression.py
+  brand_master: Assets/Brand/bull-logo-canonical.png
+  brand_lock: Assets/Brand/brand-lock.json
+  measurement_freeze: prompts, scorers, recovery, and runtime options unchanged
+
+t3_release:
+  name: BULL Registry
+  version: v0.24.0.0
+  status: complete
+  registry: Shared/bull_llm/evaluation/registry.py
+  manifest_schema: Schemas/bull_benchmark_pack_manifest_v1.schema.json
+  public_root: BenchmarkPacks
+  private_root: Runtime/BenchmarkPacks
+  bundled_pack: bull_chat_core@1.0.0
+  bundled_cases: 12
+  lifecycle: [experimental, candidate, stable, deprecated, retired]
+  data_only: true
+  executable_pack_content: forbidden
+  reference_resolution: engine-owned allowlists only
+  commands:
+    - /bench pack list
+    - /bench pack validate [id[@version]]
+    - /bench pack inspect id[@version]
+  authoring_guide: Docs/BENCHMARK_PACK_AUTHORING.md
+  tests: Tests/registry_regression.py
+  startup_fix: Windows PowerShell 5.1 launcher is ASCII-only and parse-tested
+  measurement_freeze: CHAT prompts, result instructions, scorers, recovery, and runtime options unchanged

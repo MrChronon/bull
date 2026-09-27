@@ -1,0 +1,33 @@
+{
+  "schema": "bull-brand-lock",
+  "schema_version": 1,
+  "decision": "canonical_logo_approved",
+  "decision_date": "2026-09-26",
+  "source_file": "bull-logo-canonical.png",
+  "source_sha256": "60d91a700b9cd91ad3fd6ad598287a8e2cccd067f2ab0ed7515dd52af44b2269",
+  "source_dimensions": [
+    1774,
+    887
+  ],
+  "derivation": "crop_resize_only_no_redraw",
+  "crops": {
+    "logo": [
+      31,
+      170,
+      1763,
+      718
+    ],
+    "wordmark": [
+      47,
+      186,
+      1323,
+      702
+    ],
+    "mark": [
+      1336,
+      248,
+      1731,
+      643
+    ]
+  }
+}

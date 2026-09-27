@@ -1,0 +1,3 @@
+BULL project benchmark notice
+
+This benchmark pack is part of the BULL project. No separate license grant is created by this metadata file; use is governed by the license and notices of the repository that distributes the pack.

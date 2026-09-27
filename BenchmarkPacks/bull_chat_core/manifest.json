@@ -1,0 +1,43 @@
+{
+  "content": {
+    "case_count": 12,
+    "cases_file": "cases.json",
+    "sha256": "f8d4c9d628382c6ddd45d4a736c9b8061e60f93ef5c8e2a55f79a29c965be383"
+  },
+  "description": "Frozen v0.23 CHAT quality suite migrated without prompt or scorer changes.",
+  "documentation": "README.md",
+  "engine": {
+    "minimum_version": "0.24.0.0"
+  },
+  "gold": {
+    "file": "gold.json",
+    "sha256": "e371ab6c7554e0303a246730f07d153a54772c160e81490f8aa1e1e556560ac3"
+  },
+  "id": "bull_chat_core",
+  "license": {
+    "file": "LICENSE.txt",
+    "id": "LicenseRef-BULL-Project-Notice",
+    "name": "BULL project benchmark notice"
+  },
+  "provenance": {
+    "migration": "data-only extraction",
+    "prompts_changed": false,
+    "scorers_changed": false,
+    "source": "BULL v0.23.0.0 builtin_benchmarks/CHAT_CORE_TESTS"
+  },
+  "schema": "bull-benchmark-pack-manifest",
+  "schema_version": 1,
+  "status": "stable",
+  "taxonomy": [
+    "analytics_reasoning",
+    "dialogue_consistency",
+    "formal_logic",
+    "groundedness_security",
+    "instruction_following",
+    "linguistics_ru",
+    "ru_language_stress"
+  ],
+  "title": "BULL CHAT Core",
+  "version": "1.0.0",
+  "visibility": "public"
+}

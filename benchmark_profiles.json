@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "global_defaults": {
+    "sampling_source": "benchmark_override",
+    "experimental_parameters": [],
+    "repeat_penalty": 1.0,
+    "sampling_preset": "balanced",
+    "strict_fair_compare": false,
+    "recovery": {
+      "enabled": true,
+      "strategy": "continue_then_targeted_rescue_v3",
+      "max_passes": 2,
+      "continuation_predict": 2400,
+      "scratch_predict": 4800,
+      "rescue_predict": 1600,
+      "force_result_marker": true,
+      "format_preservation": true
+    }
+  },
+  "sampling_presets": {
+    "balanced": {
+      "temperature": 0.4,
+      "top_p": 0.9,
+      "top_k": 40,
+      "min_p": 0.02
+    },
+    "coder_precise": {
+      "temperature": 0.2,
+      "top_p": 0.85,
+      "top_k": 40,
+      "min_p": 0.05
+    },
+    "coder_official": {
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "top_k": 40,
+      "min_p": 0.0
+    }
+  },
+  "profiles": {
+    "fair_default": {
+      "description": "Единые воспроизводимые условия для честного сравнения моделей",
+      "sampling_preset": "coder_precise",
+      "ctx": 16384,
+      "num_thread": 12,
+      "think": false,
+      "repeat_penalty": 1.0,
+      "strict_fair_compare": true,
+      "recovery": {
+        "enabled": true,
+        "strategy": "continue_then_targeted_rescue_v3",
+        "max_passes": 2,
+        "continuation_predict": 2400,
+        "scratch_predict": 4800,
+        "rescue_predict": 1600,
+        "force_result_marker": true,
+        "format_preservation": true
+      }
+    },
+    "analytics_fair_v1": {
+      "description": "Контрольный analytics_case: одинаковый runtime для сравнения квантов",
+      "sampling_preset": "coder_precise",
+      "ctx": 16384,
+      "num_thread": 12,
+      "num_predict": 5600,
+      "think": false,
+      "repeat_penalty": 1.0,
+      "force_final_answer": true,
+      "strict_fair_compare": true,
+      "seeds": [42, 43, 44],
+      "recovery": {
+        "enabled": true,
+        "strategy": "continue_then_targeted_rescue_v3",
+        "max_passes": 2,
+        "continuation_predict": 2400,
+        "scratch_predict": 4800,
+        "rescue_predict": 1600,
+        "force_result_marker": true,
+        "format_preservation": true
+      }
+    },
+    "ollama_profile_compare": {
+      "description": "Сравнение параметров Modelfile без передачи sampling options через API",
+      "base_profile": "fair_default",
+      "sampling_source": "model_profile",
+      "experimental_parameters": [
+        "temperature",
+        "top_p",
+        "top_k",
+        "min_p"
+      ],
+      "strict_fair_compare": true
+    }
+  }
+}

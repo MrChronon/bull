@@ -1,0 +1,90 @@
+{
+  "cases": [
+    {
+      "definition_sha256": "b2c53b773789663c19123c5f2ec5460e5be0a552b41e3554bfdcbfe0f48ff5d0",
+      "id": "dialogue_state",
+      "prompt_sha256": "ccafc5a091f76df54bc93c62287bddb41f489174c6a4f88026ab44e2fcf84420",
+      "result_instruction_sha256": "916f58b8a8422ecc109ccb399e6abb2c0aef8c849c9115be54cc87d68d66b26e",
+      "version": 1
+    },
+    {
+      "definition_sha256": "28a6509d6ba8cd434fdf0b2f792b783e9128dbd27d6301b1a744ac83efd9aab6",
+      "id": "groundedness",
+      "prompt_sha256": "9fa19f37a4d59c2e87f4ef62ad5e361e77fd187cfeddd340e03e9d0fe1a38060",
+      "result_instruction_sha256": "25e4d87b25b6027eca9950b6ca03418525d59776399aed426fb99cd11a641536",
+      "version": 1
+    },
+    {
+      "definition_sha256": "0873628abb2fcfa6519db7111c3dfba4b794d3ab048d3ea5a338f4e02a5390a5",
+      "id": "groundedness_adversarial",
+      "prompt_sha256": "0110fbac77b96b0d84b7e8a5350c80b848800cad06c340c2d4ab68348f9de97d",
+      "result_instruction_sha256": "b10210b42b1df3435765032f63b4fd1904c1be88bed92963ab8d91bf67761098",
+      "version": 1
+    },
+    {
+      "definition_sha256": "699d25a94309efe9b9bd6aa6d180a76d3af60f1b38389c49370bd2373013109c",
+      "id": "instruction",
+      "prompt_sha256": "66ceb2e2e008548bd49e97f7debfb11de1e5fd73428701723456ce3bdc0bdfe1",
+      "result_instruction_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "version": 4
+    },
+    {
+      "definition_sha256": "918df3222870a21312e731b0b2a26d480f2617b5e56920a9b4771c8b96243169",
+      "id": "logic_constraints",
+      "prompt_sha256": "d21e7ed33957c6e90d2eac4f11cad511f987e49e096132b94b3de0d7534f20f9",
+      "result_instruction_sha256": "7563a770d70d04a30cb13b922e2ddbd00c101f0adc9df5464580b808e955f942",
+      "version": 1
+    },
+    {
+      "definition_sha256": "c17d3954f859a81f31400a31e1b256985a00849ab954f5292286c6e76a0272d2",
+      "id": "ru_business_tone",
+      "prompt_sha256": "147b969389f72b286319bb5adff6adcb27d4ed157976036c0fc3b9435d457ad3",
+      "result_instruction_sha256": "8b0129473e72f65de7d840e185ecb7837a9fa1e9efa094df634c717f6954db1c",
+      "version": 2
+    },
+    {
+      "definition_sha256": "558271cb78ba37664156d5dfe8252fc8322d8bdf157b5d8601f0e10656543ee0",
+      "id": "ru_causality_precision",
+      "prompt_sha256": "633de81bb35cc3d1074b28c48ee375f3f9f23150a08302bb9f6ad808bc0849a1",
+      "result_instruction_sha256": "8f100562f1057b813e73b0679031887bf626c59673b623363608f14825b9d3b2",
+      "version": 1
+    },
+    {
+      "definition_sha256": "437ffb5faa3928e6a8bed6c9e1fa7d08329ec04e922b8b72ebcd70fad5e09cab",
+      "id": "ru_context_corrections",
+      "prompt_sha256": "a6a1ceabc009c56efffc4c460b7e5713cfe7efda5231bebd0d07668e2e3bf294",
+      "result_instruction_sha256": "2abe43492864412c7f4a911ed9b28d6c4384a6ca5f3debcbdcfc6db646ae8ae4",
+      "version": 1
+    },
+    {
+      "definition_sha256": "e5b3a2ed7f51800873378f1b98028c1c111d9cd88ab5669438e21997a29cee02",
+      "id": "ru_debureaucratize",
+      "prompt_sha256": "99f50c9f547adddb35983eaeebe88bcc67dd9958948685b8df11c8591d0c3375",
+      "result_instruction_sha256": "f511bed361cbf9d9cc3e1e11adf618d81d6e0c495bfefcdf70db19852cf8a77c",
+      "version": 1
+    },
+    {
+      "definition_sha256": "540d437ae9db2510cc196ec90886539dd7e8071c94b4cce4d38b7bfbab65d5f6",
+      "id": "ru_semantic_negation",
+      "prompt_sha256": "c410ff0f5e8dabe389352f1e18dadce923191b7a0c6e4727939bf8f296de7c7f",
+      "result_instruction_sha256": "6fd5329f564e035777b91dffd41e56be681fac9ccd6d062f166380d7afec7c93",
+      "version": 1
+    },
+    {
+      "definition_sha256": "31aa5ca15f1fce818fd0523f28ee0f23c75944e77bc3b33753a306e79585fb0d",
+      "id": "russian_editing",
+      "prompt_sha256": "4d0f4b4f5bf4a100a25418a3bfa97620a35e3559d8eaeb41b6e79116c10bd5a0",
+      "result_instruction_sha256": "6c5d774f61e2ca3ff5d682da74cf7621e08d1705a4b347d3f2e2ebe2630573cb",
+      "version": 1
+    },
+    {
+      "definition_sha256": "6eefab2816dc5d0e61b7a091c30c601d94dca247d795a8a4dfafdd21bb0a0f64",
+      "id": "simpson",
+      "prompt_sha256": "e54798f327914b8fd1d0b3c4255e1bc928630ad0c40f3b520bb76ed9444ff82b",
+      "result_instruction_sha256": "1a4239b57c6b9d6b677c349c3300f03ef5f2392d21055f4134db9a6f2f5fecf4",
+      "version": 3
+    }
+  ],
+  "schema": "bull-benchmark-pack-gold",
+  "schema_version": 1
+}

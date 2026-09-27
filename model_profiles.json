@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "models": {
+    "qwen36-35b-a3b-iq3m-4k:latest": {
+      "ctx": 8192,
+      "threads": 12,
+      "think": {
+        "num_predict": 3200,
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0.0,
+        "seed": 42
+      },
+      "fast": {
+        "num_predict": 512,
+        "temperature": 0.2,
+        "top_p": 0.85,
+        "top_k": 40,
+        "min_p": 0.05,
+        "seed": 42
+      },
+      "ultimate": {
+        "num_predict": 5000,
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0.0,
+        "seed": 42
+      }
+    },
+    "qwen3-coder-next-80b-iq2m-8k:latest": {
+      "ctx": 8192,
+      "threads": 12,
+      "capabilities": {
+        "supports_thinking": false,
+        "supports_completion": true,
+        "native_context": 8192
+      },
+      "fast": {
+        "num_predict": 1024,
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "top_k": 40,
+        "min_p": 0.0,
+        "seed": 42
+      },
+      "think": {
+        "num_predict": 3200,
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "top_k": 40,
+        "min_p": 0.0,
+        "seed": 42
+      },
+      "ultimate": {
+        "num_predict": 5000,
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "top_k": 40,
+        "min_p": 0.0,
+        "seed": 42
+      },
+      "notes": "Qwen3-Coder-Next is non-thinking only; official sampling temperature=1.0, top_p=0.95, top_k=40."
+    }
+  }
+}

@@ -1,0 +1,44 @@
+name: Предложение функции
+description: Идея по улучшению BULL Client, Benchmark Lab, Server или установки
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: dropdown
+    id: component
+    attributes:
+      label: Область
+      options:
+        - Client
+        - Benchmark Lab
+        - Server и удалённый доступ
+        - Installer и обновление
+        - Интерфейс
+        - Документация
+        - Другое
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Какую проблему это решает
+      description: Опишите пользовательский сценарий, а не только желаемую кнопку.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Предлагаемое поведение
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Возможные альтернативы и ограничения
+  - type: checkboxes
+    id: compatibility
+    attributes:
+      label: Совместимость
+      options:
+        - label: Я отметил, затрагивает ли идея benchmark prompts, scorers, runtime pipeline, форматы результатов или безопасность.
+          required: true

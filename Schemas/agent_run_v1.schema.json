@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BULL Agent run v1",
+  "type": "object",
+  "required": ["schema", "schema_version", "run_id", "timestamp", "agent_version", "task", "config", "status", "metrics", "verification", "requests", "tool_calls", "contexts", "events", "interventions", "resources", "errors"],
+  "properties": {
+    "schema": {"const": "local-llm-agent-run"},
+    "schema_version": {"const": 1},
+    "run_id": {"type": "string"},
+    "parent_run_id": {"type": ["string", "null"]},
+    "timestamp": {"type": "string"},
+    "agent_version": {"type": "string"},
+    "status": {"enum": ["running", "success", "timeout", "context_overflow", "backend_error", "interrupted", "model_error", "agent_loop", "step_limit", "failed", "verification_failed", "configuration_mismatch"]},
+    "task": {"type": "object", "required": ["id", "version", "initial_state_sha256", "prompt_sha256", "verifier_version"]},
+    "config": {"type": "object", "required": ["model", "backend_context", "agent_context", "sampling", "instructions_sha256", "configuration_sha256"]},
+    "metrics": {"type": "object", "required": ["success", "autonomous_success", "duration_seconds", "human_interventions", "tool_calls", "tool_failures", "compactions"]},
+    "verification": {"type": "object", "required": ["success"]},
+    "requests": {"type": "array", "items": {"type": "object", "required": ["step", "status", "retry_count"]}},
+    "tool_calls": {"type": "array", "items": {"type": "object", "required": ["name", "success", "duration_seconds", "arguments_bytes", "result_bytes", "repeated", "retry_count"]}},
+    "contexts": {"type": "array", "items": {"type": "object", "required": ["phase", "tokens", "source", "elapsed_seconds"], "properties": {"tokens": {"type": "number", "minimum": 0}, "source": {"enum": ["estimate", "ollama_prompt_eval_count"]}}}},
+    "events": {"type": "array"},
+    "interventions": {"type": "array"},
+    "resources": {"type": "array"},
+    "errors": {"type": "array"}
+  },
+  "$comment": "No prompts, hidden reasoning, raw tool arguments/results or raw exceptions in this artifact. Unknown resource/token measurements are null, not zero."
+}
