@@ -1,0 +1,68 @@
+name: Benchmark methodology feedback
+description: Report a scorer blind spot, ambiguous case or reproducibility concern
+title: "[Benchmark]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for a concrete benchmark defect. Use Discussions for broad proposals.
+        Share only sanitized excerpts you have the right to publish.
+  - type: dropdown
+    id: feedback_type
+    attributes:
+      label: Feedback type
+      options:
+        - False positive
+        - False negative
+        - Ambiguous prompt or contract
+        - Scorer robustness
+        - Statistical methodology
+        - Order / warm-up / performance methodology
+        - Resume / recovery attribution
+        - Benchmark taxonomy gap
+        - Pack format or provenance
+    validations:
+      required: true
+  - type: input
+    id: case
+    attributes:
+      label: Pack, case and scorer version
+      placeholder: bull_chat_core@1.0.0 / groundedness_adversarial / scorer v2
+    validations:
+      required: true
+  - type: textarea
+    id: observation
+    attributes:
+      label: Observed problem
+      description: Explain what the benchmark reported and why that interpretation may be wrong.
+    validations:
+      required: true
+  - type: textarea
+    id: minimal_example
+    attributes:
+      label: Minimal sanitized example
+      description: Include only the smallest excerpt needed to reproduce the concern.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected evaluation behavior
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Comparability and false-positive risk
+      description: Which historical results or other cases could be affected by a change?
+  - type: checkboxes
+    id: integrity
+    attributes:
+      label: Evidence check
+      options:
+        - label: I removed private prompts, model responses, endpoints, usernames and personal paths unless they are essential and safe to publish.
+          required: true
+        - label: I distinguished native model output from client-assisted recovery.
+          required: true

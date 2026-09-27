@@ -17,7 +17,7 @@ $forbiddenPatterns = @(
     '.env.*','*.pem','*.key','*.ppk','*.p12','*.pfx','*.pub','*.llm-access*',
     '*.private.json','*.connection.json'
 )
-$textExtensions = @('.py','.ps1','.cmd','.txt','.md','.yaml','.yml','.json','.toml','.ini','.cfg','.csv','.svg','.b64')
+$textExtensions = @('.py','.ps1','.cmd','.txt','.md','.yaml','.yml','.json','.toml','.ini','.cfg','.csv','.svg','.b64','.cff')
 
 function Add-Finding([string]$message) {
     $failures.Add($message)

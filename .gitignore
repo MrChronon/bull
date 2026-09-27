@@ -1,9 +1,9 @@
 # Runtime data: never publish
-Chats/
-Benchmarks/
-Exports/
-Workspace/
-Runtime/
+/Chats/
+/Benchmarks/
+/Exports/
+/Workspace/
+/Runtime/
 __pycache__/
 *.py[cod]
 client_debug.log

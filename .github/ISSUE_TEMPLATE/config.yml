@@ -1,2 +1,8 @@
 blank_issues_enabled: false
-contact_links: []
+contact_links:
+  - name: Benchmark design and open-ended ideas
+    url: https://github.com/MrChronon/bull/discussions
+    about: Discuss methodology, taxonomy, scorers, hardware experiments and project direction.
+  - name: Security policy
+    url: https://github.com/MrChronon/bull/security/policy
+    about: Read the private-reporting guidance before disclosing a vulnerability.

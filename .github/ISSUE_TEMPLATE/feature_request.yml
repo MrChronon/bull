@@ -1,44 +1,56 @@
-name: Предложение функции
-description: Идея по улучшению BULL Client, Benchmark Lab, Server или установки
+name: Feature request
+description: Propose a scoped improvement to BULL
 title: "[Feature]: "
 labels:
   - enhancement
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Start with the user problem and desired outcome. For open-ended ideas or methodology debates, use GitHub Discussions first.
   - type: dropdown
     id: component
     attributes:
-      label: Область
+      label: Area
       options:
-        - Client
+        - LLM Client
         - Benchmark Lab
-        - Server и удалённый доступ
-        - Installer и обновление
-        - Интерфейс
-        - Документация
-        - Другое
+        - Agent Lab
+        - GPU Lab
+        - Server / remote access
+        - Installer / update
+        - Interface / accessibility
+        - Reports / visualization
+        - Documentation
+        - Other
     validations:
       required: true
   - type: textarea
     id: problem
     attributes:
-      label: Какую проблему это решает
-      description: Опишите пользовательский сценарий, а не только желаемую кнопку.
+      label: Problem or user scenario
+      description: Describe the workflow and friction, not only the desired button.
     validations:
       required: true
   - type: textarea
     id: proposal
     attributes:
-      label: Предлагаемое поведение
+      label: Proposed behavior
     validations:
       required: true
   - type: textarea
     id: alternatives
     attributes:
-      label: Возможные альтернативы и ограничения
+      label: Alternatives and constraints
+  - type: textarea
+    id: success
+    attributes:
+      label: How would we know it works?
+      description: Suggest an observable acceptance criterion.
   - type: checkboxes
     id: compatibility
     attributes:
-      label: Совместимость
+      label: Compatibility review
       options:
-        - label: Я отметил, затрагивает ли идея benchmark prompts, scorers, runtime pipeline, форматы результатов или безопасность.
+        - label: I noted whether this affects benchmark prompts, scorers, runtime, schemas, historical results or security.
           required: true

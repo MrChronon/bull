@@ -1,72 +1,81 @@
-name: Ошибка программы
-description: Воспроизводимый сбой BULL Client, Benchmark Lab, installer или Server node
+name: Bug report
+description: Report a reproducible BULL Client, Benchmark Lab, installer or server failure
 title: "[Bug]: "
 labels:
   - bug
 body:
   - type: markdown
     attributes:
-      value: Не прикладывайте private key, connection store, токены или необработанные логи с личными данными.
+      value: |
+        Thanks for helping improve BULL. English and Russian are welcome.
+        **Do not attach private keys, connection stores, tokens, raw private prompts or unreviewed logs.**
   - type: input
     id: version
     attributes:
-      label: Версия
-      placeholder: v0.22.0.0
+      label: BULL version
+      placeholder: v0.24.0.0
     validations:
       required: true
   - type: dropdown
     id: component
     attributes:
-      label: Компонент
+      label: Component
       options:
-        - Client
+        - LLM Client
         - Benchmark Lab
-        - Server node
-        - Installer
-        - Release package
+        - Agent Lab
+        - GPU Lab
+        - Server node / SSH
+        - Installer / launcher
+        - Report or artifact
         - Documentation
     validations:
       required: true
   - type: dropdown
     id: route
     attributes:
-      label: Схема подключения
+      label: Connection mode
       options:
-        - Локальная модель на этом компьютере
+        - Local model on this computer
         - LAN
-        - Overlay VPN (Tailscale/WireGuard)
-        - Direct SSH через Интернет
-        - Не относится к подключению
+        - SSH tunnel over the Internet
+        - AllInOne
+        - Not connection-related
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
-      label: Шаги воспроизведения
-      description: Укажите минимальную последовательность действий и команд без секретов.
+      label: Minimal reproduction
+      description: List the shortest repeatable sequence. Replace private values with placeholders.
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
-      label: Ожидаемый результат
+      label: Expected behavior
     validations:
       required: true
   - type: textarea
     id: actual
     attributes:
-      label: Фактический результат
+      label: Observed behavior
     validations:
       required: true
   - type: textarea
     id: environment
     attributes:
-      label: Окружение
-      description: Windows/Python/backend и способ установки. Не указывайте публичный IP, username и пути к ключам.
+      label: Environment
+      description: Windows, Python, backend, model runtime and installation method. Do not include public IPs, usernames or key paths.
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized evidence
+      description: Paste the smallest relevant excerpt. Prefer text over screenshots; never upload the full client_debug.log without review.
   - type: checkboxes
     id: privacy
     attributes:
-      label: Безопасность данных
+      label: Privacy check
       options:
-        - label: Я проверил вложения и удалил ключи, токены, адреса, личные пути, промпты и ответы моделей.
+        - label: I removed keys, tokens, addresses, personal paths, private prompts and model responses from this report.
           required: true

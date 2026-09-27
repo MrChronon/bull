@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If BULL supports your evaluation work, please cite the software and the exact release used."
+title: "BULL — Benchmark Lab"
+type: software
+authors:
+  - name: "BULL Contributors"
+repository-code: "https://github.com/MrChronon/bull"
+url: "https://github.com/MrChronon/bull"
+version: "0.24.0.0"
+date-released: "2026-09-27"
+license: MIT
+keywords:
+  - local LLM
+  - LLM evaluation
+  - benchmarking
+  - Ollama
+  - llama.cpp
+  - reproducibility
