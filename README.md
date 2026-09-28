@@ -33,6 +33,10 @@ platform for local LLMs served by **Ollama** or a compatible **llama.cpp HTTP
 server**. Run chat, compare selected models, resume interrupted suites, inspect
 offline reports and move a tested profile into the working client.
 
+<p align="center">
+  <img src="Assets/Brand/readme-signal-panel.svg" alt="BULL evaluation signal panel: 349 offline regressions, 12 CHAT Core cases, three recommended seeds, seven artifact types and four measurement dimensions" width="100%">
+</p>
+
 ## Why BULL
 
 | Evaluation problem | How BULL handles it |

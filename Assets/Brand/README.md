@@ -24,3 +24,9 @@ from `bull-mark-512.png` with Chafa 1.18.3 using
 release remains safe to inspect and compatible with source-control tooling;
 runtime loading accepts only bounded SGR colour sequences. Chafa itself is not
 required or shipped with BULL.
+
+`readme-signal-panel.svg` is a repository presentation infographic. Its figures
+are verified project facts, while the lower section is a conceptual measurement
+map rather than benchmark data or model scores. Update the displayed counts only
+after the corresponding regression, benchmark-pack and artifact contracts have
+been verified.
