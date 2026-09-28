@@ -28,6 +28,16 @@ ui_print=localized_print
 from Shared.bull_llm.evaluation.registry import (
     PackRegistry,PackValidationError,RegistryPolicy,canonical_sha256,load_pack,
 )
+from Shared.bull_llm.evidence import evidence_paths,save_evidence_artifacts
+
+_CLIENT_SOURCE_SHA256_CACHE=None
+
+
+def client_source_sha256():
+    global _CLIENT_SOURCE_SHA256_CACHE
+    if _CLIENT_SOURCE_SHA256_CACHE is None:
+        _CLIENT_SOURCE_SHA256_CACHE=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    return _CLIENT_SOURCE_SHA256_CACHE
 
 # Windows console editor for normal Ctrl+V multiline paste.
 # It uses only Python standard library.
@@ -6053,6 +6063,7 @@ def _registry_benchmarks(built):
     result={}
     sources={}
     for pack in packs:
+        pack_cases={case.id:case for case in pack.cases}
         for case_id,definition in pack.legacy_definitions().items():
             if case_id in result:
                 raise PackValidationError(
@@ -6060,6 +6071,16 @@ def _registry_benchmarks(built):
                 )
             if case_id in built and pack.id!='bull_chat_core':
                 raise PackValidationError('BUILTIN_CASE_CONFLICT',f'{case_id} conflicts with an engine benchmark',pack.root)
+            case=pack_cases[case_id]
+            definition['_pack']={
+                'identity':pack.identity,
+                'manifest_sha256':pack.manifest_sha256,
+                'compiled_sha256':pack.compiled_sha256,
+                'definition_sha256':case.definition_sha256,
+                'runner_ref':case.runner_ref,
+                'scorer_ref':case.scorer_ref,
+                'verifier_ref':case.verifier_ref,
+            }
             result[case_id]=definition
             sources[case_id]=pack.identity
     return result,packs
@@ -6263,6 +6284,30 @@ def benchmark_test_execution_fingerprint(item):
     }
     raw=json.dumps(payload,ensure_ascii=False,sort_keys=True,separators=(',',':'))
     return hashlib.sha256(raw.encode('utf-8')).hexdigest()
+
+
+def benchmark_scorer_sha256(item):
+    """Fingerprint the exact scorer contract without executing or changing it."""
+    payload={
+        'scorer_ref':((item.get('_pack') or {}).get('scorer_ref') or item.get('score_type') or 'none'),
+        'scorer_config':item.get('scorer_config') or {},
+        'benchmark_version':int(item.get('version') or 1),
+        'benchmark_execution_sha256':benchmark_test_execution_fingerprint(item),
+        'engine_source_sha256':client_source_sha256(),
+    }
+    return stable_fingerprint(payload)
+
+
+def benchmark_verifier_sha256(item):
+    """Fingerprint the verifier contract separately from scorer identity."""
+    payload={
+        'verifier_ref':((item.get('_pack') or {}).get('verifier_ref') or 'benchmark_contract_v1'),
+        'completion_contract':item.get('completion_contract') or {},
+        'constraints':item.get('constraints') or {},
+        'benchmark_execution_sha256':benchmark_test_execution_fingerprint(item),
+        'engine_source_sha256':client_source_sha256(),
+    }
+    return stable_fingerprint(payload)
 
 
 def benchmark_reference_sha256(item):
@@ -9693,19 +9738,27 @@ def benchmark_record(name,item,cfg,think_value,run_index,total_runs,bench_mode='
     request_fingerprint=effective_runtime_request_fingerprint(cfg['model'],effective,launch_fingerprint)
     runtime['launch_fingerprint']=launch_fingerprint
     runtime['observed_fingerprint']=observed_runtime_fingerprint(runtime,digest_value,launch_fingerprint)
+    pack_identity=item.get('_pack') or {}
     record={
         'record_schema_version':BENCH_RECORD_SCHEMA_VERSION,
         'execution_status':'ok',
         'identity':{
             'timestamp':datetime.now().isoformat(timespec='seconds'),
             'client_version':APP_VERSION,
-            'client_source_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            'client_source_sha256':client_source_sha256(),
             'benchmark':name,
             'benchmark_category':item.get('category','custom'),
             'benchmark_version':int(item.get('version') or 1),
             'benchmark_prompt_sha256':benchmark_prompt_sha256(item),
             'benchmark_reference_sha256':benchmark_reference_sha256(item),
             'benchmark_execution_sha256':benchmark_test_execution_fingerprint(item),
+            'benchmark_pack_identity':pack_identity.get('identity'),
+            'benchmark_pack_manifest_sha256':pack_identity.get('manifest_sha256'),
+            'benchmark_definition_sha256':pack_identity.get('definition_sha256'),
+            'scorer_ref':pack_identity.get('scorer_ref') or item.get('score_type','none'),
+            'scorer_sha256':benchmark_scorer_sha256(item),
+            'verifier_ref':pack_identity.get('verifier_ref') or 'benchmark_contract_v1',
+            'verifier_sha256':benchmark_verifier_sha256(item),
             'backend':ACTIVE_BACKEND,
             'model':cfg['model'],
             'model_digest':digest_value,
@@ -9850,12 +9903,21 @@ def benchmark_error_record(name,item,model_name,run_index,bench_mode,seed_mode,s
     reasoning_policy=benchmark_reasoning_policy(model_name,item,think_value)
     effective_think=reasoning_policy['actual']; effective_mode=reasoning_policy['mode']
     launch_fingerprint=backend_launch_fingerprint()
+    pack_identity=item.get('_pack') or {}
     return {
         'record_schema_version':BENCH_RECORD_SCHEMA_VERSION,'execution_status':'error','completion_status':'not_executed',
         'identity':{
             'timestamp':datetime.now().isoformat(timespec='seconds'),'client_version':APP_VERSION,
             'benchmark':name,'benchmark_category':item.get('category','custom'),'benchmark_version':int(item.get('version') or 1),'benchmark_prompt_sha256':benchmark_prompt_sha256(item),
-            'benchmark_reference_sha256':benchmark_reference_sha256(item),'backend':ACTIVE_BACKEND,
+            'benchmark_reference_sha256':benchmark_reference_sha256(item),
+            'benchmark_execution_sha256':benchmark_test_execution_fingerprint(item),
+            'benchmark_pack_identity':pack_identity.get('identity'),
+            'benchmark_pack_manifest_sha256':pack_identity.get('manifest_sha256'),
+            'benchmark_definition_sha256':pack_identity.get('definition_sha256'),
+            'scorer_ref':pack_identity.get('scorer_ref') or item.get('score_type','none'),
+            'scorer_sha256':benchmark_scorer_sha256(item),
+            'verifier_ref':pack_identity.get('verifier_ref') or 'benchmark_contract_v1',
+            'verifier_sha256':benchmark_verifier_sha256(item),'backend':ACTIVE_BACKEND,
             'model':model_name,'model_digest':model_digest(model_name,catalog),'run':run_index,'attempt':attempt,
         },
         'config':{
@@ -10078,7 +10140,7 @@ def benchmark_summary_rows(records):
         bench_mode=_rec_v4(first,'config.benchmark_mode') if modern else None
         seed_mode_meta=_rec_v4(first,'config.seed_mode') if modern else None
         rates=[]; warm_rates=[]; recovery_rates=[]; pipes=[]; native_scores=[]; final_scores=[]; seeds=[]
-        native_seed_scores=[]; final_seed_scores=[]; run_fingerprints=[]; load_states=[]
+        native_seed_scores=[]; final_seed_scores=[]; run_fingerprints=[]; load_states=[]; context_lengths=[]
         backend_launch_fingerprints=[]; effective_request_fingerprints=[]; observed_runtime_fingerprints=[]
         gpu_peaks=[]; gpu_utils=[]; off=[]; pipeline_eval_tokens=[]; ultimate_cycles=[]; ultimate_rollovers=[]; limit_causes=[]
         partial_scores=[]; best_partial_scores=[]; partial_code_checked=0; partial_code_valid=0
@@ -10102,6 +10164,9 @@ def benchmark_summary_rows(records):
                 )
                 request_fp=_rec_v4(r,'config.effective_runtime_request_fingerprint') or launch_fp
                 observed_fp=_rec_v4(r,'telemetry.runtime.observed_fingerprint')
+                context_length=_rec_v4(r,'config.ctx')
+                if context_length is not None and context_length not in context_lengths:
+                    context_lengths.append(context_length)
                 if launch_fp and launch_fp not in backend_launch_fingerprints: backend_launch_fingerprints.append(launch_fp)
                 if request_fp and request_fp not in effective_request_fingerprints: effective_request_fingerprints.append(request_fp)
                 if observed_fp and observed_fp not in observed_runtime_fingerprints: observed_runtime_fingerprints.append(observed_fp)
@@ -10193,6 +10258,8 @@ def benchmark_summary_rows(records):
             'effective_runtime_request_fingerprints':effective_request_fingerprints,
             'observed_runtime_fingerprint':observed_runtime_fingerprints[0] if len(observed_runtime_fingerprints)==1 else None,
             'observed_runtime_fingerprints':observed_runtime_fingerprints,
+            'context_length':context_lengths[0] if len(context_lengths)==1 else None,
+            'context_lengths':sorted(context_lengths),
             'runs_planned':len(items),'runs_executed':len(ok),'runs_completed':final,
             'runs_task_completed':final_task,
             'runs_truncated':sum(1 for r in ok if _rec_v4(r,'final.done_reason')=='length'),
@@ -10354,7 +10421,7 @@ def _report_bar(value,kind='native'):
     )
 
 
-def benchmark_visual_report_document(records):
+def benchmark_visual_report_document(records,evidence_summary=None):
     """Build an offline report from metrics only; never embed prompts or answers."""
     records=list(records or [])
     model_rows=benchmark_model_summary_rows(records)
@@ -10474,6 +10541,117 @@ def benchmark_visual_report_document(records):
             '</tr>'
         )
 
+    evidence_analytics=(evidence_summary or {}).get('analytics') or {}
+    confidence_source=evidence_analytics.get('confidence_intervals') or [
+        {
+            'benchmark':row.get('benchmark'),'model':row.get('model'),
+            'mean':row.get('native_score_avg'),'low':row.get('native_score_ci95_low'),
+            'high':row.get('native_score_ci95_high'),
+            'available':None not in (row.get('native_score_ci95_low'),row.get('native_score_ci95_high')),
+        }
+        for row in detail_rows
+    ]
+    confidence_rows=[]
+    for point in confidence_source:
+        mean=point.get('mean'); low=point.get('low'); high=point.get('high')
+        available=bool(point.get('available')) and None not in (mean,low,high)
+        if available:
+            left=max(0.0,min(100.0,float(low)*100.0))
+            right=max(left,min(100.0,float(high)*100.0))
+            dot=max(0.0,min(100.0,float(mean)*100.0))
+            plot=(
+                '<div class="ci-track">'
+                f'<span class="ci-range" style="left:{left:.2f}%;width:{max(1.0,right-left):.2f}%"></span>'
+                f'<span class="ci-dot" style="left:{dot:.2f}%"></span></div>'
+            )
+            label=f'{_report_percent(mean)} · 95% CI {_report_percent(low)}–{_report_percent(high)}'
+        else:
+            plot='<div class="ci-track unavailable"></div>'
+            label='Недостаточно сопоставимых runs'
+        confidence_rows.append(
+            '<div class="ci-row">'
+            f'<span>{html_lib.escape(str(point.get("model") or "?"))}<small>{html_lib.escape(str(point.get("benchmark") or "?"))}</small></span>'
+            f'{plot}<strong>{label}</strong></div>'
+        )
+
+    latency_source=evidence_analytics.get('latency_distributions') or [
+        {
+            'benchmark':row.get('benchmark'),'model':row.get('model'),
+            'mean':row.get('pipeline_wall_avg'),'sd':row.get('pipeline_wall_sd'),
+            'min':row.get('pipeline_wall_min'),'max':row.get('pipeline_wall_max'),
+            'ci95_low':row.get('pipeline_wall_ci95_low'),'ci95_high':row.get('pipeline_wall_ci95_high'),
+        }
+        for row in detail_rows
+    ]
+    latency_max=max([
+        float(point.get('max')) for point in latency_source if point.get('max') is not None
+    ],default=0.0)
+    latency_rows=[]
+    for point in latency_source:
+        minimum=point.get('min'); maximum=point.get('max'); mean=point.get('mean')
+        if latency_max>0 and None not in (minimum,maximum,mean):
+            left=max(0.0,min(100.0,float(minimum)/latency_max*100.0))
+            right=max(left,min(100.0,float(maximum)/latency_max*100.0))
+            dot=max(0.0,min(100.0,float(mean)/latency_max*100.0))
+            plot=(
+                '<div class="ci-track latency">'
+                f'<span class="ci-range" style="left:{left:.2f}%;width:{max(1.0,right-left):.2f}%"></span>'
+                f'<span class="ci-dot" style="left:{dot:.2f}%"></span></div>'
+            )
+        else:
+            plot='<div class="ci-track unavailable"></div>'
+        latency_rows.append(
+            '<div class="ci-row">'
+            f'<span>{html_lib.escape(str(point.get("model") or "?"))}<small>{html_lib.escape(str(point.get("benchmark") or "?"))}</small></span>'
+            f'{plot}<strong>{_report_number(mean,1," s")} · SD {_report_number(point.get("sd"),1," s")} · '
+            f'{_report_number(minimum,1)}–{_report_number(maximum,1," s")}</strong></div>'
+        )
+
+    context_source=evidence_analytics.get('context_curves') or []
+    if not context_source:
+        by_model={}
+        for row in detail_rows:
+            context=row.get('context_length')
+            if context is None: continue
+            by_model.setdefault(str(row.get('model') or '?'),[]).append({
+                'context_length':context,'native_score':row.get('native_score_avg'),
+                'warm_tokens_per_second':row.get('primary_eval_warm_avg'),
+            })
+        context_source=[{'model':model,'points':points} for model,points in sorted(by_model.items())]
+    context_cards=[]
+    for curve in context_source:
+        unique={int(point['context_length']):point for point in (curve.get('points') or []) if point.get('context_length') is not None}
+        points=[unique[key] for key in sorted(unique)]
+        if len(points)<2: continue
+        min_x=math.log2(max(1,int(points[0]['context_length']))); max_x=math.log2(max(1,int(points[-1]['context_length'])))
+        span=max(1e-9,max_x-min_x); coords=[]
+        for point in points:
+            score=point.get('native_score')
+            if score is None: continue
+            x=20+(math.log2(max(1,int(point['context_length'])))-min_x)/span*260
+            y=110-max(0.0,min(1.0,float(score)))*90
+            coords.append(f'{x:.1f},{y:.1f}')
+        if len(coords)<2: continue
+        labels=' · '.join(
+            f'{int(point["context_length"]):,} ctx: {_report_percent(point.get("native_score"))} / {_report_number(point.get("warm_tokens_per_second"),1," tok/s")}'
+            for point in points
+        )
+        context_cards.append(
+            '<article class="curve-card">'
+            f'<h3>{html_lib.escape(str(curve.get("model") or "?"))}</h3>'
+            '<svg viewBox="0 0 300 130" role="img" aria-label="Native quality by context length">'
+            '<line x1="20" y1="110" x2="280" y2="110" class="axis"/><line x1="20" y1="20" x2="20" y2="110" class="axis"/>'
+            f'<polyline points="{" ".join(coords)}" class="curve"/></svg>'
+            f'<p class="micro">{html_lib.escape(labels)}</p></article>'
+        )
+    context_section=(
+        '<section><h2>Context curves</h2><p class="lead">Native quality и warm speed по реально протестированным размерам контекста.</p>'
+        '<div class="curve-grid">'+''.join(context_cards)+'</div></section>'
+    ) if context_cards else (
+        '<section><h2>Context curves</h2><p class="lead">Для кривой нужны минимум два сопоставимых значения context length на модель. '
+        'В этом прогоне доступна только одна точка или контекст не был зафиксирован.</p></section>'
+    )
+
     if not model_rows:
         warnings.append('Нет сохранённых model records для построения сводки.')
     warning_html=''.join(f'<li>{item}</li>' for item in dict.fromkeys(warnings)) or '<li>Метрики доступны в полном объёме.</li>'
@@ -10500,8 +10678,10 @@ section{{margin-top:20px;background:var(--panel);border:1px solid var(--line);bo
 .speed-row{{display:grid;grid-template-columns:minmax(140px,1.2fr) minmax(220px,4fr) 100px;gap:12px;align-items:center;margin:12px 0}} .speed-row .metric-track{{margin:0}}
 .table-wrap{{overflow:auto;margin-top:14px}} table{{width:100%;border-collapse:collapse;min-width:850px}} th,td{{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}} th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){{text-align:left}} thead th{{position:sticky;top:0;background:#eaf4ef;color:#294b3a;font-size:12px;text-transform:uppercase;letter-spacing:.04em}}
 .heat{{display:inline-block;min-width:58px;padding:4px 8px;border-radius:8px;background:linear-gradient(90deg,#dfece5 var(--heat),transparent var(--heat));font-weight:700}}
+.ci-row{{display:grid;grid-template-columns:minmax(190px,1.5fr) minmax(260px,4fr) minmax(210px,1.6fr);gap:14px;align-items:center;margin:13px 0}} .ci-row span small{{display:block;color:var(--muted);overflow-wrap:anywhere}} .ci-track{{height:16px;background:#e5efea;border-radius:999px;position:relative}} .ci-track.unavailable{{background:repeating-linear-gradient(135deg,#edf2ef 0 8px,#d9e5df 8px 16px)}} .ci-range{{position:absolute;top:4px;height:8px;border-radius:999px;background:linear-gradient(90deg,#0b9f55,#35ed8b)}} .ci-dot{{position:absolute;top:1px;width:4px;height:14px;border-radius:2px;background:#10231a;transform:translateX(-2px)}} .ci-track.latency .ci-range{{background:linear-gradient(90deg,#1769aa,#6cbcff)}}
+.curve-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:14px}} .curve-card{{border:1px solid var(--line);border-radius:15px;padding:16px;background:#fbfefd}} .curve-card svg{{width:100%;height:auto}} .axis{{stroke:#9cb5a8;stroke-width:1}} .curve{{fill:none;stroke:#0b9f55;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}}
 .notice{{border-left:5px solid #e5aa23;background:#fff9e9}} footer{{margin-top:18px;color:var(--muted);font-size:13px}}
-@media(max-width:700px){{.kpis{{grid-template-columns:1fr 1fr}}.speed-row{{grid-template-columns:1fr 80px}}.speed-row .metric-track{{grid-column:1/-1}}}}
+@media(max-width:700px){{.kpis{{grid-template-columns:1fr 1fr}}.speed-row{{grid-template-columns:1fr 80px}}.speed-row .metric-track{{grid-column:1/-1}}.ci-row{{grid-template-columns:1fr}}}}
 @media print{{body{{background:#fff}}main{{max-width:none;padding:0}}header,section{{box-shadow:none;break-inside:avoid}}}}
 </style></head><body><main>
 <header><div class="eyebrow">BULL · Benchmark Lab · {html_lib.escape(APP_VERSION)}</div><h1>Наглядный отчёт</h1>
@@ -10511,16 +10691,19 @@ section{{margin-top:20px;background:var(--panel);border:1px solid var(--line);bo
 <section><h2>Скорость warm-запусков</h2><p class="lead">Шкала нормирована только внутри этого отчёта; tok/s не входит в quality score.</p>{''.join(speed_cards)}</section>
 <section><h2>Сводная таблица</h2><div class="table-wrap"><table><thead><tr><th>Модель</th><th>Покрытие</th><th>Native</th><th>Final system</th><th>Generation</th><th>Task contract</th><th>Recovery used</th><th>Warm speed</th><th>SD quality</th><th>Worst seed</th><th>VRAM peak</th></tr></thead><tbody>{''.join(summary_rows)}</tbody></table></div></section>
 {category_section}
+<section><h2>95% confidence intervals</h2><p class="lead">Точка — среднее Native quality, полоса — интервал неопределённости. При недостаточной выборке вывод не строится.</p>{''.join(confidence_rows)}</section>
+<section><h2>Latency distributions</h2><p class="lead">Точка — среднее pipeline time, полоса — наблюдаемый min/max; SD показано отдельно.</p>{''.join(latency_rows)}</section>
+{context_section}
 <section><h2>Подробно по тестам</h2><div class="table-wrap"><table><thead><tr><th>Тест</th><th>Модель</th><th>Native</th><th>Final system</th><th>Warm speed</th><th>Wall time</th><th>Generation</th><th>Task contract</th><th>Rank stability</th></tr></thead><tbody>{''.join(detailed)}</tbody></table></div></section>
 <section class="notice"><h2>Как читать отчёт</h2><ul><li>Native и Final system нельзя смешивать в один рейтинг.</li><li>Generation означает технически завершённую выдачу; Task contract — соблюдение обязательной структуры и схемы.</li><li>Warm определяется по фактическому load duration, а не по номеру seed.</li><li>SD, min/max, worst seed и Pareto требуют нескольких сопоставимых запусков.</li><li>Сетевые retries и restart recovery исключены из model quality.</li>{warning_html}</ul></section>
 <footer>Создано {html_lib.escape(generated)}. Отчёт автономный: внешние ресурсы, prompts и raw-ответы не встроены.</footer>
 </main></body></html>'''
 
 
-def save_benchmark_visual_report(raw_json_path,records):
+def save_benchmark_visual_report(raw_json_path,records,evidence_summary=None):
     path=benchmark_visual_report_path(raw_json_path)
     tmp=path.with_suffix(path.suffix+'.tmp')
-    tmp.write_text(benchmark_visual_report_document(records),encoding='utf-8')
+    tmp.write_text(benchmark_visual_report_document(records,evidence_summary=evidence_summary),encoding='utf-8')
     tmp.replace(path)
     return path
 
@@ -10570,9 +10753,10 @@ def benchmark_report_browser():
     return report
 
 
-def save_benchmark_summary(raw_json_path,records):
+def save_benchmark_summary(raw_json_path,records,spec=None):
     base=Path(raw_json_path)
     rows=benchmark_summary_rows(records)
+    model_rows=benchmark_model_summary_rows(records)
     sj=base.with_name(base.stem+'_summary.json'); sc=base.with_name(base.stem+'_summary.csv')
     summary_tmp=sj.with_suffix(sj.suffix+'.tmp')
     summary_tmp.write_text(json.dumps(rows,ensure_ascii=False,indent=2),encoding='utf-8')
@@ -10594,7 +10778,11 @@ def save_benchmark_summary(raw_json_path,records):
     with csv_tmp.open('w',encoding='utf-8-sig',newline='') as f:
         w=csv.DictWriter(f,fieldnames=fields); w.writeheader(); w.writerows(_csv_safe_row(row) for row in flat)
     csv_tmp.replace(sc)
-    save_benchmark_visual_report(base,records)
+    _private_evidence,_share_evidence,evidence_summary=save_evidence_artifacts(
+        base,spec=spec or {},records=records,model_rows=model_rows,
+        case_rows=rows,engine_version=APP_VERSION,
+    )
+    save_benchmark_visual_report(base,records,evidence_summary=evidence_summary)
     return sj,sc
 
 
@@ -11953,6 +12141,13 @@ def make_benchmark_spec(tests,models,runs,think_value,mode='native',seed_mode='f
                 'prompt_sha256':benchmark_prompt_sha256(benches[t]),
                 'reference_sha256':benchmark_reference_sha256(benches[t]),
                 'execution_sha256':benchmark_test_execution_fingerprint(benches[t]),
+                'pack_identity':(benches[t].get('_pack') or {}).get('identity'),
+                'pack_manifest_sha256':(benches[t].get('_pack') or {}).get('manifest_sha256'),
+                'definition_sha256':(benches[t].get('_pack') or {}).get('definition_sha256'),
+                'scorer_ref':(benches[t].get('_pack') or {}).get('scorer_ref') or benches[t].get('score_type','none'),
+                'scorer_sha256':benchmark_scorer_sha256(benches[t]),
+                'verifier_ref':(benches[t].get('_pack') or {}).get('verifier_ref') or 'benchmark_contract_v1',
+                'verifier_sha256':benchmark_verifier_sha256(benches[t]),
                 'think_override':benches[t].get('think_override','inherit'),
             } for t in tests
         },
@@ -11963,6 +12158,9 @@ def make_benchmark_spec(tests,models,runs,think_value,mode='native',seed_mode='f
                 'description':benches[t].get('description',''),'prompt':str(benches[t].get('prompt') or ''),
                 'result_instruction':str(benches[t].get('result_instruction') or ''),
                 'score_type':benches[t].get('score_type','none'),
+                'pack':deepcopy(benches[t].get('_pack') or {}),
+                'scorer_sha256':benchmark_scorer_sha256(benches[t]),
+                'verifier_sha256':benchmark_verifier_sha256(benches[t]),
                 'constraints':deepcopy(benches[t].get('constraints') or {}),
                 'scorer_config':deepcopy(benches[t].get('scorer_config') or {}),
                 'reference':deepcopy(benches[t].get('reference')),
@@ -12152,7 +12350,10 @@ def load_checkpoint(path):
     return p,d
 
 
-_BENCHMARK_OUTPUT_KEYS=('json','csv','summary_json','summary_csv','tested_profiles_json','report_html')
+_BENCHMARK_OUTPUT_KEYS=(
+    'json','csv','summary_json','summary_csv','tested_profiles_json','report_html',
+    'evidence_private_json','evidence_share_safe_json',
+)
 
 
 def _checkpoint_expected_job_count(cp):
@@ -12673,13 +12874,16 @@ def finalize_checkpoint(path,cp):
     _atomic_json(path,cp)
     try:
         jp,cp_csv=save_benchmark_results(cp['spec']['label'],records,base_path=base)
-        sj,sc=save_benchmark_summary(jp,records)
+        sj,sc=save_benchmark_summary(jp,records,spec=cp.get('spec') or {})
         tested_profiles=save_tested_profiles_artifact(jp,cp.get('spec') or {},records)
         report=benchmark_visual_report_path(jp)
+        evidence_private,evidence_share_safe=evidence_paths(jp)
         outputs={
             'json':str(jp),'csv':str(cp_csv),'summary_json':str(sj),
             'summary_csv':str(sc),'tested_profiles_json':str(tested_profiles),
             'report_html':str(report),
+            'evidence_private_json':str(evidence_private),
+            'evidence_share_safe_json':str(evidence_share_safe),
         }
         cp['outputs']=outputs
         cp['output_integrity']={

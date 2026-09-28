@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/MrChronon/bull/Schemas/bull_benchmark_record_v1.schema.json",
+  "title": "BULL Benchmark Record v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "schema_version", "artifact_classification", "provenance", "records"],
+  "properties": {
+    "schema": {"const": "bull-benchmark-record"},
+    "schema_version": {"const": 1},
+    "artifact_classification": {"const": "private"},
+    "provenance": {"$ref": "#/$defs/provenance"},
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["record_schema_version", "execution_status", "identity", "config", "primary", "final", "score"],
+        "additionalProperties": true
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "provenance": {
+      "type": "object",
+      "required": ["schema", "schema_version", "immutable", "created_at_utc", "engine", "source", "benchmark_spec_sha256", "packs", "cases", "fingerprints", "execution_order_sha256", "provenance_sha256"],
+      "properties": {
+        "schema": {"const": "bull-evidence-provenance"},
+        "schema_version": {"const": 1},
+        "immutable": {"const": true},
+        "benchmark_spec_sha256": {"$ref": "#/$defs/sha256"},
+        "execution_order_sha256": {"$ref": "#/$defs/sha256"},
+        "provenance_sha256": {"$ref": "#/$defs/sha256"},
+        "fingerprints": {
+          "type": "object",
+          "required": ["launch", "effective_runtime_request", "observed_runtime", "effective_profile"]
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

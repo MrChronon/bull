@@ -21,6 +21,10 @@ from .schemas import (
     TESTED_PROFILE_SCHEMA_VERSION,
     USER_BENCHMARK_SCHEMA,
     USER_BENCHMARK_SCHEMA_VERSION,
+    BULL_RECORD_SCHEMA,
+    BULL_RECORD_SCHEMA_VERSION,
+    BULL_SUMMARY_SCHEMA,
+    BULL_SUMMARY_SCHEMA_VERSION,
 )
 
 MAX_ARTIFACT_BYTES = 32 * 1024 * 1024
@@ -37,6 +41,14 @@ class CompatibilityInfo:
 
 
 _NAMED_SCHEMAS = {
+    (BULL_RECORD_SCHEMA, BULL_RECORD_SCHEMA_VERSION): CompatibilityInfo(
+        "bull_benchmark_record", BULL_RECORD_SCHEMA, BULL_RECORD_SCHEMA_VERSION,
+        migration="native"
+    ),
+    (BULL_SUMMARY_SCHEMA, BULL_SUMMARY_SCHEMA_VERSION): CompatibilityInfo(
+        "bull_benchmark_summary", BULL_SUMMARY_SCHEMA, BULL_SUMMARY_SCHEMA_VERSION,
+        migration="native"
+    ),
     (TESTED_PROFILE_SCHEMA, TESTED_PROFILE_SCHEMA_VERSION): CompatibilityInfo(
         "tested_profile", TESTED_PROFILE_SCHEMA, TESTED_PROFILE_SCHEMA_VERSION
     ),

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/MrChronon/bull/Schemas/bull_benchmark_summary_v1.schema.json",
+  "title": "BULL Benchmark Summary v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "schema_version", "artifact_classification", "provenance", "metric_spaces", "statistics_policy", "metrics", "analytics"],
+  "properties": {
+    "schema": {"const": "bull-benchmark-summary"},
+    "schema_version": {"const": 1},
+    "artifact_classification": {"const": "share_safe"},
+    "provenance": {"type": "object"},
+    "metric_spaces": {
+      "type": "array",
+      "items": {"enum": ["quality.native", "quality.assisted", "contract", "runtime", "resources", "recovery", "reliability", "security", "human"]},
+      "uniqueItems": true
+    },
+    "statistics_policy": {"type": "object"},
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["model", "case"],
+      "properties": {
+        "model": {"type": "array", "items": {"$ref": "#/$defs/metric"}},
+        "case": {"type": "array", "items": {"$ref": "#/$defs/metric"}}
+      }
+    },
+    "analytics": {
+      "type": "object",
+      "required": ["confidence_intervals", "latency_distributions", "context_curves", "category_heatmap"]
+    }
+  },
+  "$defs": {
+    "metric": {
+      "type": "object",
+      "required": ["identity", "quality", "contract", "runtime", "resources", "recovery", "reliability", "security", "human"]
+    }
+  }
+}

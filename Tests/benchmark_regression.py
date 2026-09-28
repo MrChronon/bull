@@ -407,7 +407,10 @@ def test_checkpoint_finalize_is_idempotent_and_recovers_missing_output():
         mod.execute_benchmark_checkpoint(path,cp,catalog)
         mod.finalize_checkpoint(path,cp)
         eq(cp['suite_status'],'complete')
-        eq(set(cp['output_integrity']),{'json','csv','summary_json','summary_csv','tested_profiles_json','report_html'})
+        eq(set(cp['output_integrity']),{
+            'json','csv','summary_json','summary_csv','tested_profiles_json','report_html',
+            'evidence_private_json','evidence_share_safe_json',
+        })
         assert all(re.fullmatch(r'[0-9a-f]{64}',row['sha256']) for row in cp['output_integrity'].values())
         missing=Path(cp['outputs']['summary_csv']); missing.unlink()
         eq(mod.latest_resumable_checkpoint(),path)
@@ -2085,6 +2088,9 @@ def test_benchmark_spec_contains_backend_and_reference_provenance():
         eq(spec['resume_environment_fingerprint'],'b'*64)
         eq(spec['suite_launch_fingerprint'],'b'*64)
         fp=spec['test_fingerprints']['analytics_case']; assert fp['reference_sha256']==mod.benchmark_reference_sha256(mod.builtin_benchmarks()['analytics_case'])
+        assert re.fullmatch(r'[0-9a-f]{64}',fp['scorer_sha256'])
+        assert re.fullmatch(r'[0-9a-f]{64}',fp['verifier_sha256'])
+        eq(fp['verifier_ref'],'benchmark_contract_v1')
     finally:
         mod.ACTIVE_BACKEND=old_backend; mod.backend_runtime_fingerprint=old_fp; mod.model_profile=old_prof; mod.model_digest=old_digest
 
@@ -2389,6 +2395,10 @@ def test_benchmark_record_provenance_for_nonthinking_model():
         eq(r['config']['primary_mode'],'fast')
         eq(r['config']['reasoning_mode_reason'],'model_no_thinking_capability')
         assert 'thinking' not in r['config']['model_capabilities']
+        assert re.fullmatch(r'[0-9a-f]{64}',r['identity']['scorer_sha256'])
+        assert re.fullmatch(r'[0-9a-f]{64}',r['identity']['verifier_sha256'])
+        eq(r['identity']['scorer_ref'],'instruction_v4')
+        eq(r['identity']['verifier_ref'],'benchmark_contract_v1')
     finally:
         mod.cached_model_capabilities=old_caps
         mod.stream_chat=old_stream
@@ -5070,17 +5080,26 @@ def test_visual_report_is_offline_graphical_and_excludes_raw_answers():
         raw.write_text(json.dumps(records,ensure_ascii=False),encoding='utf-8')
         sj,sc=mod.save_benchmark_summary(raw,records)
         report=mod.benchmark_visual_report_path(raw)
+        evidence_private,evidence_share=mod.evidence_paths(raw)
         assert sj.is_file() and sc.is_file() and report.is_file()
+        assert evidence_private.is_file() and evidence_share.is_file()
         html_text=report.read_text(encoding='utf-8')
         assert '<!doctype html>' in html_text.casefold()
         assert 'Сводная таблица' in html_text and 'Шкалы качества' in html_text
         assert 'Native model quality' in html_text and 'Final system quality' in html_text
+        assert '95% confidence intervals' in html_text and 'Latency distributions' in html_text
+        assert 'Context curves' in html_text
         assert 'Выбранные тесты' in html_text and '64%' in html_text
         assert 'metric-bar' in html_text and '<table' in html_text
         assert '&lt;model-a&gt;' in html_text
         assert 'PRIVATE_RAW_ANSWER' not in html_text and 'PRIVATE_FINAL_ANSWER' not in html_text
         assert '<script>' not in html_text.casefold()
         assert 'http://' not in html_text and 'https://' not in html_text
+        share=json.loads(evidence_share.read_text(encoding='utf-8'))
+        eq(share['schema'],'bull-benchmark-summary')
+        eq(share['artifact_classification'],'share_safe')
+        share_text=evidence_share.read_text(encoding='utf-8')
+        assert 'PRIVATE_RAW_ANSWER' not in share_text and 'PRIVATE_FINAL_ANSWER' not in share_text
     finally:
         shutil.rmtree(root,ignore_errors=True)
 
@@ -5349,4 +5368,7 @@ passed.extend(f'BULL Core {i+1}' for i in range(bridge_test_count))
 from Tests.core_regression import run_suite as run_core_suite
 core_test_count=run_core_suite()
 passed.extend(f'BULL Core {i+1}' for i in range(core_test_count))
+from Tests.evidence_regression import run_suite as run_evidence_suite
+evidence_test_count=run_evidence_suite()
+passed.extend(f'BULL Evidence {i+1}' for i in range(evidence_test_count))
 print(f'PASS {len(passed)}/{len(passed)}')

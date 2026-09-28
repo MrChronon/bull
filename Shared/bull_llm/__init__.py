@@ -12,6 +12,12 @@ from .schemas import (
     TESTED_PROFILE_SCHEMA_VERSION,
     USER_BENCHMARK_SCHEMA,
     USER_BENCHMARK_SCHEMA_VERSION,
+    BULL_RECORD_SCHEMA,
+    BULL_RECORD_SCHEMA_VERSION,
+    BULL_SUMMARY_SCHEMA,
+    BULL_SUMMARY_SCHEMA_VERSION,
+    BULL_PROVENANCE_SCHEMA,
+    BULL_PROVENANCE_SCHEMA_VERSION,
 )
 from .compatibility import (
     CompatibilityInfo,
@@ -42,6 +48,19 @@ from .core import (
     TelemetryProvider,
     Verifier,
 )
+from .evidence import (
+    EvidenceValidationError,
+    METRIC_SPACES,
+    audit_share_safe,
+    build_private_record_document,
+    build_provenance,
+    build_share_safe_summary_document,
+    evidence_paths,
+    migrate_legacy_record_copy,
+    migrate_legacy_summary_copy,
+    save_evidence_artifacts,
+    validate_provenance,
+)
 
 __all__ = [name for name in globals() if name.isupper() or name in {
     "CompatibilityInfo",
@@ -69,4 +88,14 @@ __all__ = [name for name in globals() if name.isupper() or name in {
     "Scorer",
     "TelemetryProvider",
     "Verifier",
+    "EvidenceValidationError",
+    "audit_share_safe",
+    "build_private_record_document",
+    "build_provenance",
+    "build_share_safe_summary_document",
+    "evidence_paths",
+    "migrate_legacy_record_copy",
+    "migrate_legacy_summary_copy",
+    "save_evidence_artifacts",
+    "validate_provenance",
 }]
