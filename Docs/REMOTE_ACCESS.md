@@ -1,10 +1,10 @@
-# BULL v0.24.0.0 — удалённый доступ
+# BULL v0.25.0.0 — удалённый доступ
 
 ## Коротко
 
 Публичная сборка не знает адресов серверов и не пытается подключаться к ним автоматически. По умолчанию Client использует локальный Ollama на `127.0.0.1:11434`.
 
-В v0.24.0.0 рекомендуемый путь для уже настроенного OpenSSH —
+В v0.25.0.0 рекомендуемый путь для уже настроенного OpenSSH —
 **Подключения → Подключиться по SSH-алиасу**. Достаточно ввести `Host` из
 `%USERPROFILE%\.ssh\config`; BULL безопасно разрешает его через `ssh -G`.
 Если alias ещё не создан, используйте **Как создать SSH-ключ и алиас** или
@@ -91,7 +91,7 @@ TCP <PUBLIC_IP>:<EXTERNAL_SSH_PORT> -> <SERVER_LAN_IP>:22
 Пример подготовки Server:
 
 ```powershell
-.\Install-BULL-v0.24.0.0.ps1 `
+.\Install-BULL-v0.25.0.0.ps1 `
   -Role Server `
   -Route direct `
   -AuthorizedKeyPath C:\Transfer\bull_access.pub `
@@ -148,7 +148,7 @@ Private key нельзя отправлять администратору ил�
 Запустите от администратора:
 
 ```powershell
-.\Install-BULL-v0.24.0.0.ps1 `
+.\Install-BULL-v0.25.0.0.ps1 `
   -Role Server `
   -AuthorizedKeyPath C:\Transfer\bull_access.pub `
   -PublicHost <VPN-IP-or-DNS>
@@ -157,7 +157,7 @@ Private key нельзя отправлять администратору ил�
 Для overlay client:
 
 ```powershell
-.\Install-BULL-v0.24.0.0.ps1 `
+.\Install-BULL-v0.25.0.0.ps1 `
   -Role Server `
   -InstallTailscale `
   -AuthorizedKeyPath C:\Transfer\bull_access.pub `

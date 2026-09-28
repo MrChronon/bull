@@ -1,29 +1,33 @@
-# BULL v0.24.0.0 — руководство пользователя
+# BULL v0.25.0.0 — руководство пользователя
 
-**Версия клиента:** v0.24.0.0  
-**Версия документации:** v0.24.0.0
+**Версия клиента:** v0.25.0.0
+
+**Версия документации:** v0.25.0.0
 
 BULL — Benchmark Lab — переносимое приложение для Windows 11, которое объединяет рабочий чат с локальными LLM и лабораторию воспроизводимого сравнения моделей. Поддерживаются Ollama и совместимый с OpenAI API сервер llama.cpp. Модели могут работать на том же компьютере или на отдельном узле, доступном через защищённое SSH-соединение.
 
-Версия документа: 27 сентября 2026 года. История изменений вынесена в `Docs/CHANGELOG_v0.24.0.0.md`.
+Версия документа: 28 сентября 2026 года. История изменений вынесена в `Docs/CHANGELOG_v0.25.0.0.md`.
 
-### Что изменилось в v0.24.0.0
+### Что изменилось в v0.25.0.0
 
-Это переходный релиз **BULL Registry**, этап T3. Стандартный CHAT Core перенесён
-в независимый data-only pack `bull_chat_core@1.0.0`. Его 12 prompts, result
-instructions и scorer IDs сверяются с прежней реализацией по canonical SHA-256 и
-не менялись. Публичные packs находятся в `BenchmarkPacks`, личные — в
-`Runtime/BenchmarkPacks` и не попадают в релиз.
+Это переходный релиз **BULL Evidence**, этап T4. Каждый новый benchmark теперь
+создаёт два явно разных JSON-артефакта: private record с исходными records и
+share-safe summary с разрешённым набором метрик. Share-safe export проходит
+privacy audit и не содержит prompts, raw-ответов, endpoints, e-mail и домашних
+путей. Имена моделей остаются видимыми и перед публикацией требуют осознанной
+проверки пользователя.
 
-Registry проверяет manifest, версию engine, license, provenance, taxonomy,
-content/gold hashes и lock до inference. Pack не может выполнить Python или другой
-код: разрешены только engine-owned runner/scorer/verifier IDs. Для просмотра есть
-`/bench pack list`, `/bench pack validate` и `/bench pack inspect`. Руководство
-автора: `Docs/BENCHMARK_PACK_AUTHORING.md`.
+Provenance фиксирует hashes engine, spec, prompt/pack, scorer и verifier, а также
+раздельные launch и effective runtime fingerprints и фактический порядок
+выполнения. Новые схемы называются `bull-benchmark-record` и
+`bull-benchmark-summary`; legacy artifacts по-прежнему читаются через compatibility
+layer, а миграция всегда создаёт новую копию и не перезаписывает источник.
 
-Также исправлен запуск через штатный Windows PowerShell 5.1: entry script теперь
-ASCII-safe и не закрывается из-за неверного чтения UTF-8 без BOM. Подробности:
-`Docs/RELEASE_NOTES_0.24.0.0.md`.
+Автономный HTML использует те же summary data, что и terminal, и добавляет
+95%-интервалы при достаточной выборке, распределения latency, context curves и
+category heatmap. HTML по-прежнему не использует CDN, JavaScript, prompts или
+raw-ответы. Benchmark prompts, scorers, recovery и runtime pipeline в T4 не
+изменялись. Подробности: `Docs/RELEASE_NOTES_0.25.0.0.md`.
 
 Стартовый экран теперь показывает полноцветную Chafa-версию головы быка,
 уменьшенную до ширины 30 символов и подготовленную из официального изображения
@@ -52,7 +56,7 @@ ASCII-safe и не закрывается из-за неверного чтен�
 Agent Benchmark теперь предлагает стандартные настройки и краткий итог с деталями
 по запросу. Промпты, скореры, генерация, checkpoint и независимый verifier не изменены.
 Подробный маршрут по экранам: `Docs/UI_GUIDE.md`. Актуальная карта документации —
-`Docs/README.md`; остаточные риски перечислены в `Docs/AUDIT_v0.24.0.0.md`.
+`Docs/README.md`; остаточные риски перечислены в `Docs/AUDIT_v0.25.0.0.md`.
 
 Важно: старые исполняемые CODE-наборы не имеют полноценной OS-песочницы. Для
 недоверенных ответов используйте отдельную disposable VM без секретов и сети.
@@ -68,6 +72,8 @@ Agent Benchmark теперь предлагает стандартные нас�
   telemetry, atomic artifacts и report boundary без зависимости от UI.
 - **BULL Registry** — versioned data-only benchmark packs, validation, gold
   snapshots и воспроизводимые hashes без выполнения кода из pack.
+- **BULL Evidence** — immutable provenance, раздельные пространства метрик,
+  private/share-safe artifacts и единые данные для terminal/HTML reports.
 - **Server role** — настройка inference-узла без выдачи клиенту доступа к чужим ключам или конфигурациям.
 
 Языковые модели в архив не входят. Установите их отдельно и соблюдайте их лицензии.
@@ -76,20 +82,20 @@ Agent Benchmark теперь предлагает стандартные нас�
 
 1. Распакуйте релиз в новую папку.
 2. По возможности сравните SHA-256 архива с опубликованным файлом `.sha256.txt`.
-3. Запустите `Install-BULL-v0.24.0.0.cmd`.
+3. Запустите `Install-BULL-v0.25.0.0.cmd`.
 4. Выберите роль:
    - `Client` — чат и Benchmark Lab для уже доступного backend;
    - `Server` — подготовка компьютера с моделями;
    - `AllInOne` — клиент и backend на одной машине.
-5. Для основного приложения используйте `BULL-v0.24.0.0.cmd`.
-6. Для прямого входа в лабораторию используйте `BULL-Benchmark-Lab-v0.24.0.0.cmd`.
+5. Для основного приложения используйте `BULL-v0.25.0.0.cmd`.
+6. Для прямого входа в лабораторию используйте `BULL-Benchmark-Lab-v0.25.0.0.cmd`.
 
 При первом запуске выполняется offline regression. Если проверка не прошла, inference и benchmark блокируются: сначала устраните причину или повторите `Run-Tests.ps1`.
 Для запуска Client и полного startup regression достаточно стандартной библиотеки
 Python: Pillow и другие сторонние Python-пакеты не требуются. Pillow нужен только
 разработчику, который заново генерирует брендовые raster assets.
 
-В исправленной v0.24 installer и все launchers совместимы с Windows PowerShell
+Installer и все launchers совместимы с Windows PowerShell
 5.1. Архив обязательно содержит программный модуль `Shared/bull_llm/runtime`;
 корневой `Runtime` по-прежнему считается приватными пользовательскими данными и
 в публичный ZIP не входит. В bundle больше нет дублирующих legacy launchers или
@@ -335,7 +341,12 @@ CHAT core включает задачи на:
 
 ### HTML-отчёт
 
-Рядом с raw JSON создаётся `*_report.html`. Он автономный, работает offline, не использует JavaScript/CDN и не встраивает prompts или raw-ответы. В нём есть шкалы качества, warm speed, таблицы, категории, Generation/Task contract и предупреждения о недостаточной выборке.
+Рядом с raw JSON создаётся `*_report.html`. Он автономный, работает offline, не
+использует JavaScript/CDN и не встраивает prompts или raw-ответы. В нём есть шкалы
+качества, warm speed, таблицы, category heatmap, Generation/Task contract,
+confidence intervals, latency distributions, context curves и предупреждения о
+недостаточной выборке. Если для curve или CI точек недостаточно, отчёт говорит об
+этом прямо и не рисует ложную тенденцию.
 
 ### Файлы результата
 
@@ -343,11 +354,18 @@ CHAT core включает задачи на:
 
 - raw JSON и плоский CSV;
 - summary JSON и CSV;
+- `*_evidence_private.json` — приватный `bull-benchmark-record` с исходными
+  records и полным provenance;
+- `*_evidence_share_safe.json` — allow-listed `bull-benchmark-summary`, прошедший
+  автоматический privacy audit;
 - checkpoint JSON;
 - tested profiles JSON;
 - HTML report.
 
-Raw JSON содержит ответы модели и может содержать пользовательский промпт в snapshot. Не публикуйте его без ручной проверки. HTML предназначен для безопасного просмотра метрик, но имена моделей всё равно могут раскрывать локальную номенклатуру.
+Raw JSON и evidence private содержат ответы модели и могут содержать
+пользовательский промпт в snapshot. Не публикуйте их. Share-safe JSON и HTML
+предназначены для передачи метрик, но имена моделей всё равно могут раскрывать
+локальную номенклатуру: просмотрите их перед публикацией.
 
 ## 8. Сбои и resume
 
@@ -488,7 +506,7 @@ Benchmark ставится на паузу; готовые runs остаются
 
 - `Docs/README.md` — что актуально сейчас, а что сохранено только как история.
 - `README.md` — короткое введение.
-- `Docs/RELEASE_NOTES_0.24.0.0.md` — что нового и первые шаги.
+- `Docs/RELEASE_NOTES_0.25.0.0.md` — что нового и первые шаги.
 - `Docs/MIGRATION_TO_BULL.md` — переход со старых имён и imports.
 - `Docs/SECURITY.md` — модель угроз и безопасная конфигурация.
 - `Docs/REMOTE_ACCESS.md` — удалённая работа.

@@ -1,4 +1,4 @@
-BULL v0.24.0.0 — Benchmarking & Usage of Local LLMs
+BULL v0.25.0.0 — Benchmarking & Usage of Local LLMs
 =========================================
 
 Релиз BULL Registry добавляет безопасные versioned benchmark packs. Стандартный
@@ -8,19 +8,19 @@ CHAT Core загружается из bull_chat_core@1.0.0 без изменен
 УСТАНОВКА
 ---------
 
-  Install-BULL-v0.24.0.0.cmd
+  Install-BULL-v0.25.0.0.cmd
 
 Основной клиент:
 
-  BULL-v0.24.0.0.cmd
+  BULL-v0.25.0.0.cmd
 
 Benchmark Lab:
 
-  BULL-Benchmark-Lab-v0.24.0.0.cmd
+  BULL-Benchmark-Lab-v0.25.0.0.cmd
 
 Agent Lab:
 
-  BULL-Agent-Lab-v0.24.0.0.cmd
+  BULL-Agent-Lab-v0.25.0.0.cmd
 
 В релизе используются только launchers с именем BULL; старые алиасы удалены.
 Подробности: Docs\MIGRATION_TO_BULL.md.
@@ -41,7 +41,7 @@ client_debug.log нельзя публиковать.
 Документация:
 
   Docs\USER_GUIDE.md
-  Docs\RELEASE_NOTES_0.24.0.0.md
+  Docs\RELEASE_NOTES_0.25.0.0.md
   Docs\BENCHMARK_PACK_AUTHORING.md
   Docs\SECURITY.md
   Docs\AI_CONTEXT.yaml

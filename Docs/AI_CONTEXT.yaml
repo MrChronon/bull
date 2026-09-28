@@ -1,16 +1,16 @@
 schema: bull-llm-ai-context
 schema_version: 1
-document_version: 0.24.0.0
-client_version: v0.24.0.0
-documentation_version: v0.24.0.0
-updated: 2026-09-27
+document_version: 0.25.0.0
+client_version: v0.25.0.0
+documentation_version: v0.25.0.0
+updated: 2026-09-28
 language: ru
 
 project:
   name: BULL
   qualified_name: BULL — Benchmark Lab
   legacy_name: Local LLM
-  release: v0.24.0.0
+  release: v0.25.0.0
   frozen_stable_baseline: v17.3.2
   platform:
     primary: Windows 11
@@ -42,16 +42,16 @@ agent_rules:
     - prefer small verifiable commits in a clean repository
 
 release_layout:
-  bundle: BULL-v0.24.0.0-Bundle
-  core: bull_client_v0.24.0.0.py
+  bundle: BULL-v0.25.0.0-Bundle
+  core: bull_client_v0.25.0.0.py
   launchers:
-    client: BULL-v0.24.0.0.cmd
-    benchmark_lab: BULL-Benchmark-Lab-v0.24.0.0.cmd
-    agent_lab: BULL-Agent-Lab-v0.24.0.0.cmd
+    client: BULL-v0.25.0.0.cmd
+    benchmark_lab: BULL-Benchmark-Lab-v0.25.0.0.cmd
+    agent_lab: BULL-Agent-Lab-v0.25.0.0.cmd
   apps:
-    client: Apps/bull_client_app_v0_24_0_0.py
-    benchmark_lab: Apps/benchmark_lab_v0_24_0_0.py
-    agent_lab: Apps/agent_benchmark_v0_24_0_0.py
+    client: Apps/bull_client_app_v0_25_0_0.py
+    benchmark_lab: Apps/benchmark_lab_v0_25_0_0.py
+    agent_lab: Apps/agent_benchmark_v0_25_0_0.py
   public_namespace: Shared/bull_llm
   shared_package: Shared/bull_llm
   schemas_directory: Schemas
@@ -87,6 +87,7 @@ architecture:
       - Shared.bull_llm.runtime
       - Shared.bull_llm.evaluation
       - Shared.bull_llm.evaluation.registry
+      - Shared.bull_llm.evidence
       - Shared.bull_llm.reports
       - Shared.bull_llm.schemas
       - Shared.bull_llm.profiles
@@ -549,9 +550,12 @@ schemas:
   tested_profile: 1
   prompt_index: 2
   user_benchmark: 1
+  evidence_record: bull-benchmark-record@1
+  evidence_summary: bull-benchmark-summary@1
+  evidence_provenance: bull-evidence-provenance@1
 
 verification:
-  current_offline_regression: 349/349
+  current_offline_regression: 358/358
   clean_python_no_site_packages: pass
   runtime_third_party_python_dependencies: none_on_windows
   scorer_gold_set: 15/15
@@ -620,8 +624,8 @@ agent_benchmark:
   maturity: MVP
   module: Shared/bull_llm/agent_benchmark
   guide: Docs/AGENT_BENCHMARK.md
-  entrypoint: Apps/agent_benchmark_v0_24_0_0.py
-  launcher: BULL-Agent-Lab-v0.24.0.0.cmd
+  entrypoint: Apps/agent_benchmark_v0_25_0_0.py
+  launcher: BULL-Agent-Lab-v0.25.0.0.cmd
   menu_path: home > tests (2) > agent (5)
   config_schema: local-llm-agent-config
   run_schema: local-llm-agent-run
@@ -654,7 +658,7 @@ agent_benchmark:
 
 hardening_audit:
   version: v0.19.0.1 (retained)
-  report: Docs/AUDIT_v0.24.0.0.md
+  report: Docs/AUDIT_v0.25.0.0.md
   new_tests: Tests/hardening_regression.py
   benchmark_prompts_changed: false
   scorer_functions_changed: false
@@ -767,3 +771,25 @@ t3_release:
   tests: Tests/registry_regression.py
   startup_fix: Windows PowerShell 5.1 launcher is ASCII-only and parse-tested
   measurement_freeze: CHAT prompts, result instructions, scorers, recovery, and runtime options unchanged
+
+t4_release:
+  name: BULL Evidence
+  version: v0.25.0.0
+  status: complete
+  module: Shared/bull_llm/evidence.py
+  record_schema: Schemas/bull_benchmark_record_v1.schema.json
+  summary_schema: Schemas/bull_benchmark_summary_v1.schema.json
+  metric_spaces: [quality.native, quality.assisted, contract, runtime, resources, recovery, reliability, security, human]
+  artifacts:
+    private: '*_evidence_private.json'
+    share_safe: '*_evidence_share_safe.json'
+  provenance:
+    immutable: true
+    hashes: [engine, source, spec, prompt_or_pack, scorer, verifier, execution_order]
+    runtime_fingerprints: [launch, effective, observed, profile]
+  migration: copy_only; source hash verified before and after
+  share_safe_policy: allow-listed fields plus automatic privacy audit; model labels remain user-reviewed metadata
+  html: offline only; no CDN or JavaScript; confidence intervals, latency distributions, context curves, category heatmap
+  compatibility: legacy artifacts remain readable
+  tests: Tests/evidence_regression.py
+  measurement_freeze: benchmark prompts, scorers, recovery, and runtime options unchanged

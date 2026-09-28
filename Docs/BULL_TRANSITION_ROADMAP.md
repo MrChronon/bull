@@ -1,11 +1,17 @@
 # BULL Transition Roadmap
 
-**Документ:** поэтапный план архитектурного перехода Local LLM → BULL  
-**Версия документа:** 1.0  
-**Дата:** 2026-09-26  
-**Текущий продукт:** Local LLM v0.21.0.0  
-**Замороженная baseline:** v17.3.2  
-**Целевое имя:** BULL — Benchmarking & Usage of Local LLMs  
+**Документ:** поэтапный план архитектурного перехода Local LLM → BULL
+
+**Версия документа:** 1.1
+
+**Дата:** 2026-09-28
+
+**Текущий продукт:** BULL v0.25.0.0
+
+**Замороженная baseline:** v17.3.2
+
+**Целевое имя:** BULL — Benchmarking & Usage of Local LLMs
+
 **Целевой стабильный релиз:** BULL v1.0.0
 
 ## 1. Назначение дорожной карты
@@ -269,6 +275,9 @@ bull_llm.reports
 ---
 
 ## T4 — BULL Evidence
+
+**Статус:** завершён в v0.25.0.0 (2026-09-28); prompts, scorers, recovery и
+runtime inference pipeline не изменялись.
 
 ### Назначение
 

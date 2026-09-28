@@ -174,7 +174,11 @@ class OllamaAgentBackend:
             finally:
                 timer.cancel()
         if not meta:
-            if time.monotonic() - start >= timeout:
+            # The abort timer can wake a mocked or real socket a fraction before
+            # the monotonic comparison reaches the rounded deadline.  Its event
+            # is authoritative: an empty stream caused by our own shutdown is a
+            # timeout, not an unrelated transport reset.
+            if deadline_fired.is_set() or time.monotonic() - start >= timeout:
                 raise TimeoutError("Backend timeout")
             raise ConnectionResetError("Incomplete stream")
         request_duration = time.monotonic() - start

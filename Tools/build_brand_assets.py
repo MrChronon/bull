@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 BRAND = ROOT / "Assets" / "Brand"
 MASTER = BRAND / "bull-logo-canonical.png"
 LOCK = BRAND / "brand-lock.json"
-VERSION = "v0.24.0.0"
+VERSION = "v0.25.0.0"
 EXPECTED_SHA256 = "60d91a700b9cd91ad3fd6ad598287a8e2cccd067f2ab0ed7515dd52af44b2269"
 
 

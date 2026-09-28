@@ -155,7 +155,7 @@ class EvidenceContractTests(unittest.TestCase):
             {"prompt": "secret"},
             {"note": "http://private.example:11434"},
             {"note": "C:\\Users\\person\\private.json"},
-            {"note": "person@example.test"},
+            {"note": "person@example.org"},
         )
         for value in bad_values:
             with self.subTest(value=value), self.assertRaises(ValueError):

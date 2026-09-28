@@ -34,7 +34,7 @@ server**. Run chat, compare selected models, resume interrupted suites, inspect
 offline reports and move a tested profile into the working client.
 
 <p align="center">
-  <img src="Assets/Brand/readme-signal-panel.svg" alt="BULL evaluation signal panel: 349 offline regressions, 12 CHAT Core cases, three recommended seeds, seven artifact types and four measurement dimensions" width="100%">
+  <img src="Assets/Brand/readme-signal-panel.svg" alt="BULL evaluation signal panel: 358 offline regressions, 12 CHAT Core cases, three recommended seeds, private and share-safe evidence, and nine separated metric spaces" width="100%">
 </p>
 
 ## Why BULL
@@ -79,13 +79,13 @@ general model superiority from a single run.
 
 ### Install
 
-1. Download `BULL-v0.24.0.0-Bundle.zip` and its SHA-256 file from the
+1. Download `BULL-v0.25.0.0-Bundle.zip` and its SHA-256 file from the
    [latest release](https://github.com/MrChronon/bull/releases/latest).
 2. Verify the checksum, extract the archive and run
-   `Install-BULL-v0.24.0.0.cmd`.
+   `Install-BULL-v0.25.0.0.cmd`.
 3. Choose `Client`, `Server` or `AllInOne`.
-4. Start `BULL-v0.24.0.0.cmd` for chat or
-   `BULL-Benchmark-Lab-v0.24.0.0.cmd` for evaluation.
+4. Start `BULL-v0.25.0.0.cmd` for chat or
+   `BULL-Benchmark-Lab-v0.25.0.0.cmd` for evaluation.
 
 The interface opens without a running backend, so connection setup, help,
 diagnostics and saved reports remain available offline.
@@ -98,7 +98,8 @@ flowchart LR
     R --> C[LLM Client]
     R --> L[Benchmark Lab]
     R --> A[Agent Lab]
-    L --> J[JSON / CSV / checkpoint]
+    L --> J[Private evidence / checkpoint]
+    L --> S[Share-safe summary]
     L --> H[Offline HTML report]
     L --> P[Tested profile]
     P --> C
@@ -116,10 +117,11 @@ llama.cpp `8080` directly to the Internet.
 
 ## Reproducible outputs
 
-Each benchmark can produce raw JSON/CSV, summary JSON/CSV, an atomic checkpoint,
-tested profiles and a self-contained HTML report. Reports separate descriptive
-observations from claims and keep native model output distinct from client
-assistance.
+Each benchmark can produce raw JSON/CSV, an immutable private evidence record, a
+privacy-audited share-safe summary, an atomic checkpoint, tested profiles and a
+self-contained HTML report. Provenance includes prompt/pack/scorer/verifier hashes
+and separate launch/effective runtime fingerprints. Reports keep native model
+output, client assistance and recovery behavior in distinct metric spaces.
 
 ```powershell
 .\Run-Tests.ps1
@@ -127,7 +129,7 @@ assistance.
 .\Build-Release.ps1
 ```
 
-The current release passes **349/349 offline regressions**, including clean
+The current release passes **358/358 offline regressions**, including clean
 Python without site packages, forced `cp1251`, startup integration, manifest
 hashes and ZIP verification.
 
@@ -160,10 +162,11 @@ Public release gates exclude `Chats`, `Runtime`, `Benchmarks`, `Exports`,
 
 ## Project status
 
-`v0.24.0.0` is the **BULL Registry** release. It introduces independent,
-versioned data-only benchmark packs while preserving CHAT prompts, scorers,
-recovery behavior and historical artifact compatibility. See the
-[release notes](Docs/RELEASE_NOTES_0.24.0.0.md) and
+`v0.25.0.0` is the **BULL Evidence** release. It introduces versioned evidence
+schemas, immutable provenance, explicit private/share-safe artifacts and richer
+offline analytics while preserving CHAT prompts, scorers, recovery behavior and
+historical artifact compatibility. See the
+[release notes](Docs/RELEASE_NOTES_0.25.0.0.md) and
 [documentation index](Docs/README.md).
 
 ## License and naming

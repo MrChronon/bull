@@ -3,6 +3,6 @@ setlocal
 cd /d "%~dp0"
 set "PYTHONUTF8=1"
 set "PYTHONIOENCODING=utf-8"
-python "Apps\benchmark_lab_v0_24_0_0.py"
+python "Apps\benchmark_lab_v0_25_0_0.py"
 set "EXIT_CODE=%ERRORLEVEL%"
 endlocal & exit /b %EXIT_CODE%

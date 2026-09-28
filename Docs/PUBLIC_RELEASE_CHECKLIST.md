@@ -35,7 +35,7 @@ Use this checklist for every GitHub release.
 
 Do not push the development repository or its history merely because the current release ZIP passed. Old commits, historical baselines and untracked bundles can contain machine/model provenance that is intentionally absent from the public release.
 
-1. Build and verify `BULL-v0.24.0.0-Bundle.zip` and its SHA-256.
+1. Build and verify `BULL-v0.25.0.0-Bundle.zip` and its SHA-256.
 2. Extract the audited bundle into a new empty directory.
 3. Add the license selected by the repository owner.
 4. Run `Test-Public-Release.ps1` again from that directory.
