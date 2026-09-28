@@ -7,7 +7,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from PIL import Image, ImageOps
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,6 +28,17 @@ def contain(image: Image.Image, size: tuple[int, int], padding: int = 0) -> Imag
     canvas = Image.new("RGBA", size, (0, 0, 0, 0))
     canvas.alpha_composite(fitted, ((size[0] - fitted.width) // 2, (size[1] - fitted.height) // 2))
     return canvas
+
+
+def ui_font(size: int, *, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+    names = ("seguisb.ttf", "segoeuib.ttf") if bold else ("segoeui.ttf",)
+    candidates = [Path("C:/Windows/Fonts") / name for name in names]
+    candidates += [Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else
+                        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")]
+    for candidate in candidates:
+        if candidate.is_file():
+            return ImageFont.truetype(str(candidate), size=size)
+    return ImageFont.load_default()
 
 
 def svg_wrapper(png_name: str, width: int, height: int, *, label: str) -> str:
@@ -106,8 +117,50 @@ def main() -> None:
     )
 
     social = Image.new("RGBA", (1280, 640), "#07120F")
-    social_logo = contain(logo, (1180, 420), padding=24)
-    social.alpha_composite(social_logo, (50, 60))
+    draw = ImageDraw.Draw(social, "RGBA")
+    for y in range(640):
+        blend = y / 639
+        draw.line((0, y, 1280, y), fill=(7, 18 + round(5 * blend), 15 + round(10 * blend), 255))
+    for x in range(0, 1281, 40):
+        draw.line((x, 0, x, 640), fill=(88, 150, 135, 13))
+    for y in range(0, 641, 40):
+        draw.line((0, y, 1280, y), fill=(88, 150, 135, 13))
+    draw.rounded_rectangle((24, 24, 1256, 616), radius=30, outline=(31, 92, 79, 230), width=2)
+    draw.ellipse((40, 112, 476, 548), fill=(5, 42, 35, 255),
+                 outline=(0, 230, 168, 150), width=3)
+    social_mark = contain(mark_source, (430, 430), padding=22)
+    social.alpha_composite(social_mark, (42, 105))
+
+    title_font = ui_font(58, bold=True)
+    label_font = ui_font(18, bold=True)
+    body_font = ui_font(25)
+    stat_font = ui_font(17, bold=True)
+    x = 505
+    draw.text((x, 112), "BULL", font=title_font, fill="#00E6A8")
+    bull_width = draw.textbbox((0, 0), "BULL", font=title_font)[2]
+    draw.text((x + bull_width + 24, 112), "EVIDENCE", font=title_font, fill="#F4F7F5")
+    draw.text((x, 190), "v0.25.0.0  ·  VERIFIABLE LOCAL LLM EVALUATION",
+              font=label_font, fill="#82AA9F")
+    draw.line((x, 232, 1200, 232), fill="#24D6FF", width=3)
+
+    cards = (
+        ("IMMUTABLE PROVENANCE", "Prompt · pack · scorer · verifier hashes"),
+        ("PRIVATE / SHARE-SAFE", "Explicit evidence boundary with privacy audit"),
+        ("OFFLINE ANALYTICS", "Confidence · latency · context · category"),
+    )
+    card_y = 262
+    for title, detail in cards:
+        draw.rounded_rectangle((x, card_y, 1200, card_y + 72), radius=14,
+                               fill=(15, 31, 32, 235), outline=(31, 92, 79, 230), width=2)
+        draw.rectangle((x, card_y + 12, x + 6, card_y + 60), fill="#00E6A8")
+        draw.text((x + 26, card_y + 12), title, font=label_font, fill="#24D6FF")
+        draw.text((x + 26, card_y + 38), detail, font=body_font, fill="#F4F7F5")
+        card_y += 88
+
+    draw.line((62, 565, 1218, 565), fill=(36, 214, 255, 110), width=2)
+    draw.text((62, 582), "358/358 REGRESSIONS", font=stat_font, fill="#00E6A8")
+    draw.text((330, 582), "OLLAMA  ·  LLAMA.CPP  ·  WINDOWS  ·  MIT",
+              font=stat_font, fill="#82AA9F")
     social.save(BRAND / "github-social-preview.png", optimize=True)
 
     lock = {
