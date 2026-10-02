@@ -5,10 +5,10 @@ param(
 )
 $ErrorActionPreference = "Stop"
 $base = $PSScriptRoot
-$launcher = Join-Path $base "BULL-v0.25.0.0.cmd"
-$icon = Join-Path $base "BULL-v0.25.0.0.ico"
-if (-not (Test-Path $launcher)) { throw "BULL-v0.25.0.0.cmd not found in $base" }
-if (-not (Test-Path $icon)) { throw "BULL-v0.25.0.0.ico not found in $base" }
+$launcher = Join-Path $base "BULL-v0.26.0.0.cmd"
+$icon = Join-Path $base "BULL-v0.26.0.0.ico"
+if (-not (Test-Path $launcher)) { throw "BULL-v0.26.0.0.cmd not found in $base" }
+if (-not (Test-Path $icon)) { throw "BULL-v0.26.0.0.ico not found in $base" }
 $ws = New-Object -ComObject WScript.Shell
 $desktopRoot = if ($DesktopDirectory) { $DesktopDirectory } else { [Environment]::GetFolderPath("Desktop") }
 $programsRoot = if ($ProgramsDirectory) { $ProgramsDirectory } else { [Environment]::GetFolderPath("Programs") }
@@ -23,7 +23,7 @@ foreach ($linkPath in $targets) {
     $sc.TargetPath = $launcher
     $sc.WorkingDirectory = $base
     $sc.IconLocation = "$icon,0"
-    $sc.Description = "BULL v0.25.0.0 Benchmark Lab"
+    $sc.Description = "BULL v0.26.0.0 Benchmark Lab"
     $sc.Save()
     if (-not $Quiet) { Write-Host "Shortcut created: $linkPath" -ForegroundColor Green }
 }

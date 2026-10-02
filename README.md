@@ -34,7 +34,7 @@ server**. Run chat, compare selected models, resume interrupted suites, inspect
 offline reports and move a tested profile into the working client.
 
 <p align="center">
-  <img src="Assets/Brand/readme-signal-panel.svg" alt="BULL evaluation signal panel: 358 offline regressions, 12 CHAT Core cases, three recommended seeds, private and share-safe evidence, and nine separated metric spaces" width="100%">
+  <img src="Assets/Brand/readme-signal-panel.svg" alt="BULL evaluation signal panel: 363 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases, private and share-safe evidence, and nine separated metric spaces" width="100%">
 </p>
 
 ## Why BULL
@@ -53,6 +53,8 @@ offline reports and move a tested profile into the working client.
 
 - **CHAT quality:** instruction following, groundedness, dialogue state,
   causality, semantic negation, Russian business language and reasoning;
+- **RU Dialogue candidate:** 10 parameterized Russian cases with separately
+  reported semantic and structural scores plus auditable critical failures;
 - **contract completion:** generation, structure, terminal JSON and exact schema
   are tracked as distinct facts;
 - **performance:** load duration, warm tokens/second, VRAM and GPU telemetry;
@@ -64,9 +66,12 @@ offline reports and move a tested profile into the working client.
 - **hardware experiments:** an experimental Windows + Ollama GPU Lab.
 
 The bundled `bull_chat_core@1.0.0` pack contains the stable 12-case CHAT Core.
-Its extracted definitions are hash-checked against the proven suite. Automatic
-scores support investigation; they do not replace expert review or establish
-general model superiority from a single run.
+The new `bull_ru_dialogue@1.0.0` candidate adds 10 public parameterized cases for
+confirmed-state updates, evidence limits, causal caution, instruction retention,
+business Russian and embedded-instruction resistance. Its scorer publishes
+semantic and structural dimensions independently. Automatic scores support
+investigation; they do not replace expert review or establish general model
+superiority from a single run.
 
 ## Quick start
 
@@ -79,13 +84,13 @@ general model superiority from a single run.
 
 ### Install
 
-1. Download `BULL-v0.25.0.0-Bundle.zip` and its SHA-256 file from the
+1. Download `BULL-v0.26.0.0-Bundle.zip` and its SHA-256 file from the
    [latest release](https://github.com/MrChronon/bull/releases/latest).
 2. Verify the checksum, extract the archive and run
-   `Install-BULL-v0.25.0.0.cmd`.
+   `Install-BULL-v0.26.0.0.cmd`.
 3. Choose `Client`, `Server` or `AllInOne`.
-4. Start `BULL-v0.25.0.0.cmd` for chat or
-   `BULL-Benchmark-Lab-v0.25.0.0.cmd` for evaluation.
+4. Start `BULL-v0.26.0.0.cmd` for chat or
+   `BULL-Benchmark-Lab-v0.26.0.0.cmd` for evaluation.
 
 The interface opens without a running backend, so connection setup, help,
 diagnostics and saved reports remain available offline.
@@ -129,7 +134,7 @@ output, client assistance and recovery behavior in distinct metric spaces.
 .\Build-Release.ps1
 ```
 
-The current release passes **358/358 offline regressions**, including clean
+The current release passes **363/363 offline regressions**, including clean
 Python without site packages, forced `cp1251`, startup integration, manifest
 hashes and ZIP verification.
 
@@ -162,11 +167,11 @@ Public release gates exclude `Chats`, `Runtime`, `Benchmarks`, `Exports`,
 
 ## Project status
 
-`v0.25.0.0` is the **BULL Evidence** release. It introduces versioned evidence
-schemas, immutable provenance, explicit private/share-safe artifacts and richer
-offline analytics while preserving CHAT prompts, scorers, recovery behavior and
-historical artifact compatibility. See the
-[release notes](Docs/RELEASE_NOTES_0.25.0.0.md) and
+`v0.26.0.0` is the first **BULL Flagships** release. It introduces the public
+`bull_ru_dialogue@1.0.0` candidate pack and an auditable engine-owned scorer with
+separate semantic and structural dimensions. The stable CHAT Core, recovery and
+runtime inference behavior remain unchanged. See the
+[release notes](Docs/RELEASE_NOTES_0.26.0.0.md) and
 [documentation index](Docs/README.md).
 
 ## License and naming

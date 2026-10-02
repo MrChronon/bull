@@ -14,8 +14,8 @@ $env:CUA_DD_PYTHON_TOOL_WARM_SPREADSHEET_RUNTIME = "0"
 $env:CUA_DD_INIT_ARTIFACT_TOOL_V2_RECORD_OPERATIONS = "0"
 $env:CUA_DD_INIT_ARTIFACT_TOOL_V2 = "0"
 
-$expectedVersion = "v0.25.0.0"
-$client = Join-Path $PSScriptRoot "bull_client_v0.25.0.0.py"
+$expectedVersion = "v0.26.0.0"
+$client = Join-Path $PSScriptRoot "bull_client_v0.26.0.0.py"
 if (-not (Test-Path -LiteralPath $client)) { throw "Mandatory client missing: $client" }
 
 $code = Get-Content -LiteralPath $client -Raw -Encoding UTF8
@@ -34,8 +34,8 @@ $required = @(
     "Docs\CODE_AUDIT.md",
     "Docs\SECURITY.md",
     "Docs\PUBLIC_RELEASE_CHECKLIST.md",
-    "Docs\CHANGELOG_v0.25.0.0.md",
-    "Docs\RELEASE_NOTES_0.25.0.0.md",
+    "Docs\CHANGELOG_v0.26.0.0.md",
+    "Docs\RELEASE_NOTES_0.26.0.0.md",
     "Docs\MIGRATION_TO_BULL.md",
     "README.md",
     ".gitignore",
@@ -56,6 +56,7 @@ $required = @(
     "Tests\core_regression.py",
     "Tests\registry_regression.py",
     "Tests\evidence_regression.py",
+    "Tests\ru_dialogue_regression.py",
     "Tests\Build-Gpu-Lab-Fixture.ps1",
     "Server\Gpu-Lab-Worker.ps1",
     "Docs\GPU_LAB.md",
@@ -72,10 +73,10 @@ $required = @(
     "Shared\bull_llm\storage.py",
     "Shared\bull_llm\presentation.py",
     "Shared\bull_llm\i18n.py",
-    "Docs\AUDIT_v0.25.0.0.md",
+    "Docs\AUDIT_v0.26.0.0.md",
     "Docs\AGENT_BENCHMARK.md",
-    "Apps\agent_benchmark_v0_25_0_0.py",
-    "BULL-Agent-Lab-v0.25.0.0.cmd",
+    "Apps\agent_benchmark_v0_26_0_0.py",
+    "BULL-Agent-Lab-v0.26.0.0.cmd",
     "Schemas\agent_config_v1.schema.json",
     "Schemas\agent_run_v1.schema.json",
     "Shared\bull_llm\agent_benchmark\contracts.py",
@@ -89,8 +90,8 @@ $required = @(
     "Tests\Fixtures\ru_language_stress_sanitized_v3.json",
     "Tests\Fixtures\benchmark_scorer_v3.json",
     "Apps\_bootstrap.py",
-    "Apps\benchmark_lab_v0_25_0_0.py",
-    "Apps\bull_client_app_v0_25_0_0.py",
+    "Apps\benchmark_lab_v0_26_0_0.py",
+    "Apps\bull_client_app_v0_26_0_0.py",
     "Shared\bull_llm\__init__.py",
     "Shared\bull_llm\schemas.py",
     "Shared\bull_llm\profiles.py",
@@ -113,12 +114,12 @@ $required = @(
     "backend_settings.json",
     "model_profiles.json",
     "benchmark_profiles.json",
-    "BULL-v0.25.0.0.cmd",
-    "BULL-Benchmark-Lab-v0.25.0.0.cmd",
-    "BULL-v0.25.0.0.ps1",
-    "BULL-v0.25.0.0.ico",
-    "BULL-v0.25.0.0.png",
-    "BULL-v0.25.0.0.svg",
+    "BULL-v0.26.0.0.cmd",
+    "BULL-Benchmark-Lab-v0.26.0.0.cmd",
+    "BULL-v0.26.0.0.ps1",
+    "BULL-v0.26.0.0.ico",
+    "BULL-v0.26.0.0.png",
+    "BULL-v0.26.0.0.svg",
     "Assets\Brand\bull-mark.svg",
     "Assets\Brand\bull-mark-light.svg",
     "Assets\Brand\bull-mark-mono.svg",
@@ -146,14 +147,14 @@ $required = @(
     "Assets\Brand\github-social-preview.png",
     "Assets\Brand\README.md",
     "Tools\build_brand_assets.py",
-    "Install-BULL-v0.25.0.0-Shortcut.ps1",
-    "Install-BULL-v0.25.0.0.ps1",
-    "Install-BULL-v0.25.0.0.cmd",
+    "Install-BULL-v0.26.0.0-Shortcut.ps1",
+    "Install-BULL-v0.26.0.0.ps1",
+    "Install-BULL-v0.26.0.0.cmd",
     "Server\Install-BULL-Node.ps1",
     "Server\Test-BULL-RemoteReadiness.ps1",
     "Server\connection.template.json",
     "Client\New-BULL-ClientKey.ps1",
-    "BULL-v0.25.0.0-README.txt",
+    "BULL-v0.26.0.0-README.txt",
     "Schemas\bull_benchmark_pack_manifest_v1.schema.json",
     "Schemas\bull_benchmark_record_v1.schema.json",
     "Schemas\bull_benchmark_summary_v1.schema.json",
@@ -164,7 +165,17 @@ $required = @(
     "BenchmarkPacks\bull_chat_core\pack.lock.json",
     "BenchmarkPacks\bull_chat_core\README.md",
     "BenchmarkPacks\bull_chat_core\LICENSE.txt",
-    "Tools\build_chat_core_pack.py"
+    "Tools\build_chat_core_pack.py",
+    "Tools\build_ru_dialogue_pack.py",
+    "BenchmarkPacks\bull_ru_dialogue\manifest.json",
+    "BenchmarkPacks\bull_ru_dialogue\cases.json",
+    "BenchmarkPacks\bull_ru_dialogue\development_set.json",
+    "BenchmarkPacks\bull_ru_dialogue\gold.json",
+    "BenchmarkPacks\bull_ru_dialogue\scorer_gold.json",
+    "BenchmarkPacks\bull_ru_dialogue\manual_audit.json",
+    "BenchmarkPacks\bull_ru_dialogue\pack.lock.json",
+    "BenchmarkPacks\bull_ru_dialogue\README.md",
+    "BenchmarkPacks\bull_ru_dialogue\LICENSE.txt"
 )
 foreach ($rel in $required) {
     if (-not (Test-Path -LiteralPath $rel)) {
@@ -189,7 +200,7 @@ if ($ai -notmatch ('documentation_version:\s*["'']?' + [regex]::Escape($version)
 Write-Host "Documentation gate: OK" -ForegroundColor Green
 
 $brandSvgs = @(
-    'BULL-v0.25.0.0.svg',
+    'BULL-v0.26.0.0.svg',
     'Assets\Brand\bull-logo-canonical.svg',
     'Assets\Brand\bull-mark.svg',
     'Assets\Brand\bull-mark-light.svg',
@@ -212,7 +223,7 @@ if ($brandLock.schema -ne 'bull-brand-lock' -or $brandLock.schema_version -ne 1 
     $canonicalHash -ne ([string]$brandLock.source_sha256).ToLowerInvariant()) {
     throw 'Canonical BULL logo or brand lock changed without approval.'
 }
-$iconBytes = [IO.File]::ReadAllBytes('BULL-v0.25.0.0.ico')
+$iconBytes = [IO.File]::ReadAllBytes('BULL-v0.26.0.0.ico')
 if ($iconBytes.Length -lt 6 -or $iconBytes[0] -ne 0 -or $iconBytes[1] -ne 0 -or
     $iconBytes[2] -ne 1 -or $iconBytes[3] -ne 0) {
     throw 'BULL Windows icon has an invalid ICO header.'
@@ -271,16 +282,16 @@ if ($LASTEXITCODE -ne 0) { throw "Public release audit failed with code $LASTEXI
 
 # Exact obsolete-version gate.
 $allowedVersioned = @(
-    "bull_client_v0.25.0.0.py",
-    "BULL-v0.25.0.0.cmd",
-    "BULL-v0.25.0.0.ps1",
-    "BULL-v0.25.0.0.ico",
-    "BULL-v0.25.0.0.png",
-    "BULL-v0.25.0.0.svg",
-    "BULL-v0.25.0.0-README.txt",
-    "Install-BULL-v0.25.0.0-Shortcut.ps1",
-    "Install-BULL-v0.25.0.0.ps1",
-    "Install-BULL-v0.25.0.0.cmd"
+    "bull_client_v0.26.0.0.py",
+    "BULL-v0.26.0.0.cmd",
+    "BULL-v0.26.0.0.ps1",
+    "BULL-v0.26.0.0.ico",
+    "BULL-v0.26.0.0.png",
+    "BULL-v0.26.0.0.svg",
+    "BULL-v0.26.0.0-README.txt",
+    "Install-BULL-v0.26.0.0-Shortcut.ps1",
+    "Install-BULL-v0.26.0.0.ps1",
+    "Install-BULL-v0.26.0.0.cmd"
 )
 $obsolete = Get-ChildItem -LiteralPath . -File | Where-Object {
     ($_.Name -match '^(bull_client_v|BULL-v|Install-BULL-v)') -and
@@ -298,7 +309,7 @@ Write-Host "Running forced cp1251 regression gate..." -ForegroundColor Cyan
 $oldUtf8=$env:PYTHONUTF8
 $oldIo=$env:PYTHONIOENCODING
 $oldPycachePrefix=$env:PYTHONPYCACHEPREFIX
-$cp1251Pycache=Join-Path ([IO.Path]::GetTempPath()) ('bull-v02500-cp1251-' + [guid]::NewGuid().ToString('N'))
+$cp1251Pycache=Join-Path ([IO.Path]::GetTempPath()) ('bull-v02600-cp1251-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cp1251Pycache -Force | Out-Null
 try {
     $env:PYTHONUTF8='0'

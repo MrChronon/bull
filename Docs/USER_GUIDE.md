@@ -1,33 +1,32 @@
-# BULL v0.25.0.0 — руководство пользователя
+# BULL v0.26.0.0 — руководство пользователя
 
-**Версия клиента:** v0.25.0.0
+**Версия клиента:** v0.26.0.0
 
-**Версия документации:** v0.25.0.0
+**Версия документации:** v0.26.0.0
 
 BULL — Benchmark Lab — переносимое приложение для Windows 11, которое объединяет рабочий чат с локальными LLM и лабораторию воспроизводимого сравнения моделей. Поддерживаются Ollama и совместимый с OpenAI API сервер llama.cpp. Модели могут работать на том же компьютере или на отдельном узле, доступном через защищённое SSH-соединение.
 
-Версия документа: 28 сентября 2026 года. История изменений вынесена в `Docs/CHANGELOG_v0.25.0.0.md`.
+Версия документа: 2 октября 2026 года. История изменений вынесена в `Docs/CHANGELOG_v0.26.0.0.md`.
 
-### Что изменилось в v0.25.0.0
+### Что изменилось в v0.26.0.0
 
-Это переходный релиз **BULL Evidence**, этап T4. Каждый новый benchmark теперь
-создаёт два явно разных JSON-артефакта: private record с исходными records и
-share-safe summary с разрешённым набором метрик. Share-safe export проходит
-privacy audit и не содержит prompts, raw-ответов, endpoints, e-mail и домашних
-путей. Имена моделей остаются видимыми и перед публикацией требуют осознанной
-проверки пользователя.
+Это первый релиз этапа **BULL Flagships**. Он добавляет candidate pack
+`bull_ru_dialogue@1.0.0`: 10 параметризованных русскоязычных тестов на состояние
+диалога, замену устаревших данных, ограничения доказательности, причинную
+осторожность, удержание инструкций, деловой русский и сопротивление инструкциям,
+встроенным в недоверенный текст.
 
-Provenance фиксирует hashes engine, spec, prompt/pack, scorer и verifier, а также
-раздельные launch и effective runtime fingerprints и фактический порядок
-выполнения. Новые схемы называются `bull-benchmark-record` и
-`bull-benchmark-summary`; legacy artifacts по-прежнему читаются через compatibility
-layer, а миграция всегда создаёт новую копию и не перезаписывает источник.
+Новый engine-owned scorer `ru_dialogue_contract_v1` независимо выводит
+`semantic_score` и `structural_score`. Критическое противоречие получает cap,
+машиночитаемые evidence/reason и обязательный `manual_review_required=true`.
+В pack входят публичный development set, deterministic builder, gold fixtures и
+отдельный набор adversarial audit fixtures. Они проверяют scorer, а не качество
+какой-либо модели.
 
-Автономный HTML использует те же summary data, что и terminal, и добавляет
-95%-интервалы при достаточной выборке, распределения latency, context curves и
-category heatmap. HTML по-прежнему не использует CDN, JavaScript, prompts или
-raw-ответы. Benchmark prompts, scorers, recovery и runtime pipeline в T4 не
-изменялись. Подробности: `Docs/RELEASE_NOTES_0.25.0.0.md`.
+Pack имеет статус `candidate`: его нельзя представлять как окончательный
+leaderboard до независимого cross-model прогона и второго человеческого review.
+Стабильный CHAT Core, recovery и runtime inference pipeline в этом релизе не
+изменены. Подробности: `Docs/RELEASE_NOTES_0.26.0.0.md`.
 
 Стартовый экран теперь показывает полноцветную Chafa-версию головы быка,
 уменьшенную до ширины 30 символов и подготовленную из официального изображения
@@ -56,7 +55,7 @@ raw-ответы. Benchmark prompts, scorers, recovery и runtime pipeline в T4
 Agent Benchmark теперь предлагает стандартные настройки и краткий итог с деталями
 по запросу. Промпты, скореры, генерация, checkpoint и независимый verifier не изменены.
 Подробный маршрут по экранам: `Docs/UI_GUIDE.md`. Актуальная карта документации —
-`Docs/README.md`; остаточные риски перечислены в `Docs/AUDIT_v0.25.0.0.md`.
+`Docs/README.md`; остаточные риски перечислены в `Docs/AUDIT_v0.26.0.0.md`.
 
 Важно: старые исполняемые CODE-наборы не имеют полноценной OS-песочницы. Для
 недоверенных ответов используйте отдельную disposable VM без секретов и сети.
@@ -74,6 +73,8 @@ Agent Benchmark теперь предлагает стандартные нас�
   snapshots и воспроизводимые hashes без выполнения кода из pack.
 - **BULL Evidence** — immutable provenance, раздельные пространства метрик,
   private/share-safe artifacts и единые данные для terminal/HTML reports.
+- **BULL RU Dialogue** — public candidate pack с 10 параметризованными кейсами,
+  раздельными semantic/structural scores и auditable critical failures.
 - **Server role** — настройка inference-узла без выдачи клиенту доступа к чужим ключам или конфигурациям.
 
 Языковые модели в архив не входят. Установите их отдельно и соблюдайте их лицензии.
@@ -82,13 +83,13 @@ Agent Benchmark теперь предлагает стандартные нас�
 
 1. Распакуйте релиз в новую папку.
 2. По возможности сравните SHA-256 архива с опубликованным файлом `.sha256.txt`.
-3. Запустите `Install-BULL-v0.25.0.0.cmd`.
+3. Запустите `Install-BULL-v0.26.0.0.cmd`.
 4. Выберите роль:
    - `Client` — чат и Benchmark Lab для уже доступного backend;
    - `Server` — подготовка компьютера с моделями;
    - `AllInOne` — клиент и backend на одной машине.
-5. Для основного приложения используйте `BULL-v0.25.0.0.cmd`.
-6. Для прямого входа в лабораторию используйте `BULL-Benchmark-Lab-v0.25.0.0.cmd`.
+5. Для основного приложения используйте `BULL-v0.26.0.0.cmd`.
+6. Для прямого входа в лабораторию используйте `BULL-Benchmark-Lab-v0.26.0.0.cmd`.
 
 При первом запуске выполняется offline regression. Если проверка не прошла, inference и benchmark блокируются: сначала устраните причину или повторите `Run-Tests.ps1`.
 Для запуска Client и полного startup regression достаточно стандартной библиотеки
@@ -284,6 +285,27 @@ CHAT core включает задачи на:
 - логику.
 
 Качество кода и специализированная аналитика оцениваются отдельными категориями и не смешиваются с CHAT-рейтингом.
+
+### BULL RU Dialogue (candidate)
+
+Новый pack отображается в каталоге как отдельные тесты с префиксом
+`ru_dialogue_`. Его можно запустить через **Расширенные тесты → Один тест**,
+**Одну категорию** или командой `/bench list`, а сведения о pack посмотреть через:
+
+```text
+/bench pack inspect bull_ru_dialogue
+```
+
+В pack входят 10 вариантов из шести семейств: confirmed state, evidence limits,
+causal caution, instruction retention, business Russian и embedded-instruction
+resistance. `semantic_score` оценивает согласованность фактов и запретных
+утверждений; `structural_score` — terminal JSON, точную схему, секции и формат.
+Один показатель не заменяет другой. Critical failure всегда требует просмотра
+ответа человеком; автоматический cap — сигнал для аудита, а не диагноз модели.
+
+Файлы `development_set.json`, `scorer_gold.json` и `manual_audit.json` открыты для
+review. `Tools/build_ru_dialogue_pack.py` детерминированно создаёт runnable pack.
+Не редактируйте сгенерированные `cases.json`, hashes или lock вручную.
 
 ### Источник параметров генерации
 
@@ -506,7 +528,7 @@ Benchmark ставится на паузу; готовые runs остаются
 
 - `Docs/README.md` — что актуально сейчас, а что сохранено только как история.
 - `README.md` — короткое введение.
-- `Docs/RELEASE_NOTES_0.25.0.0.md` — что нового и первые шаги.
+- `Docs/RELEASE_NOTES_0.26.0.0.md` — что нового и первые шаги.
 - `Docs/MIGRATION_TO_BULL.md` — переход со старых имён и imports.
 - `Docs/SECURITY.md` — модель угроз и безопасная конфигурация.
 - `Docs/REMOTE_ACCESS.md` — удалённая работа.

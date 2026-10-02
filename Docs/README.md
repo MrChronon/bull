@@ -1,8 +1,8 @@
-# Документация BULL v0.25.0.0
+# Документация BULL v0.26.0.0
 
 Этот файл — актуальная карта документов. Если инструкция из старого changelog или
 аудита расходится с текущим руководством, приоритет имеют `USER_GUIDE.md`,
-`SECURITY.md` и `AI_CONTEXT.yaml` версии v0.25.0.0.
+`SECURITY.md` и `AI_CONTEXT.yaml` версии v0.26.0.0.
 
 ## Начать работу
 
@@ -16,12 +16,13 @@
 
 - `SECURITY.md` — границы доверия, ключи, host pinning, tools и остаточные риски.
 - `PUBLIC_RELEASE_CHECKLIST.md` — что проверить перед GitHub/release.
-- `AUDIT_v0.25.0.0.md` — текущий аудит этапа T4 и evidence/privacy boundary.
+- `AUDIT_v0.26.0.0.md` — текущий аудит этапа T5.1, scorer и release boundary.
 - `CODE_AUDIT.md` — текущая верхняя сводка и подробная историческая база.
 
 ## Benchmark-разработка
 
 - `BENCHMARK_PACK_AUTHORING.md` — безопасные data-only benchmark packs.
+- `../BenchmarkPacks/bull_ru_dialogue/README.md` — методика candidate pack BULL RU Dialogue.
 - `AGENT_BENCHMARK.md` — Agent Benchmark MVP и его ограничения.
 - `GPU_LAB.md` — экспериментальная Windows + Ollama GPU Lab.
 - `PROMPTING_GUIDE.md` — prompts, версии и воспроизводимость.
@@ -30,7 +31,7 @@
 
 ## История, не текущая инструкция
 
-Файлы `RELEASE_NOTES_0.21.0.0.md`–`RELEASE_NOTES_0.24.0.0.md`, старые changelog и
-`AUDIT_v0.21.0.0.md`–`AUDIT_v0.24.0.0.md` сохранены для проверки происхождения
+Файлы `RELEASE_NOTES_0.21.0.0.md`–`RELEASE_NOTES_0.25.0.0.md`, старые changelog и
+`AUDIT_v0.21.0.0.md`–`AUDIT_v0.25.0.0.md` сохранены для проверки происхождения
 решений. Упомянутые в них имена файлов, namespaces, номера тестов и меню могут быть
-устаревшими. Не используйте их для настройки v0.25.0.0.
+устаревшими. Не используйте их для настройки v0.26.0.0.

@@ -6,7 +6,7 @@
 
 **Дата:** 2026-09-28
 
-**Текущий продукт:** BULL v0.25.0.0
+**Текущий продукт:** BULL v0.26.0.0
 
 **Замороженная baseline:** v17.3.2
 
@@ -276,7 +276,7 @@ bull_llm.reports
 
 ## T4 — BULL Evidence
 
-**Статус:** завершён в v0.25.0.0 (2026-09-28); prompts, scorers, recovery и
+**Статус:** завершён в v0.26.0.0 (2026-09-28); prompts, scorers, recovery и
 runtime inference pipeline не изменялись.
 
 ### Назначение
@@ -341,6 +341,10 @@ human
 
 ### T5.1 — BULL RU Dialogue, v0.26.0.0
 
+**Статус:** завершён 2 октября 2026 года как candidate pack
+`bull_ru_dialogue@1.0.0`. Pack намеренно не помечен `stable` до независимого
+cross-model прогона и второго человеческого review.
+
 Категории:
 
 - изменение подтверждённого состояния;
@@ -356,12 +360,14 @@ human
 
 Критерии выхода:
 
-- public development set;
-- parameterized variants;
-- scorer gold set;
-- adversarial cases;
-- ручной audit всех critical failures;
-- отдельные semantic и structural metrics.
+- [x] public development set;
+- [x] 10 parameterized variants в шести семействах;
+- [x] scorer gold set;
+- [x] adversarial cases;
+- [x] ручной audit всех synthetic critical-failure fixtures;
+- [x] отдельные `semantic_score` и `structural_score`;
+- [x] critical failures содержат evidence/reason и требуют manual review;
+- [x] CHAT Core, recovery и inference runtime не изменены.
 
 ### T5.2 — BULL Local System Matrix, v0.26.1.0
 

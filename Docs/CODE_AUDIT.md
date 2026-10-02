@@ -1,12 +1,11 @@
 # BULL — аудит кода, benchmark, безопасности, производительности и UX
 
-## Текущий аудит v0.25.0.0
+## Текущий аудит v0.26.0.0
 
-Переходный аудит BULL Evidence: **`AUDIT_v0.25.0.0.md`**. На этапе T4 добавлены
-versioned record/summary schemas, immutable provenance, раздельные metric spaces,
-private/share-safe artifacts и единые данные для terminal/HTML reports. Legacy
-artifacts читаются через compatibility layer; миграция создаёт новую копию.
-Benchmark prompts, scorers, recovery и runtime pipeline не менялись.
+Переходный аудит BULL RU Dialogue: **`AUDIT_v0.26.0.0.md`**. На этапе T5.1
+добавлен data-only candidate pack с 10 параметризованными cases, engine-owned
+scorer и раздельными semantic/structural metrics. Стабильный CHAT Core, recovery
+и runtime inference pipeline не менялись.
 Текущий UX/security addendum: полноцветный Chafa pixel mark шириной 30 символов
 ограничен 18 строками,
 показывается один раз после включения UTF-8, а загрузчик разрешает только ANSI SGR

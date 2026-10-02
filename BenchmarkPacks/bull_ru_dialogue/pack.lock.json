@@ -1,8 +1,8 @@
 {
-  "compiled_sha256": "e4470cffe78ce8a58290e807d3bdcfbdaa3985e694587b1d97eb1a7bf9bbfbd6",
+  "compiled_sha256": "402caffc8d7b1b64698eb9955eb87f2b069296084e5c6d6b6c9f8dc545a965e2",
   "content_sha256": "22bbda0529af22ef91c5373d2d31af17f8eb95e5cfd7b1c67e94c5ba5eb8795f",
   "gold_sha256": "5d46025477154987499caaf1205b30aad763dafa9def9dc124e3f4e31ec9005a",
-  "manifest_sha256": "3c7df37e51c96fe5de0f855590116474185b93d59a18ea5618cb466a497180df",
+  "manifest_sha256": "66ff4d7cf91cf56d3fefa1099cfa905e07341041c2448575c25c438d94e7617c",
   "pack": {
     "id": "bull_ru_dialogue",
     "version": "1.0.0"

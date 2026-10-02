@@ -7,7 +7,7 @@
   "description": "Parameterized Russian dialogue correctness and instruction-retention development benchmark.",
   "documentation": "README.md",
   "engine": {
-    "minimum_version": "0.25.0.0"
+    "minimum_version": "0.26.0.0"
   },
   "gold": {
     "file": "gold.json",

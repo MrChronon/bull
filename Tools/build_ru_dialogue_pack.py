@@ -377,7 +377,7 @@ def main() -> int:
         "description": "Parameterized Russian dialogue correctness and instruction-retention development benchmark.",
         "status": "candidate",
         "visibility": "public",
-        "engine": {"minimum_version": "0.25.0.0"},
+        "engine": {"minimum_version": "0.26.0.0"},
         "license": {"id": "MIT", "name": "MIT License", "file": "LICENSE.txt"},
         "provenance": {
             "source": "BULL T5.1 public synthetic development set",
@@ -395,7 +395,7 @@ def main() -> int:
     _write_json(PACK_ROOT / "manual_audit.json", manual_audit)
     _write_json(PACK_ROOT / "manifest.json", manifest)
     policy = RegistryPolicy(
-        engine_version="0.25.0.0",
+        engine_version="0.26.0.0",
         runner_refs=frozenset({"single_turn_v1"}),
         scorer_refs=frozenset({"ru_dialogue_contract_v1"}),
         verifier_refs=frozenset({"benchmark_contract_v1"}),
