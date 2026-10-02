@@ -13,8 +13,13 @@
 
 - Home, benchmark, connection, and post-run menus use progressive disclosure.
 - Expert, server, Agent, and GPU actions are under More/Experimental.
-- A compact BULL mark appears on each navigational page.
-- English localization covers the new primary routes.
+- A complete BULL mark and expanded product name appear on each page.
+- Page transitions clear the previous menu instead of stacking terminal screens.
+- Language is requested once, then changed together with appearance in settings.
+- BULL Red and a focused Matrix theme join the default and high-contrast themes.
+- Connections are grouped as local, saved remote, SSH alias, manual, and tools.
+- Offline status distinguishes saved session data from live backend diagnostics.
+- English localization covers the new primary routes and startup warnings.
 - Current launchers, installers, documentation, and packaging identify v0.27.
 
 ## Not changed

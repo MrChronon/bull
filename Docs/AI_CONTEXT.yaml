@@ -212,6 +212,7 @@ ssh_alias_onboarding:
 terminal_brand:
   startup_mark: pre-rendered Chafa 1.18.3 full-color pixel bull at width 30
   display_count: once per process
+  page_mark: complete 11-line theme-coloured bull plus expanded product name on every ui_header
   source_asset: Assets/Brand/bull-mark-512.png
   render_asset: Assets/Brand/bull-mark-chafa-full-30.ansi.b64
   runtime_chafa_dependency: false
@@ -220,9 +221,10 @@ terminal_brand:
   benchmark_behavior_changed: false
 
 localization:
-  startup_selector: English or Russian before backend initialization
+  startup_selector: English or Russian before backend initialization on first run only
   default_language: en
   persisted_in: ui_settings.json
+  later_change: More -> Language and appearance
   english_catalog: Assets/Localization/ui.en.json
   excluded_from_translation:
     - benchmark prompts
@@ -232,6 +234,7 @@ localization:
 
 ui_theme:
   default: bull_brand
+  visible_choices: [bull_brand, matrix, bull_red, high_contrast]
   brand_colors:
     primary: '#00E6A8'
     action: '#24D6FF'
@@ -555,7 +558,7 @@ schemas:
   evidence_provenance: bull-evidence-provenance@1
 
 verification:
-  current_offline_regression: 373/373
+  current_offline_regression: 379/379
   clean_python_no_site_packages: pass
   runtime_third_party_python_dependencies: none_on_windows
   scorer_gold_set: 15/15
@@ -836,12 +839,21 @@ v0_27_release:
     - Connection
     - More
   progressive_disclosure:
-    more: [saved results, appearance and language, diagnostics, help, exact commands, experiments]
+    more: [saved results, language and appearance, saved session status, help, exact commands, experiments]
     experimental: [Agent Benchmark, GPU Lab, advanced engine and server tools]
     server_setup_on_primary_path: false
   branding:
     startup: full-colour bounded Chafa asset
-    pages: compact bull mark on every ui_header
+    pages: complete theme-coloured bull and expanded BULL name on every ui_header
+  page_transition: ui_header clears the previous terminal page before drawing
+  connections:
+    visible_groups: [this computer, remote server, tools]
+    remote_paths: [saved server, SSH alias, manual server]
+    tools: [import or migrate, help or explicit diagnostics]
+    implicit_diagnostics: false
+  offline_status:
+    live_telemetry_request: false
+    saved_values_labelled_as_saved: true
   user_tests:
     directory: UserTests
     guide: Docs/USER_TESTS.md

@@ -10,7 +10,11 @@ capabilities remain available, but no longer compete with the main workflow.
 - Two-level benchmark flow with a standard comparison as the primary action.
 - Agent Lab, GPU Lab, manual server setup, and exact commands moved to advanced
   or experimental menus.
-- Compact BULL mark on every navigational page.
+- Complete theme-coloured bull mark and the expanded BULL name on every page.
+- First-run-only language choice with later language/theme changes in one screen.
+- BULL, Matrix, BULL Red, and high-contrast visual themes.
+- Connection choices grouped into local computer, remote server, and tools.
+- Offline session status never presents saved values as live diagnostics.
 - Concise terminal results without leaving the application.
 - Model-choice markers for Quality, Speed, Balance, and Low memory.
 - Custom decision weights for quality, speed, task completion, and VRAM.

@@ -34,7 +34,7 @@ server**. Run chat, compare selected models, resume interrupted suites, inspect
 offline reports and move a tested profile into the working client.
 
 <p align="center">
-  <img src="Assets/Brand/readme-signal-panel.svg" alt="BULL evaluation signal panel: 373 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases, private and share-safe evidence, and nine separated metric spaces" width="100%">
+  <img src="Assets/Brand/readme-signal-panel.svg" alt="BULL evaluation signal panel: 379 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases, private and share-safe evidence, and nine separated metric spaces" width="100%">
 </p>
 
 ## Why BULL
@@ -146,7 +146,7 @@ output, client assistance and recovery behavior in distinct metric spaces.
 .\Build-Release.ps1
 ```
 
-The current release passes **373/373 offline regressions**, including clean
+The current release passes **379/379 offline regressions**, including clean
 Python without site packages, forced `cp1251`, startup integration, manifest
 hashes and ZIP verification.
 

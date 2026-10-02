@@ -41,5 +41,7 @@ included in the public source or bundle payload.
 - Python compile and complete offline regression pass.
 - Forced-cp1251 and startup integration pass.
 - English/Russian primary routes do not mix interface languages.
+- First-run language persistence, page clearing, complete branding, theme palettes,
+  structured connection navigation, and offline dashboard semantics pass UX tests.
 - Public-candidate audit finds no personal paths, endpoints, or secret patterns.
 - Manifest hashes and release ZIP verify from a clean extracted directory.

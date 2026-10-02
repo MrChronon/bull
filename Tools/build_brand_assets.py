@@ -158,7 +158,7 @@ def main() -> None:
         card_y += 88
 
     draw.line((62, 565, 1218, 565), fill=(36, 214, 255, 110), width=2)
-    draw.text((62, 582), "373/373 REGRESSIONS", font=stat_font, fill="#00E6A8")
+    draw.text((62, 582), "379/379 REGRESSIONS", font=stat_font, fill="#00E6A8")
     draw.text((330, 582), "OLLAMA  ·  LLAMA.CPP  ·  WINDOWS  ·  MIT",
               font=stat_font, fill="#82AA9F")
     social.save(BRAND / "github-social-preview.png", optimize=True)
