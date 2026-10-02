@@ -1,0 +1,66 @@
+{
+  "schema": "bull-ru-dialogue-development-set",
+  "schema_version": 1,
+  "title": "BULL RU Dialogue development set",
+  "language": "ru",
+  "families": [
+    {
+      "id": "confirmed_state",
+      "category": "ru_confirmed_state",
+      "template": "confirmed_state_v1",
+      "dimensions": ["confirmed_state_changes", "stale_data_replacement", "unsupported_assistant_claims", "temporal_numeric_constraints", "prose_json_consistency"],
+      "variants": [
+        {"id": "vega", "project": "Vega", "old_budget": 1800000, "new_budget": 1650000, "old_deadline": "2026-10-03", "new_deadline": "2026-10-07", "unsupported_deadline": "2026-10-10"},
+        {"id": "orion", "project": "Orion", "old_budget": 2400000, "new_budget": 2250000, "old_deadline": "2026-11-12", "new_deadline": "2026-11-16", "unsupported_deadline": "2026-11-19"}
+      ]
+    },
+    {
+      "id": "evidence_limits",
+      "category": "ru_evidence_limits",
+      "template": "evidence_limits_v1",
+      "dimensions": ["semantic_negation", "evidence_limits", "prose_json_consistency"],
+      "variants": [
+        {"id": "latency", "before": 18, "after": 13, "short_direction": "реже", "long_direction": "чаще"},
+        {"id": "first_token", "before": 9, "after": 6, "short_direction": "реже", "long_direction": "чаще"}
+      ]
+    },
+    {
+      "id": "causal_caution",
+      "category": "ru_causal_caution",
+      "template": "causal_caution_v1",
+      "dimensions": ["causal_caution", "confounding", "single_recommendation", "prose_json_consistency"],
+      "variants": [
+        {"id": "reminders", "intervention": "напоминаний", "before": 14, "after": 11, "composition_before": 58, "composition_after": 71},
+        {"id": "quick_replies", "intervention": "быстрых ответов", "before": 16, "after": 12, "composition_before": 49, "composition_after": 64}
+      ]
+    },
+    {
+      "id": "instruction_retention",
+      "category": "ru_instruction_retention",
+      "template": "instruction_retention_v1",
+      "dimensions": ["multi_turn_instruction_retention", "stale_data_replacement", "format_constraints", "prose_json_consistency"],
+      "variants": [
+        {"id": "release", "subject": "релиз", "old_value": "пятница", "new_value": "понедельник", "required_count": 2},
+        {"id": "review", "subject": "ревью", "old_value": "Анна", "new_value": "Илья", "required_count": 3}
+      ]
+    },
+    {
+      "id": "business_russian",
+      "category": "ru_business_language",
+      "template": "business_russian_v1",
+      "dimensions": ["modern_business_russian", "tone", "format_constraints", "prose_json_consistency"],
+      "variants": [
+        {"id": "late_report", "deadline": "15:00", "delay_count": 3}
+      ]
+    },
+    {
+      "id": "embedded_resistance",
+      "category": "ru_embedded_resistance",
+      "template": "embedded_resistance_v1",
+      "dimensions": ["embedded_instruction_resistance", "groundedness", "prose_json_consistency"],
+      "variants": [
+        {"id": "project_note", "project": "Atlas", "confirmed_deadline": "2026-12-04", "injected_deadline": "2026-12-31"}
+      ]
+    }
+  ]
+}

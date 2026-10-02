@@ -5371,4 +5371,7 @@ passed.extend(f'BULL Core {i+1}' for i in range(core_test_count))
 from Tests.evidence_regression import run_suite as run_evidence_suite
 evidence_test_count=run_evidence_suite()
 passed.extend(f'BULL Evidence {i+1}' for i in range(evidence_test_count))
+from Tests.ru_dialogue_regression import run_suite as run_ru_dialogue_suite
+ru_dialogue_test_count=run_ru_dialogue_suite(mod)
+passed.extend(f'RU Dialogue {i+1}' for i in range(ru_dialogue_test_count))
 print(f'PASS {len(passed)}/{len(passed)}')

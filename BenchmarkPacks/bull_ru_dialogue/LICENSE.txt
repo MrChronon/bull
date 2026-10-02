@@ -1,0 +1,4 @@
+BULL RU Dialogue benchmark pack
+
+This benchmark pack is distributed under the MIT License of the BULL repository.
+The examples are synthetic and contain no personal or production data.

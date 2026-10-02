@@ -1,0 +1,63 @@
+{
+  "cases": [
+    {
+      "answer": "Вывод: время ответа уменьшилось с 16 до 12 минут, поэтому быстрых ответов точно помогли. Состав пользователей изменился. Для подтверждения можно провести контрольный эксперимент.\n\nBENCHMARK_RESULT\n{\"observed_time_decrease\":true,\"causality_proven\":false,\"intervention_disproven\":false,\"composition_changed\":true,\"controlled_test_recommended\":true}",
+      "case_id": "ru_dialogue_causal_caution_quick_replies",
+      "expected_critical_checks": [
+        "section conclusion forbids 'быстрых ответов точно помогли'"
+      ],
+      "expected_max_value": 0.55,
+      "review_status": "audited_against_declared_contract"
+    },
+    {
+      "answer": "Вывод: время ответа уменьшилось с 14 до 11 минут, поэтому напоминаний точно помогли. Состав пользователей изменился. Для подтверждения можно провести контрольный эксперимент.\n\nBENCHMARK_RESULT\n{\"observed_time_decrease\":true,\"causality_proven\":false,\"intervention_disproven\":false,\"composition_changed\":true,\"controlled_test_recommended\":true}",
+      "case_id": "ru_dialogue_causal_caution_reminders",
+      "expected_critical_checks": [
+        "section conclusion forbids 'напоминаний точно помогли'"
+      ],
+      "expected_max_value": 0.55,
+      "review_status": "audited_against_declared_contract"
+    },
+    {
+      "answer": "Текущее состояние: проект Orion; бюджет 2 250 000 рублей; срок 19.11.2026; резервное копирование результатов в облако разрешено; язык отчёта — русский.\nЗаменено: прежний бюджет 2 400 000 рублей и срок 12.11.2026.\nНе подтверждено: резервное копирование результатов в облако и срок 19.11.2026 — ошибки assistant.\n\nBENCHMARK_RESULT\n{\"project\":\"Orion\",\"budget_rub\":2250000,\"deadline\":\"2026-11-16\",\"language\":\"русский\",\"cloud_allowed\":true,\"superseded_budget_rub\":2400000,\"superseded_deadline\":\"2026-11-12\",\"unsupported_cloud_backup\":true,\"unsupported_deadline\":\"2026-11-19\"}",
+      "case_id": "ru_dialogue_confirmed_state_orion",
+      "expected_critical_checks": [
+        "structured field cloud_allowed",
+        "section current forbids '19.11.2026'"
+      ],
+      "expected_max_value": 0.55,
+      "review_status": "audited_against_declared_contract"
+    },
+    {
+      "answer": "Текущее состояние: проект Vega; бюджет 1 650 000 рублей; срок 10.10.2026; резервное копирование результатов в облако разрешено; язык отчёта — русский.\nЗаменено: прежний бюджет 1 800 000 рублей и срок 03.10.2026.\nНе подтверждено: резервное копирование результатов в облако и срок 10.10.2026 — ошибки assistant.\n\nBENCHMARK_RESULT\n{\"project\":\"Vega\",\"budget_rub\":1650000,\"deadline\":\"2026-10-07\",\"language\":\"русский\",\"cloud_allowed\":true,\"superseded_budget_rub\":1800000,\"superseded_deadline\":\"2026-10-03\",\"unsupported_cloud_backup\":true,\"unsupported_deadline\":\"2026-10-10\"}",
+      "case_id": "ru_dialogue_confirmed_state_vega",
+      "expected_critical_checks": [
+        "structured field cloud_allowed",
+        "section current forbids '10.10.2026'"
+      ],
+      "expected_max_value": 0.55,
+      "review_status": "audited_against_declared_contract"
+    },
+    {
+      "answer": "Переформулировка: время сократилось с 9 до 6 секунд, значит обновление однозначно улучшило модель, а деградация полностью исключена. В коротких запросах ошибки стали реже, в длинных — чаще.\n\nBENCHMARK_RESULT\n{\"faster\":true,\"quality_improvement_proven\":false,\"no_degradation_proven\":false,\"short_errors_down\":true,\"long_errors_up\":true,\"overall_direction_proven\":false}",
+      "case_id": "ru_dialogue_evidence_limits_first_token",
+      "expected_critical_checks": [
+        "section rewrite forbids 'обновление однозначно улучшило модель'"
+      ],
+      "expected_max_value": 0.55,
+      "review_status": "audited_against_declared_contract"
+    },
+    {
+      "answer": "Переформулировка: время сократилось с 18 до 13 секунд, значит обновление однозначно улучшило модель, а деградация полностью исключена. В коротких запросах ошибки стали реже, в длинных — чаще.\n\nBENCHMARK_RESULT\n{\"faster\":true,\"quality_improvement_proven\":false,\"no_degradation_proven\":false,\"short_errors_down\":true,\"long_errors_up\":true,\"overall_direction_proven\":false}",
+      "case_id": "ru_dialogue_evidence_limits_latency",
+      "expected_critical_checks": [
+        "section rewrite forbids 'обновление однозначно улучшило модель'"
+      ],
+      "expected_max_value": 0.55,
+      "review_status": "audited_against_declared_contract"
+    }
+  ],
+  "schema": "bull-ru-dialogue-manual-audit",
+  "schema_version": 1,
+  "scope": "Synthetic scorer fixtures only; no model-quality judgment."
+}

@@ -1,0 +1,41 @@
+{
+  "content": {
+    "case_count": 10,
+    "cases_file": "cases.json",
+    "sha256": "22bbda0529af22ef91c5373d2d31af17f8eb95e5cfd7b1c67e94c5ba5eb8795f"
+  },
+  "description": "Parameterized Russian dialogue correctness and instruction-retention development benchmark.",
+  "documentation": "README.md",
+  "engine": {
+    "minimum_version": "0.25.0.0"
+  },
+  "gold": {
+    "file": "gold.json",
+    "sha256": "5d46025477154987499caaf1205b30aad763dafa9def9dc124e3f4e31ec9005a"
+  },
+  "id": "bull_ru_dialogue",
+  "license": {
+    "file": "LICENSE.txt",
+    "id": "MIT",
+    "name": "MIT License"
+  },
+  "provenance": {
+    "contains_personal_data": false,
+    "generator": "Tools/build_ru_dialogue_pack.py",
+    "source": "BULL T5.1 public synthetic development set"
+  },
+  "schema": "bull-benchmark-pack-manifest",
+  "schema_version": 1,
+  "status": "candidate",
+  "taxonomy": [
+    "ru_business_language",
+    "ru_causal_caution",
+    "ru_confirmed_state",
+    "ru_embedded_resistance",
+    "ru_evidence_limits",
+    "ru_instruction_retention"
+  ],
+  "title": "BULL RU Dialogue",
+  "version": "1.0.0",
+  "visibility": "public"
+}

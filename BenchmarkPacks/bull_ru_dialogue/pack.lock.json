@@ -1,0 +1,12 @@
+{
+  "compiled_sha256": "e4470cffe78ce8a58290e807d3bdcfbdaa3985e694587b1d97eb1a7bf9bbfbd6",
+  "content_sha256": "22bbda0529af22ef91c5373d2d31af17f8eb95e5cfd7b1c67e94c5ba5eb8795f",
+  "gold_sha256": "5d46025477154987499caaf1205b30aad763dafa9def9dc124e3f4e31ec9005a",
+  "manifest_sha256": "3c7df37e51c96fe5de0f855590116474185b93d59a18ea5618cb466a497180df",
+  "pack": {
+    "id": "bull_ru_dialogue",
+    "version": "1.0.0"
+  },
+  "schema": "bull-benchmark-pack-lock",
+  "schema_version": 1
+}

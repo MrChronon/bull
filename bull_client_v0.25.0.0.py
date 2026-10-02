@@ -6024,7 +6024,9 @@ BENCHMARK_RESULT
 
 def benchmark_registry_policy(built=None):
     definitions=built if built is not None else builtin_benchmarks()
-    scorers={'none'}
+    # Pack scorers are engine-owned and explicitly allowlisted. Packs remain
+    # data-only and cannot introduce executable scoring code.
+    scorers={'none','ru_dialogue_contract_v1'}
     scorers.update(str(item.get('score_type') or 'none') for item in definitions.values())
     return RegistryPolicy(
         engine_version=APP_VERSION,
@@ -8359,6 +8361,14 @@ def _score_ru_language_stress_v3(answer,item):
             sum(float(x.get('contribution') or 0) for x in format_checks)/format_weight
             if format_weight else None
         ),
+        'semantic_score':(
+            sum(float(x.get('contribution') or 0) for x in content_rows)/content_weight
+            if content_weight else None
+        ),
+        'structural_score':(
+            sum(float(x.get('contribution') or 0) for x in format_checks)/format_weight
+            if format_weight else None
+        ),
         'prose_word_count':word_count,
         'required_min_words':int(word_range[0]) if word_range else None,
         'required_max_words':int(word_range[1]) if word_range else None,
@@ -8500,11 +8510,162 @@ def _score_groundedness_adversarial_v1(answer,item):
         'semantic_field_accuracy':semantic_accuracy,
         'prose_consistency':prose_consistency,'prose_consistency_events':prose_events,
         'content_score':content_score,'format_score':format_score,
+        'semantic_score':content_score,'structural_score':format_score,
         'embedded_instruction_ignored':ignored,
         'groundedness_failure':semantic_accuracy<1.0 or not ignored or not prose_consistency,
         'caps_applied':[],'manual_review_recommended':False,
     }
 
+
+
+def _ru_dialogue_normalize(value):
+    return re.sub(r'\s+',' ',str(value or '').casefold().replace('ё','е')).strip()
+
+
+def _ru_dialogue_literal_present(text,literal):
+    return _ru_dialogue_normalize(literal) in _ru_dialogue_normalize(text)
+
+
+def _score_ru_dialogue_contract_v1(answer,item):
+    """Score RU Dialogue semantics and structure as independent dimensions."""
+    obj,parse_error=_extract_terminal_json_after_marker(answer)
+    main=_main_text_before_benchmark_result(answer)
+    reference=item.get('reference') or {}
+    config=item.get('dialogue_contract') or {}
+    sections=config.get('sections') or []
+    constraints=config.get('constraints') or {}
+    weights=config.get('weights') or {'semantic':.80,'structural':.20}
+    semantic_weight=float(weights.get('semantic',.80))
+    structural_weight=float(weights.get('structural',.20))
+    if semantic_weight<0 or structural_weight<0 or semantic_weight+structural_weight<=0:
+        semantic_weight,structural_weight=.80,.20
+    total_weight=semantic_weight+structural_weight
+    semantic_weight/=total_weight
+    structural_weight/=total_weight
+
+    semantic_checks=[]
+    structural_checks=[]
+    critical_failures=[]
+
+    def add_check(target,dimension,name,ok,evidence=None,reason=None,critical=False):
+        row={'name':name,'ok':bool(ok),'evidence':evidence,'reason':reason}
+        target.append(row)
+        if critical and not ok:
+            critical_failures.append({
+                'name':name,'dimension':dimension,'evidence':evidence,
+                'reason':reason or 'critical contract failed',
+            })
+
+    terminal_json_valid=parse_error is None and isinstance(obj,dict)
+    schema_exact=terminal_json_valid and set(obj)==set(reference)
+    add_check(structural_checks,'structural','terminal BENCHMARK_RESULT JSON',terminal_json_valid,
+              'terminal JSON parsed' if terminal_json_valid else str(parse_error or 'JSON root is not an object'),
+              'terminal BENCHMARK_RESULT JSON is missing or invalid',True)
+    add_check(structural_checks,'structural','exact BENCHMARK_RESULT schema',schema_exact,
+              ', '.join(sorted(obj)) if isinstance(obj,dict) else None,
+              'BENCHMARK_RESULT keys differ from the reference schema',True)
+    for key,expected in reference.items():
+        actual=obj.get(key) if isinstance(obj,dict) else None
+        ok=isinstance(obj,dict) and key in obj and _structured_value_matches(actual,expected)
+        add_check(semantic_checks,'semantic','structured field '+str(key),ok,
+                  f'actual={json.dumps(actual,ensure_ascii=False)} expected={json.dumps(expected,ensure_ascii=False)}',
+                  'structured value contradicts the deterministic reference',True)
+
+    for section in sections:
+        section_id=str(section.get('id') or 'section')
+        prefix=str(section.get('prefix') or '').strip()
+        scoped=main
+        if prefix:
+            matches=list(re.finditer(re.escape(prefix),main,re.I))
+            add_check(structural_checks,'structural',f'section {section_id} appears once',len(matches)==1,
+                      f'prefix={prefix!r}; count={len(matches)}',
+                      'required prose section is missing or duplicated',bool(section.get('critical')))
+            if matches:
+                start=matches[0].end()
+                next_starts=[]
+                for other in sections:
+                    other_prefix=str(other.get('prefix') or '').strip()
+                    if not other_prefix or other_prefix==prefix:
+                        continue
+                    found=re.search(re.escape(other_prefix),main[start:],re.I)
+                    if found:
+                        next_starts.append(start+found.start())
+                scoped=main[start:min(next_starts) if next_starts else len(main)]
+        for index,alternatives in enumerate(section.get('required_any') or []):
+            variants=alternatives if isinstance(alternatives,list) else [alternatives]
+            found=next((value for value in variants if _ru_dialogue_literal_present(scoped,value)),None)
+            add_check(semantic_checks,'semantic',f'section {section_id} required claim {index+1}',found is not None,
+                      found or ' / '.join(str(value) for value in variants),
+                      'required confirmed fact is absent from the scoped prose section',bool(section.get('critical')))
+        for literal in section.get('forbidden') or []:
+            present=_ru_dialogue_literal_present(scoped,literal)
+            add_check(semantic_checks,'semantic',f'section {section_id} forbids {literal!r}',not present,
+                      str(literal) if present else None,
+                      'stale, unsupported or contradictory claim appears in prose',True)
+
+    for literal in config.get('global_forbidden') or []:
+        present=_ru_dialogue_literal_present(main,literal)
+        add_check(semantic_checks,'semantic',f'prose forbids {literal!r}',not present,
+                  str(literal) if present else None,
+                  'forbidden unsupported addition appears in prose',True)
+
+    word_count=_word_count(main)
+    word_range=constraints.get('word_range')
+    if isinstance(word_range,list) and len(word_range)==2:
+        low,high=int(word_range[0]),int(word_range[1])
+        add_check(structural_checks,'structural','prose word range',low<=word_count<=high,
+                  f'{word_count} words; expected {low}-{high}','prose length is outside the declared range')
+    line_count=constraints.get('line_count')
+    if line_count is not None:
+        actual_lines=len([line for line in main.splitlines() if line.strip()])
+        add_check(structural_checks,'structural','exact prose line count',actual_lines==int(line_count),
+                  f'{actual_lines} lines; expected {line_count}','prose line count differs from the contract')
+    if constraints.get('forbid_exclamation'):
+        add_check(structural_checks,'structural','no exclamation marks','!' not in main,
+                  '!' if '!' in main else None,'exclamation marks are forbidden')
+    if constraints.get('expected_language')=='ru':
+        language=_ru_language_diagnostics(main,item)
+        language_ok=language.get('classification') not in {'insufficient_prose','predominantly_non_russian'}
+        add_check(structural_checks,'structural','Russian prose',language_ok,
+                  language.get('classification'),'answer must contain Russian prose')
+
+    semantic_score=(sum(row['ok'] for row in semantic_checks)/len(semantic_checks)) if semantic_checks else 1.0
+    structural_score=(sum(row['ok'] for row in structural_checks)/len(structural_checks)) if structural_checks else 1.0
+    raw_value=semantic_score*semantic_weight+structural_score*structural_weight
+    caps=[]
+    if not terminal_json_valid:
+        caps.append({'name':'invalid_terminal_json','max_value':.45})
+    if terminal_json_valid and not schema_exact:
+        caps.append({'name':'schema_mismatch','max_value':.70})
+    if any(row['dimension']=='semantic' for row in critical_failures):
+        caps.append({'name':'critical_semantic_failure','max_value':.55})
+    value=raw_value
+    for cap in caps:
+        value=min(value,float(cap['max_value']))
+    checks=[]
+    for dimension,rows,weight in (
+        ('semantic',semantic_checks,semantic_weight),('structural',structural_checks,structural_weight),
+    ):
+        each=weight/len(rows) if rows else 0.0
+        for row in rows:
+            checks.append({
+                'name':row['name'],'ok':row['ok'],'group':dimension,'weight':each,
+                'contribution':each if row['ok'] else 0.0,
+                'evidence':row.get('evidence'),'reason':row.get('reason'),
+            })
+    return {
+        'method':'ru_dialogue_contract_v1','scorer_version':1,
+        'parse_error':parse_error,'structured_result':obj,
+        'value':value,'raw_value':raw_value,'checks':checks,
+        'semantic_score':semantic_score,'structural_score':structural_score,
+        'content_score':semantic_score,'format_score':structural_score,
+        'terminal_json_valid':terminal_json_valid,'schema_exact':schema_exact,
+        'structured_exact':bool(schema_exact and all(row['ok'] for row in semantic_checks if row['name'].startswith('structured field '))),
+        'critical_failures':critical_failures,
+        'manual_review_required':bool(critical_failures),
+        'manual_review_recommended':bool(critical_failures),
+        'caps_applied':caps,'prose_word_count':word_count,
+    }
 
 
 def benchmark_score(name,item,answer):
@@ -8532,6 +8693,9 @@ def benchmark_score(name,item,answer):
 
     if score_type=='groundedness_adversarial_v1':
         return _score_groundedness_adversarial_v1(answer,item)
+
+    if score_type=='ru_dialogue_contract_v1':
+        return _score_ru_dialogue_contract_v1(answer,item)
 
     if score_type=='structured_reference_v1':
         obj,parse_error=_extract_json_after_marker(answer)
