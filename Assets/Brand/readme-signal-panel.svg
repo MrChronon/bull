@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="620" viewBox="0 0 1280 620" role="img" aria-labelledby="title desc">
   <title id="title">BULL evaluation signal panel</title>
-  <desc id="desc">Project facts and a conceptual map of BULL evaluation coverage. The panel shows 363 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases and nine separated metric spaces. It is not a model score chart.</desc>
+  <desc id="desc">Project facts and a conceptual map of BULL evaluation coverage. The panel shows 373 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases and nine separated metric spaces. It is not a model score chart.</desc>
   <defs>
     <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#07110f"/>
@@ -39,7 +39,7 @@
       <rect x="640" y="154" width="274" height="132" rx="18" fill="#101d20" stroke="#1d554b"/>
       <rect x="932" y="154" width="292" height="132" rx="18" fill="#101d20" stroke="#1d554b"/>
 
-      <text x="80" y="217" fill="#f4f7f5" font-size="42" font-weight="750">363/363</text>
+      <text x="80" y="217" fill="#f4f7f5" font-size="42" font-weight="750">373/373</text>
       <text x="80" y="252" fill="#82aa9f" font-size="14" font-weight="650" letter-spacing="2">OFFLINE REGRESSIONS</text>
       <circle cx="300" cy="188" r="8" fill="#00e6a8" filter="url(#glow)"/>
 
@@ -95,7 +95,7 @@
       <circle cx="1163" cy="510" r="13" fill="#00e6a8" filter="url(#glow)"/>
     </g>
 
-    <text x="56" y="583" fill="#6f958b" font-size="13" letter-spacing="1.6">BULL · BENCHMARKING &amp; USAGE OF LOCAL LLMs · v0.26.0.0</text>
+    <text x="56" y="583" fill="#6f958b" font-size="13" letter-spacing="1.6">BULL · BENCHMARKING &amp; USAGE OF LOCAL LLMs · v0.27.0.0</text>
     <text x="1224" y="583" fill="#6f958b" font-size="13" text-anchor="end">Verified project facts · no model results shown</text>
   </g>
 </svg>

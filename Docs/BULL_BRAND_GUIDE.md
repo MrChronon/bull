@@ -115,7 +115,7 @@ Accent не заменяет текстовый status. Все важные со
 Правильно:
 
 - `BULL — Local LLM Benchmark Lab`;
-- `BULL v0.26.0.0` после первого полного упоминания;
+- `BULL v0.27.0.0` после первого полного упоминания;
 - `BULL RU Dialogue pack`;
 - `bull_llm.evaluation`.
 

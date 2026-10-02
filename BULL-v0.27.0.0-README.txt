@@ -1,0 +1,52 @@
+BULL v0.27.0.0 — Benchmarking & Usage of Local LLMs
+=========================================
+
+Релиз Simple Experience упрощает основной маршрут: сравнение моделей, чат,
+подключение и дополнительные функции. После теста сводка, профили выбора и
+карта quality/speed доступны прямо в терминале и в автономном HTML.
+
+Свои задачи можно положить в UserTests: .txt не получает выдуманного quality
+score, а строгий .yaml использует только объявленные детерминированные criteria.
+
+УСТАНОВКА
+---------
+
+  Install-BULL-v0.27.0.0.cmd
+
+Основной клиент:
+
+  BULL-v0.27.0.0.cmd
+
+Benchmark Lab:
+
+  BULL-Benchmark-Lab-v0.27.0.0.cmd
+
+Agent Lab:
+
+  BULL-Agent-Lab-v0.27.0.0.cmd
+
+В релизе используются только launchers с именем BULL; старые алиасы удалены.
+Подробности: Docs\MIGRATION_TO_BULL.md.
+
+ПРОВЕРКА
+--------
+
+  Run-Tests.ps1
+  Test-Public-Release.ps1 -AuditReleaseCandidatesOnly
+
+Существующие benchmark prompts, scorers, recovery и runtime не изменены; новый
+scorer относится только к пользовательским YAML-контрактам. Chats, Runtime,
+Benchmarks, Exports, Workspace, ключи
+и client_debug.log нельзя публиковать.
+
+Исходный код BULL распространяется по лицензии MIT. Полный текст: LICENSE.
+Модели, движки и внешние benchmark packs сохраняют собственные лицензии.
+
+Документация:
+
+  Docs\USER_GUIDE.md
+  Docs\RELEASE_NOTES_0.27.0.0.md
+  Docs\USER_TESTS.md
+  Docs\BENCHMARK_PACK_AUTHORING.md
+  Docs\SECURITY.md
+  Docs\AI_CONTEXT.yaml

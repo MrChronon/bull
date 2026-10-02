@@ -1,4 +1,4 @@
-﻿param(
+param(
     [string]$Root = $PSScriptRoot,
     [string[]]$AdditionalPrivateMarkers = @(),
     [switch]$AuditReleaseCandidatesOnly

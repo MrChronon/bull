@@ -1,8 +1,8 @@
 schema: bull-llm-ai-context
 schema_version: 1
-document_version: 0.26.0.0
-client_version: v0.26.0.0
-documentation_version: v0.26.0.0
+document_version: 0.27.0.0
+client_version: v0.27.0.0
+documentation_version: v0.27.0.0
 updated: 2026-10-02
 language: ru
 
@@ -10,7 +10,7 @@ project:
   name: BULL
   qualified_name: BULL — Benchmark Lab
   legacy_name: Local LLM
-  release: v0.26.0.0
+  release: v0.27.0.0
   frozen_stable_baseline: v17.3.2
   platform:
     primary: Windows 11
@@ -42,16 +42,16 @@ agent_rules:
     - prefer small verifiable commits in a clean repository
 
 release_layout:
-  bundle: BULL-v0.26.0.0-Bundle
-  core: bull_client_v0.26.0.0.py
+  bundle: BULL-v0.27.0.0-Bundle
+  core: bull_client_v0.27.0.0.py
   launchers:
-    client: BULL-v0.26.0.0.cmd
-    benchmark_lab: BULL-Benchmark-Lab-v0.26.0.0.cmd
-    agent_lab: BULL-Agent-Lab-v0.26.0.0.cmd
+    client: BULL-v0.27.0.0.cmd
+    benchmark_lab: BULL-Benchmark-Lab-v0.27.0.0.cmd
+    agent_lab: BULL-Agent-Lab-v0.27.0.0.cmd
   apps:
-    client: Apps/bull_client_app_v0_26_0_0.py
-    benchmark_lab: Apps/benchmark_lab_v0_26_0_0.py
-    agent_lab: Apps/agent_benchmark_v0_26_0_0.py
+    client: Apps/bull_client_app_v0_27_0_0.py
+    benchmark_lab: Apps/benchmark_lab_v0_27_0_0.py
+    agent_lab: Apps/agent_benchmark_v0_27_0_0.py
   public_namespace: Shared/bull_llm
   shared_package: Shared/bull_llm
   schemas_directory: Schemas
@@ -555,7 +555,7 @@ schemas:
   evidence_provenance: bull-evidence-provenance@1
 
 verification:
-  current_offline_regression: 363/363
+  current_offline_regression: 373/373
   clean_python_no_site_packages: pass
   runtime_third_party_python_dependencies: none_on_windows
   scorer_gold_set: 15/15
@@ -624,8 +624,8 @@ agent_benchmark:
   maturity: MVP
   module: Shared/bull_llm/agent_benchmark
   guide: Docs/AGENT_BENCHMARK.md
-  entrypoint: Apps/agent_benchmark_v0_26_0_0.py
-  launcher: BULL-Agent-Lab-v0.26.0.0.cmd
+  entrypoint: Apps/agent_benchmark_v0_27_0_0.py
+  launcher: BULL-Agent-Lab-v0.27.0.0.cmd
   menu_path: home > tests (2) > agent (5)
   config_schema: local-llm-agent-config
   run_schema: local-llm-agent-run
@@ -658,7 +658,7 @@ agent_benchmark:
 
 hardening_audit:
   version: v0.19.0.1 (retained)
-  report: Docs/AUDIT_v0.26.0.0.md
+  report: Docs/AUDIT_v0.27.0.0.md
   new_tests: Tests/hardening_regression.py
   benchmark_prompts_changed: false
   scorer_functions_changed: false
@@ -824,3 +824,57 @@ t5_1_release:
   privacy: synthetic only; no personal or production data
   unchanged: stable CHAT Core, recovery behavior, runtime inference pipeline
   promotion_to_stable_requires: independent cross-model evidence and second human review
+
+v0_27_release:
+  name: BULL Simple Experience
+  version: v0.27.0.0
+  status: implemented_release_candidate
+  scope: terminal usability, user-owned tasks, decision support, and report access
+  main_navigation:
+    - Compare models
+    - Chat with a model
+    - Connection
+    - More
+  progressive_disclosure:
+    more: [saved results, appearance and language, diagnostics, help, exact commands, experiments]
+    experimental: [Agent Benchmark, GPU Lab, advanced engine and server tools]
+    server_setup_on_primary_path: false
+  branding:
+    startup: full-colour bounded Chafa asset
+    pages: compact bull mark on every ui_header
+  user_tests:
+    directory: UserTests
+    guide: Docs/USER_TESTS.md
+    module: Shared/bull_llm/user_tests.py
+    formats:
+      txt: prompt-only; runtime plus manual review; no automatic quality score
+      yaml: bull-user-test version 1; safe bounded data-only subset
+    criteria: [contains_all, contains_any, forbidden_any, word_count, terminal_json_equals, terminal_json_number]
+    weights: exactly 100
+    critical_failure_cap: 0.59
+    manual_review_numeric_weight: none
+    forbidden_features: [code execution, shell, YAML tags, anchors, aliases, regex]
+    scorer: user_contract_v1
+    tests: Tests/user_tests_regression.py
+  decision_support:
+    module: Shared/bull_llm/decision_support.py
+    inputs: existing Native quality, warm speed, task completion, and VRAM metrics
+    mutates_quality_score: false
+    profiles: [quality, speed, balance, low_memory, custom]
+    speed_quality_gate: native quality >= max(0.60, best minus 0.10); task completion >= 0.80 when known
+    scope: relative within one comparable run; never a universal leaderboard
+    outputs: [terminal markers, terminal quality-speed map, offline HTML cards and scatter]
+    tests: Tests/decision_support_regression.py
+  result_access:
+    terminal_summary: true
+    custom_priorities: true
+    offline_html: true
+    summary_json: true
+    share_safe_evidence: preferred JSON for sharing
+    raw_json: private; may contain prompts and answers
+  measurement_freeze:
+    built_in_prompts: unchanged
+    built_in_scorers: unchanged
+    recovery_pipeline: unchanged
+    inference_runtime: unchanged
+  postponed: BULL Local System Matrix T5.2

@@ -6,7 +6,7 @@
 
 **Дата:** 2026-09-28
 
-**Текущий продукт:** BULL v0.26.0.0
+**Текущий продукт:** BULL v0.27.0.0
 
 **Замороженная baseline:** v17.3.2
 
@@ -369,7 +369,24 @@ cross-model прогона и второго человеческого review.
 - [x] critical failures содержат evidence/reason и требуют manual review;
 - [x] CHAT Core, recovery и inference runtime не изменены.
 
-### T5.2 — BULL Local System Matrix, v0.26.1.0
+### UX Gate — Simple Experience, v0.27.0.0
+
+**Статус:** реализован как обязательный пользовательский этап перед T5.2.
+
+- [x] четыре однозначных действия на главной;
+- [x] expert/server/Agent/GPU функции раскрываются постепенно;
+- [x] краткий результат и выбор модели доступны в терминале;
+- [x] профили Quality/Speed/Balance/Low memory и пользовательские веса;
+- [x] относительная quality/speed карта в терминале и HTML;
+- [x] `.txt` user task без фиктивного score;
+- [x] безопасный `.yaml` contract с документированными criteria;
+- [x] raw и share-safe export явно разделены;
+- [x] встроенные prompts/scorers/runtime/recovery не менялись.
+
+### T5.2 — BULL Local System Matrix, version TBD after v0.27
+
+**Статус:** отложен. Перед расширением научной матрицы выпущен пользовательский
+этап v0.27 Simple Experience.
 
 Измерения:
 
@@ -391,7 +408,7 @@ cross-model прогона и второго человеческого review.
 - hardware comparison содержит полный fingerprint;
 - performance overhead harness измерен и документирован.
 
-### T5.3 — BULL Resilience, v0.26.2.0
+### T5.3 — BULL Resilience, version TBD
 
 Сценарии:
 

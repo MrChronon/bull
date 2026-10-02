@@ -34,7 +34,7 @@ server**. Run chat, compare selected models, resume interrupted suites, inspect
 offline reports and move a tested profile into the working client.
 
 <p align="center">
-  <img src="Assets/Brand/readme-signal-panel.svg" alt="BULL evaluation signal panel: 363 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases, private and share-safe evidence, and nine separated metric spaces" width="100%">
+  <img src="Assets/Brand/readme-signal-panel.svg" alt="BULL evaluation signal panel: 373 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases, private and share-safe evidence, and nine separated metric spaces" width="100%">
 </p>
 
 ## Why BULL
@@ -48,6 +48,8 @@ offline reports and move a tested profile into the working client.
 | A disconnect can invalidate hours of work | Atomically checkpoints completed runs and resumes only unfinished work |
 | Benchmark changes are hard to audit | Uses versioned, hash-checked, data-only benchmark packs |
 | Private endpoints leak into shared results | Excludes connections, keys, logs, chats and runtime state from public releases |
+| Generic tests miss a user's actual job | Loads prompt-only `.txt` or deterministic `.yaml` tasks from `UserTests` |
+| A table does not answer “which model fits me?” | Shows transparent Quality, Speed, Balance and Low-memory choices plus custom weights |
 
 ## What you can measure
 
@@ -64,6 +66,16 @@ offline reports and move a tested profile into the working client.
   tested-profile export;
 - **agent behavior:** a restricted Agent Lab MVP with independent verification;
 - **hardware experiments:** an experimental Windows + Ollama GPU Lab.
+
+After a run, BULL can show the comparison directly in the terminal, including a
+relative Native-quality/speed map. The same decision profiles appear in the
+self-contained HTML report. They reuse measured metrics, apply an explicit
+quality/task gate, and never become a new benchmark score or universal ranking.
+
+For your own work, copy a template into [`UserTests`](UserTests). A `.txt` file
+runs the same prompt across selected models without fabricating quality. A
+structured `.yaml` file can declare bounded deterministic checks. See the
+[user-test authoring guide](Docs/USER_TESTS.md).
 
 The bundled `bull_chat_core@1.0.0` pack contains the stable 12-case CHAT Core.
 The new `bull_ru_dialogue@1.0.0` candidate adds 10 public parameterized cases for
@@ -84,13 +96,13 @@ superiority from a single run.
 
 ### Install
 
-1. Download `BULL-v0.26.0.0-Bundle.zip` and its SHA-256 file from the
+1. Download `BULL-v0.27.0.0-Bundle.zip` and its SHA-256 file from the
    [latest release](https://github.com/MrChronon/bull/releases/latest).
 2. Verify the checksum, extract the archive and run
-   `Install-BULL-v0.26.0.0.cmd`.
+   `Install-BULL-v0.27.0.0.cmd`.
 3. Choose `Client`, `Server` or `AllInOne`.
-4. Start `BULL-v0.26.0.0.cmd` for chat or
-   `BULL-Benchmark-Lab-v0.26.0.0.cmd` for evaluation.
+4. Start `BULL-v0.27.0.0.cmd` for chat or
+   `BULL-Benchmark-Lab-v0.27.0.0.cmd` for evaluation.
 
 The interface opens without a running backend, so connection setup, help,
 diagnostics and saved reports remain available offline.
@@ -134,7 +146,7 @@ output, client assistance and recovery behavior in distinct metric spaces.
 .\Build-Release.ps1
 ```
 
-The current release passes **363/363 offline regressions**, including clean
+The current release passes **373/373 offline regressions**, including clean
 Python without site packages, forced `cp1251`, startup integration, manifest
 hashes and ZIP verification.
 
@@ -167,11 +179,12 @@ Public release gates exclude `Chats`, `Runtime`, `Benchmarks`, `Exports`,
 
 ## Project status
 
-`v0.26.0.0` is the first **BULL Flagships** release. It introduces the public
-`bull_ru_dialogue@1.0.0` candidate pack and an auditable engine-owned scorer with
-separate semantic and structural dimensions. The stable CHAT Core, recovery and
-runtime inference behavior remain unchanged. See the
-[release notes](Docs/RELEASE_NOTES_0.26.0.0.md) and
+`v0.27.0.0` is the **Simple Experience** release. It reduces the primary UI to
+compare, chat, connection and more; adds reusable user-owned tasks; and presents
+transparent model-choice profiles in the terminal and offline HTML. Existing
+expert features remain under advanced/experimental menus. Built-in prompts,
+scorers, recovery and runtime inference behavior remain unchanged. See the
+[release notes](Docs/RELEASE_NOTES_0.27.0.0.md) and
 [documentation index](Docs/README.md).
 
 ## License and naming
