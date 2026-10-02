@@ -21,16 +21,19 @@ class UXTests(unittest.TestCase):
     def inputs(self, values):
         return patch.object(self.core, 'read_user_input', side_effect=values)
 
-    def test_home_exposes_five_tasks_and_raw_command(self):
+    def test_home_exposes_four_clear_tasks_and_keeps_commands_unadvertised(self):
         out = io.StringIO()
         with patch.object(self.core, 'clear_console'), self.inputs(['/backend import "C:/My Config.JSON"']), contextlib.redirect_stdout(out):
             self.assertEqual(self.core.startup_home_menu('offline', 'OK'), '/backend import "C:/My Config.JSON"')
-        self.assertIn('Команда', out.getvalue())
+        text=out.getvalue()
+        for label in ('Сравнить модели','Чат с моделью','Подключение','Дополнительно'):
+            self.assertIn(label,text)
+        self.assertNotIn('Команда /',text)
         self.assertNotIn('MATRIX NODE', out.getvalue())
-        self.assertNotIn('[8]', out.getvalue())
+        self.assertNotIn('[5]', out.getvalue())
 
     def test_home_routes_chat_and_connections(self):
-        with patch.object(self.core, 'clear_console'), self.inputs(['1', '2']):
+        with patch.object(self.core, 'clear_console'), self.inputs(['2', '2']):
             self.assertEqual(self.core.startup_home_menu('offline', 'OK'), 'load')
         with patch.object(self.core, 'clear_console'), self.inputs(['3']):
             self.assertEqual(self.core.startup_home_menu('offline', 'OK'), 'connections')
@@ -45,10 +48,10 @@ class UXTests(unittest.TestCase):
             self.assertIsNone(selection(value, ['a', 'b', 'c']))
         self.assertEqual(selection('2', ['a', 'b']), 'b')
 
-    def test_settings_and_command_palette_offline(self):
-        from Shared.bull_llm.terminal_ui import settings_menu, command_menu
-        with patch.object(self.core, 'clear_console'), self.inputs(['2']):
-            self.assertEqual(settings_menu(self.core), '/dashboard')
+    def test_more_and_command_palette_offline(self):
+        from Shared.bull_llm.terminal_ui import more_menu, command_menu
+        with patch.object(self.core, 'clear_console'), self.inputs(['3']):
+            self.assertEqual(more_menu(self.core), '/dashboard')
         with self.inputs(['/profile import-tested "C:/Test A.JSON"']):
             self.assertEqual(command_menu(self.core), '/profile import-tested "C:/Test A.JSON"')
 
@@ -90,9 +93,9 @@ class UXTests(unittest.TestCase):
             with patch.object(self.core, 'clear_console'), self.inputs(['0']), contextlib.redirect_stdout(out):
                 self.assertEqual(self.core.startup_home_menu('offline', 'OK'), 'exit')
             text = out.getvalue()
-            self.assertIn('What would you like to do?', text)
-            self.assertIn('Tests and results', text)
-            self.assertIn('Settings and help', text)
+            self.assertIn('Choose what you want to do', text)
+            self.assertIn('Compare models', text)
+            self.assertIn('More', text)
             self.assertNotIn('Чем займёмся', text)
             model_text = 'Уникальный ответ модели, который нельзя переводить автоматически.'
             self.assertEqual(tr(model_text), model_text)
@@ -112,6 +115,25 @@ class UXTests(unittest.TestCase):
             out=io.StringIO()
             with patch.object(self.core, 'clear_console'), self.inputs(['0']), contextlib.redirect_stdout(out):
                 self.assertIsNone(self.core.connection_menu())
+            self.assertFalse(has_cyrillic(out.getvalue()), out.getvalue())
+        finally:
+            set_language('ru')
+
+    def test_english_more_experimental_and_result_menus_do_not_mix_languages(self):
+        from Shared.bull_llm.i18n import set_language
+        from Shared.bull_llm.terminal_ui import experimental_menu, more_menu
+        has_cyrillic=lambda value:any(('А' <= char <= 'я') or char in 'Ёё' for char in value)
+        set_language('en')
+        try:
+            for menu in (more_menu, experimental_menu):
+                out=io.StringIO()
+                with patch.object(self.core, 'clear_console'), self.inputs(['0']), contextlib.redirect_stdout(out):
+                    self.assertIsNone(menu(self.core))
+                self.assertFalse(has_cyrillic(out.getvalue()), out.getvalue())
+
+            out=io.StringIO()
+            with self.inputs(['0']), contextlib.redirect_stdout(out):
+                self.assertEqual(self.core.benchmark_result_menu(), '/home')
             self.assertFalse(has_cyrillic(out.getvalue()), out.getvalue())
         finally:
             set_language('ru')
@@ -386,9 +408,19 @@ class UXTests(unittest.TestCase):
             self.assertIn(code,text)
         for word in ('OK','ОШИБКА','ВНИМАНИЕ'): self.assertIn(word,text)
 
-    def test_benchmark_agent_route_needs_no_backend_until_run(self):
-        with patch.object(self.core,'clear_console'), self.inputs(['5']):
-            self.assertEqual(self.core.startup_benchmark_wizard(runtime_guard=lambda _:self.fail('unexpected network')), ('/agent',False))
+    def test_agent_is_hidden_in_experimental_menu_and_needs_no_backend_until_run(self):
+        from Shared.bull_llm.terminal_ui import experimental_menu
+        with patch.object(self.core,'clear_console'), self.inputs(['1']):
+            self.assertEqual(experimental_menu(self.core), 'agent')
+
+    def test_compact_bull_mark_is_available_on_every_page(self):
+        from Shared.bull_llm.terminal_ui import render_page_mark
+        out=io.StringIO()
+        with patch.object(self.core,'matrix'), patch.object(self.core,'white'), contextlib.redirect_stdout(out):
+            render_page_mark(self.core)
+        text=out.getvalue()
+        self.assertIn('BULL',text)
+        self.assertGreaterEqual(len(text.splitlines()),3)
 
     def test_main_dispatch_home_commands_return_home_without_chat(self):
         import os

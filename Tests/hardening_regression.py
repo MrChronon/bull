@@ -1,4 +1,4 @@
-"""Offline fault injection for the v0.26.0.0 audit. No real model/server needed."""
+"""Offline fault injection for the v0.27.0.0 audit. No real model/server needed."""
 from __future__ import annotations
 
 import copy

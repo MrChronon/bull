@@ -27,12 +27,13 @@ import urllib.error
 import re
 import tempfile
 import shutil
+import unittest
 from collections import Counter
 from copy import deepcopy
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
-CLIENT=ROOT/'bull_client_v0.26.0.0.py'
+CLIENT=ROOT/'bull_client_v0.27.0.0.py'
 SCORER_V3_FIXTURE=ROOT/'Tests'/'Fixtures'/'benchmark_scorer_v3.json'
 RU_LANGUAGE_STRESS_V176_FIXTURE=ROOT/'Tests'/'Fixtures'/'ru_language_stress_sanitized_v3.json'
 
@@ -941,12 +942,12 @@ def test_startup_home_menu_routes():
     mod.clear_console=lambda:None
     mod.time.sleep=lambda x:None
     try:
-        eq(_with_inputs(['1','1'],lambda:mod.startup_home_menu('0.32.14','18/18')),'chat')
-        eq(_with_inputs(['2'],lambda:mod.startup_home_menu('0.32.14','18/18')),'benchmark')
-        eq(_with_inputs(['1','2'],lambda:mod.startup_home_menu('0.32.14','18/18')),'load')
+        eq(_with_inputs(['2','1'],lambda:mod.startup_home_menu('0.32.14','18/18')),'chat')
+        eq(_with_inputs(['1'],lambda:mod.startup_home_menu('0.32.14','18/18')),'benchmark')
+        eq(_with_inputs(['2','2'],lambda:mod.startup_home_menu('0.32.14','18/18')),'load')
         eq(_with_inputs(['agent'],lambda:mod.startup_home_menu('0.32.14','18/18')),'agent')
         eq(_with_inputs(['3'],lambda:mod.startup_home_menu('0.32.14','18/18')),'connections')
-        eq(_with_inputs(['4','2'],lambda:mod.startup_home_menu('0.32.14','18/18')),'/dashboard')
+        eq(_with_inputs(['4','3'],lambda:mod.startup_home_menu('0.32.14','18/18')),'/dashboard')
         eq(_with_inputs(['/ui'],lambda:mod.startup_home_menu('0.32.14','18/18')),'/ui')
         eq(_with_inputs(['0'],lambda:mod.startup_home_menu('0.32.14','18/18')),'exit')
     finally:
@@ -1124,7 +1125,7 @@ def test_benchmark_result_menu_answers_stays_on_screen():
     old_input=mod.read_user_input
     old_show=mod.show_benchmark_answers
     old_color=mod._COLOR_ENABLED
-    seq=iter(['2','0'])
+    seq=iter(['5','0'])
     seen=[]
     mod._COLOR_ENABLED=False
     mod.read_user_input=lambda prompt='':next(seq)
@@ -1148,10 +1149,10 @@ def test_benchmark_result_menu_repeat_and_resume_guard():
     mod._COLOR_ENABLED=False
     try:
         cmd='/bench compare simpson all 3 client sweep'
-        mod.read_user_input=lambda prompt='':'3'
+        mod.read_user_input=lambda prompt='':'6'
         eq(mod.benchmark_result_menu(cmd,'result.json'),cmd)
 
-        seq=iter(['3','0'])
+        seq=iter(['6','0'])
         mod.read_user_input=lambda prompt='':next(seq)
         # Repeat must not pretend that a completed resume can simply be run again.
         eq(mod.benchmark_result_menu('/bench resume','result.json'),'/home')
@@ -1164,7 +1165,7 @@ def test_benchmark_result_menu_benchmark_route():
     old=mod.read_user_input
     old_color=mod._COLOR_ENABLED
     mod._COLOR_ENABLED=False
-    mod.read_user_input=lambda prompt='':'4'
+    mod.read_user_input=lambda prompt='':'7'
     try:
         eq(
             mod.benchmark_result_menu('/bench all 1 native fixed','result.json'),
@@ -1198,7 +1199,7 @@ def test_benchmark_result_menu_opens_visual_report_and_stays():
     old_input=mod.read_user_input
     old_open=mod.open_benchmark_visual_report
     old_color=mod._COLOR_ENABLED
-    seq=iter(['1','0']); seen=[]
+    seq=iter(['3','0']); seen=[]
     mod._COLOR_ENABLED=False
     mod.read_user_input=lambda prompt='':next(seq)
     mod.open_benchmark_visual_report=lambda path:seen.append(Path(path)) or True
@@ -2577,7 +2578,7 @@ def test_advanced_bench_slash_bench_stays_inside_lab():
 
 
 def test_startup_advanced_never_returns_none_command_mode():
-    result=_with_fake_inputs(['6','1'],mod.startup_benchmark_wizard)
+    result=_with_fake_inputs(['5','8','/bench','1'],mod.startup_benchmark_wizard)
     eq(result,('/bench list',False))
     assert result[0] is not None
 
@@ -3200,14 +3201,14 @@ def test_release_gate_reverifies_manifest_and_new_docs():
         'Docs\\BACKEND_SETUP.md',
         'Docs\\CODE_AUDIT.md',
         'Docs\\SECURITY.md',
-        'Docs\\RELEASE_NOTES_0.26.0.0.md',
+        'Docs\\RELEASE_NOTES_0.27.0.0.md',
     ):
         assert doc in build
     assert 'Manifest hash mismatch before packaging' in build
     assert 'Staged manifest hash mismatch' in build
     assert '$allowedVersioned' in build
-    assert 'v0.26.0.0' in build
-    assert 'Apps\\benchmark_lab_v0_26_0_0.py' in build
+    assert 'v0.27.0.0' in build
+    assert 'Apps\\benchmark_lab_v0_27_0_0.py' in build
     assert 'Shared\\bull_llm\\runtime\\__init__.py' in build
     assert 'Shared\\bull_llm\\schemas.py' in build
     assert '$rootExcludedDirs' in build and '$anywhereExcludedDirs' in build
@@ -3286,7 +3287,7 @@ def test_benchmark_wizard_multi_model_route_prompts_selector():
     old_read=mod.read_user_input
     try:
         mod._startup_choose_test=lambda:'analytics_case'
-        seq=iter(['6','3'])
+        seq=iter(['5','3'])
         mod.read_user_input=lambda prompt='':next(seq)
         cmd,ret=mod.startup_benchmark_wizard()
         eq(cmd,'/bench compare analytics_case')
@@ -3756,10 +3757,10 @@ def test_tested_profile_artifact_and_client_import():
 
 def test_v174_application_boundaries_and_shared_contracts():
     required=[
-        ROOT/'Apps'/'benchmark_lab_v0_26_0_0.py',ROOT/'Apps'/'bull_client_app_v0_26_0_0.py',
+        ROOT/'Apps'/'benchmark_lab_v0_27_0_0.py',ROOT/'Apps'/'bull_client_app_v0_27_0_0.py',
         ROOT/'Apps'/'_bootstrap.py',ROOT/'Shared'/'bull_llm'/'schemas.py',
         ROOT/'Shared'/'bull_llm'/'profiles.py',ROOT/'Shared'/'bull_llm'/'telemetry.py',
-        ROOT/'Shared'/'bull_llm'/'backends.py',ROOT/'BULL-Benchmark-Lab-v0.26.0.0.cmd',
+        ROOT/'Shared'/'bull_llm'/'backends.py',ROOT/'BULL-Benchmark-Lab-v0.27.0.0.cmd',
     ]
     assert all(path.is_file() for path in required),[str(x) for x in required if not x.is_file()]
     sys.path.insert(0,str(ROOT))
@@ -3770,35 +3771,35 @@ def test_v174_application_boundaries_and_shared_contracts():
         eq(schemas.TESTED_PROFILE_SCHEMA_VERSION,1)
     finally:
         if sys.path and sys.path[0]==str(ROOT): sys.path.pop(0)
-    lab=(ROOT/'Apps'/'benchmark_lab_v0_26_0_0.py').read_text(encoding='utf-8')
-    client=(ROOT/'Apps'/'bull_client_app_v0_26_0_0.py').read_text(encoding='utf-8')
+    lab=(ROOT/'Apps'/'benchmark_lab_v0_27_0_0.py').read_text(encoding='utf-8')
+    client=(ROOT/'Apps'/'bull_client_app_v0_27_0_0.py').read_text(encoding='utf-8')
     assert "BULL_START_SURFACE']='benchmark'" in lab
     assert "BULL_START_SURFACE']='home'" in client
 
 
 def test_icon_shortcut_and_release_assets():
-    ico=ROOT/'BULL-v0.26.0.0.ico'
+    ico=ROOT/'BULL-v0.27.0.0.ico'
     data=ico.read_bytes()
     assert data[:4]==b'\x00\x00\x01\x00'
     eq(int.from_bytes(data[4:6],'little'),7)
-    shortcut=(ROOT/'Install-BULL-v0.26.0.0-Shortcut.ps1').read_text(encoding='utf-8-sig')
-    launcher=(ROOT/'BULL-v0.26.0.0.cmd').read_text(encoding='utf-8-sig')
+    shortcut=(ROOT/'Install-BULL-v0.27.0.0-Shortcut.ps1').read_text(encoding='utf-8-sig')
+    launcher=(ROOT/'BULL-v0.27.0.0.cmd').read_text(encoding='utf-8-sig')
     assert 'IconLocation' in shortcut and 'GetFolderPath("Programs")' in shortcut
-    assert 'Install-BULL-v0.26.0.0-Shortcut.ps1' in launcher
-    assert (ROOT/'Install-BULL-v0.26.0.0.cmd').is_file()
+    assert 'Install-BULL-v0.27.0.0-Shortcut.ps1' in launcher
+    assert (ROOT/'Install-BULL-v0.27.0.0.cmd').is_file()
 
 
 def test_windows_powershell_launcher_is_ascii_parse_safe():
     # Windows PowerShell 5.1 decodes a BOM-less .ps1 as the active ANSI code
     # page. Keep the tiny entry launcher ASCII-only so parsing cannot fail
     # before it enables UTF-8 for Python and child processes.
-    launcher=ROOT/'BULL-v0.26.0.0.ps1'
+    launcher=ROOT/'BULL-v0.27.0.0.ps1'
     raw=launcher.read_bytes()
     assert raw and all(byte < 128 for byte in raw), 'launcher must remain ASCII-safe for powershell.exe 5.1'
 
     for rel in (
-        'Install-BULL-v0.26.0.0.ps1',
-        'Install-BULL-v0.26.0.0-Shortcut.ps1',
+        'Install-BULL-v0.27.0.0.ps1',
+        'Install-BULL-v0.27.0.0-Shortcut.ps1',
         'Server/Install-BULL-Node.ps1',
         'Server/Test-BULL-RemoteReadiness.ps1',
         'Client/New-BULL-ClientKey.ps1',
@@ -4206,10 +4207,10 @@ def test_matrix_benchmark_menu_copy_and_advanced_navigation_are_consistent():
             cmd,home=_with_inputs(['0'],mod.startup_benchmark_wizard)
         eq((cmd,home),('/home',False))
         text=out.getvalue()
-        assert 'Тест по своему промпту' in text
-        assert 'Сравнить модели' in text and 'Восстановить и продолжить' in text
-        assert 'Открыть результаты' in text and 'Расширенные тесты' in text
-        assert 'Агентская задача' in text
+        assert 'Мои задачи и промпты' in text
+        assert 'Стандартное сравнение' in text and 'Восстановить и продолжить' in text
+        assert 'Посмотреть результаты' in text and 'Дополнительные тесты' in text
+        assert 'Agent Benchmark' not in text and 'GPU Lab' not in text
         eq(_with_fake_inputs(['0'],mod.benchmark_advanced_menu),('__benchmark_menu__',False))
         eq(_with_fake_inputs(['h'],mod.benchmark_advanced_menu),('/home',False))
     finally:
@@ -4435,7 +4436,7 @@ def test_v18_connection_bundle_fails_closed_on_secret_or_missing_key():
 
 
 def test_v18_platform_installer_roles_and_release_secret_gate():
-    installer=ROOT/'Install-BULL-v0.26.0.0.ps1'
+    installer=ROOT/'Install-BULL-v0.27.0.0.ps1'
     node=ROOT/'Server'/'Install-BULL-Node.ps1'
     template=ROOT/'Server'/'connection.template.json'
     assert installer.is_file() and node.is_file() and template.is_file()
@@ -4458,7 +4459,7 @@ def test_v18_platform_installer_roles_and_release_secret_gate():
 
 
 def test_wan_installer_propagates_route_port_and_keeps_inference_private():
-    installer=(ROOT/'Install-BULL-v0.26.0.0.ps1').read_text(encoding='utf-8')
+    installer=(ROOT/'Install-BULL-v0.27.0.0.ps1').read_text(encoding='utf-8')
     node=(ROOT/'Server'/'Install-BULL-Node.ps1').read_text(encoding='utf-8')
     readiness_path=ROOT/'Server'/'Test-BULL-RemoteReadiness.ps1'
     assert readiness_path.is_file()
@@ -5089,6 +5090,9 @@ def test_visual_report_is_offline_graphical_and_excludes_raw_answers():
         assert 'Native model quality' in html_text and 'Final system quality' in html_text
         assert '95% confidence intervals' in html_text and 'Latency distributions' in html_text
         assert 'Context curves' in html_text
+        assert 'Какая модель лучше для задачи' in html_text
+        assert 'decision-card' in html_text and 'scatter-point' in html_text
+        assert 'Quality' in html_text and 'Balance' in html_text and 'Low memory' in html_text
         assert 'Выбранные тесты' in html_text and '64%' in html_text
         assert 'metric-bar' in html_text and '<table' in html_text
         assert '&lt;model-a&gt;' in html_text
@@ -5105,7 +5109,7 @@ def test_visual_report_is_offline_graphical_and_excludes_raw_answers():
 
 
 def test_public_release_readiness_assets_and_gate_exist():
-    for rel in ('README.md','.gitignore','Docs/PUBLIC_RELEASE_CHECKLIST.md','Docs/RELEASE_NOTES_0.26.0.0.md','Test-Public-Release.ps1'):
+    for rel in ('README.md','.gitignore','Docs/PUBLIC_RELEASE_CHECKLIST.md','Docs/RELEASE_NOTES_0.27.0.0.md','Test-Public-Release.ps1'):
         assert (ROOT/rel).is_file(),rel
     build=(ROOT/'Build-Release.ps1').read_text(encoding='utf-8-sig')
     audit=(ROOT/'Test-Public-Release.ps1').read_text(encoding='utf-8-sig')
@@ -5374,4 +5378,14 @@ passed.extend(f'BULL Evidence {i+1}' for i in range(evidence_test_count))
 from Tests.ru_dialogue_regression import run_suite as run_ru_dialogue_suite
 ru_dialogue_test_count=run_ru_dialogue_suite(mod)
 passed.extend(f'RU Dialogue {i+1}' for i in range(ru_dialogue_test_count))
+from Tests.decision_support_regression import DecisionSupportTests
+decision_result=unittest.TextTestRunner(verbosity=2).run(
+    unittest.defaultTestLoader.loadTestsFromTestCase(DecisionSupportTests)
+)
+if not decision_result.wasSuccessful():
+    raise AssertionError('BULL decision support regression failed')
+passed.extend(f'Decision Support {i+1}' for i in range(decision_result.testsRun))
+from Tests.user_tests_regression import run_suite as run_user_tests_suite
+user_tests_count=run_user_tests_suite()
+passed.extend(f'User Tests {i+1}' for i in range(user_tests_count))
 print(f'PASS {len(passed)}/{len(passed)}')

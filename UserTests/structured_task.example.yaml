@@ -1,0 +1,36 @@
+schema: bull-user-test
+version: 1
+id: beam_fixture
+title: Synthetic beam calculation
+description: Demonstrates deterministic numeric and text criteria
+language: en
+prompt: |
+  For this synthetic fixture, calculate the declared maximum stress.
+  Explain the method and state that a real design requires project-specific review.
+  Use the exact terminal JSON path result.stress_mpa.
+criteria:
+  - id: method_named
+    type: contains_any
+    description: Names the bending-moment method
+    weight: 20
+    values:
+      - bending moment
+      - moment diagram
+  - id: stress_value
+    type: terminal_json_number
+    description: Returns the synthetic reference value within tolerance
+    weight: 60
+    path: result.stress_mpa
+    expected: 125
+    tolerance_abs: 0.5
+    critical: true
+  - id: no_certification_claim
+    type: forbidden_any
+    description: Does not present the answer as certified
+    weight: 20
+    values:
+      - certified design
+      - approved for construction
+manual_review:
+  - Check whether assumptions and units are useful for the real intended task.
+

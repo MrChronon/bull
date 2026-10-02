@@ -1,0 +1,7 @@
+Explain the following synthetic engineering calculation. State every assumption,
+show the units, and do not claim that the result is a certified design.
+
+Fixture: a simply supported beam has a declared span of 2 m and a central load
+of 10 kN. Describe the calculation steps that would be needed before the result
+could be used in a real project.
+

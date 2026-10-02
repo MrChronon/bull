@@ -104,7 +104,7 @@ class EvidenceContractTests(unittest.TestCase):
     def _provenance(self):
         from Shared.bull_llm.evidence import build_provenance
         return build_provenance(
-            [_record()], spec={"spec_fingerprint": "c" * 64}, engine_version="v0.26.0.0",
+            [_record()], spec={"spec_fingerprint": "c" * 64}, engine_version="v0.27.0.0",
             source_sha256="d" * 64, created_at_utc="2000-01-01T00:00:00+00:00",
         )
 
@@ -174,7 +174,7 @@ class EvidenceContractTests(unittest.TestCase):
             raw.write_text(json.dumps([_record()]), encoding="utf-8")
             private, share, document = save_evidence_artifacts(
                 raw, spec={"spec_fingerprint": "c" * 64}, records=[_record()],
-                model_rows=[_model_row()], case_rows=[_case_row()], engine_version="v0.26.0.0",
+                model_rows=[_model_row()], case_rows=[_case_row()], engine_version="v0.27.0.0",
             )
             self.assertTrue(private.is_file())
             self.assertTrue(share.is_file())
@@ -188,10 +188,10 @@ class EvidenceContractTests(unittest.TestCase):
             destination = Path(tmp) / "migrated.json"
             source.write_text(json.dumps([_record()]), encoding="utf-8")
             before = hashlib.sha256(source.read_bytes()).hexdigest()
-            migrate_legacy_record_copy(source, destination, engine_version="v0.26.0.0")
+            migrate_legacy_record_copy(source, destination, engine_version="v0.27.0.0")
             self.assertEqual(hashlib.sha256(source.read_bytes()).hexdigest(), before)
             with self.assertRaises(FileExistsError):
-                migrate_legacy_record_copy(source, destination, engine_version="v0.26.0.0")
+                migrate_legacy_record_copy(source, destination, engine_version="v0.27.0.0")
 
     def test_summary_migration_rejects_private_legacy_content(self):
         from Shared.bull_llm.evidence import migrate_legacy_summary_copy
@@ -199,7 +199,7 @@ class EvidenceContractTests(unittest.TestCase):
             source = Path(tmp) / "summary.json"
             source.write_text(json.dumps([{"benchmark": "x", "model": "m", "prompt": "secret"}]), encoding="utf-8")
             # Normalization is an allow-list, so unknown legacy content cannot leak.
-            target = migrate_legacy_summary_copy(source, Path(tmp) / "share.json", engine_version="v0.26.0.0")
+            target = migrate_legacy_summary_copy(source, Path(tmp) / "share.json", engine_version="v0.27.0.0")
             text = target.read_text(encoding="utf-8")
             self.assertNotIn("secret", text)
             self.assertNotIn('"prompt"', text)

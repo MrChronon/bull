@@ -342,7 +342,7 @@ def show_ssh_key_guide(core):
     print(r'   .\Client\New-BULL-ClientKey.ps1')
     print(r'   Передавайте на сервер только bull_access.pub. Файл bull_access остаётся у вас.')
     print('\n2. Добавьте публичный ключ на сервер.')
-    print(r'   Проще всего: Install-BULL-v0.26.0.0.cmd → Server и укажите файл .pub.')
+    print(r'   Проще всего: Install-BULL-v0.27.0.0.cmd → Server и укажите файл .pub.')
     print(r'   Для готового OpenSSH добавьте одну строку .pub в C:\Users\<SERVER_USER>\.ssh\authorized_keys.')
     print('\n3. Создайте или дополните файл:', terminal_text(str(config)))
     print('''
@@ -446,64 +446,65 @@ def import_old(core):
 
 def advanced_menu(core):
     while True:
-        core.ui_header('Дополнительно', 'Подключения / Дополнительно')
-        core.ui_menu_item('1', 'Импорт Connection JSON', 'Файл от администратора + ваш приватный ключ')
-        core.ui_menu_item('2', 'Перенести из старой версии', 'Выбрать папку предыдущего билда')
-        core.ui_menu_item('3', 'Проверить SSH выбранного сервера', 'Не запускает модели')
-        core.ui_menu_item('4', 'Инструкция по доступу через Интернет', 'Подготовка сервера, VPN и роутера')
-        core.ui_menu_item('5', 'Устаревшие SSH-профили', 'Совместимость: LAN, VPN, direct, auto')
-        core.ui_menu_item('6', 'Забыть сервер в личной папке', 'Не удаляет ключ и не отзывает доступ на сервере')
+        core.ui_header('Экспериментальные подключения', 'Подключение / Дополнительно', 'Не нужно для локальной Ollama или уже сохранённого сервера')
+        core.ui_menu_item('1', 'Добавить SSH-сервер вручную', 'Адрес, порт, пользователь, ключ и fingerprint')
+        core.ui_menu_item('2', 'Как создать SSH-ключ и алиас', 'Пошаговая инструкция без изменения системы')
+        core.ui_menu_item('3', 'Импорт Connection JSON', 'Файл от администратора + ваш приватный ключ')
+        core.ui_menu_item('4', 'Перенести из старой версии', 'Выбрать папку предыдущего билда')
+        core.ui_menu_item('5', 'Проверить SSH выбранного сервера', 'Не запускает модели')
+        core.ui_menu_item('6', 'Инструкция по доступу через Интернет', 'Подготовка сервера, VPN и роутера')
+        core.ui_menu_item('7', 'Устаревшие SSH-профили', 'Совместимость: LAN, VPN, direct, auto')
+        core.ui_menu_item('8', 'Забыть сервер в личной папке', 'Не удаляет ключ и не отзывает доступ на сервере')
         core.ui_menu_item('0', 'Назад')
         value = core.read_user_input('Выбор › ').strip()
         if value in ('', '0'): return None
         if value == '1':
+            if new_ssh_connection(core): return '__connection_changed__'
+        elif value == '2': show_ssh_key_guide(core); pause(core)
+        elif value == '3':
             path = ask(core, 'Connection JSON (из доверенного источника)', required=True).strip('"')
             entry = core._validate_connection_bundle(read_document(path))
             entry['identity_file'] = str(private_key_path(ask(core, 'Ваш приватный ключ', required=True)))
             if confirm_install(core, entry): return '__connection_changed__'
-        elif value == '2':
+        elif value == '4':
             if import_old(core): return '__connection_changed__'
-        elif value == '3':
+        elif value == '5':
             if core.load_backend_settings().get('target_mode') != 'remote':
                 print('Сейчас выбран локальный режим. SSH не используется.')
             else:
                 ok, detail = core._test_ssh_endpoint(core.resolve_remote_endpoint(force=True), timeout=6)
                 print(('SSH OK: ' if ok else 'SSH недоступен: ') + terminal_text(detail))
             pause(core)
-        elif value == '4': core.show_internet_access_guide(); pause(core)
-        elif value == '5':
+        elif value == '6': core.show_internet_access_guide(); pause(core)
+        elif value == '7':
             result = core.remote_access_menu()
             if result: return result
-        elif value == '6':
+        elif value == '8':
             entry = pick_entry(core, saved_connections(core), 'Забыть сервер')
             if entry and core.read_user_input('Введите DELETE для удаления только записи › ').strip() == 'DELETE':
                 (vault_dir() / (entry['id'] + '.json')).unlink(missing_ok=True)
                 print('Запись удалена из личной папки. Ключ и настройки текущего билда сохранены.')
                 pause(core)
-        else: print('Выберите пункт 0–6.')
+        else: print('Выберите пункт 0–8.')
 
 
 def connection_menu(core):
     while True:
         core.clear_console()
-        core.ui_header('Подключения', 'Главная / Подключения', 'Где запускать модели? Локальная Ollama для SSH не требуется.')
+        core.ui_header('Подключение', 'Главная / Подключение', 'Где запущены модели?')
         settings = core.load_backend_settings()
         remote = settings.get('target_mode') == 'remote'
         core.ui_status_strip([('Выбрано', 'удалённый сервер' if remote else 'этот компьютер', 'info')])
         core.ui_menu_item('1', 'Использовать этот компьютер', 'Ollama на localhost; не подключается к серверу')
-        core.ui_menu_item('2', 'Подключиться по SSH-алиасу', 'Введите только Host из ~/.ssh/config', 'БЫСТРО')
-        core.ui_menu_item('3', 'Выбрать сохранённый сервер', 'Включая подключения из других версий')
-        core.ui_menu_item('4', 'Настроить сервер вручную', 'Адрес → пользователь и ключ → проверка → подключение')
-        core.ui_menu_item('5', 'Как создать SSH-ключ и алиас', 'Пошаговая инструкция без изменения системы')
-        core.ui_menu_item('6', 'Дополнительно', 'Импорт, перенос старых настроек, проверка SSH, Интернет')
+        core.ui_menu_item('2', 'Выбрать сохранённый сервер', 'Обычный способ для уже настроенного подключения','ПРОСТО')
+        core.ui_menu_item('3', 'Добавить по SSH-алиасу', 'Введите Host из ~/.ssh/config')
+        core.ui_menu_item('4', 'Дополнительно и экспериментально', 'Ручная настройка, импорт, диагностика и серверные инструкции')
         core.ui_menu_item('0', 'Назад')
         try:
             value = core.read_user_input('Выбор › ').strip()
             if value in ('', '0'): return None
             if value == '1': core.use_local_backend(); return '__connection_changed__'
             if value == '2':
-                if new_ssh_alias_connection(core): return '__connection_changed__'
-            elif value == '3':
                 # Keep both differing entries visible: no implicit merge of identities.
                 local = [clean_entry(core, x) for x in core.connection_entries()]
                 rows = local + [x for x in saved_connections(core) if not any(
@@ -513,14 +514,12 @@ def connection_menu(core):
                     if not Path(entry['identity_file']).is_file():
                         entry['identity_file'] = str(private_key_path(ask(core, 'Путь к приватному ключу', required=True)))
                     if confirm_install(core, entry): return '__connection_changed__'
+            elif value == '3':
+                if new_ssh_alias_connection(core): return '__connection_changed__'
             elif value == '4':
-                if new_ssh_connection(core): return '__connection_changed__'
-            elif value == '5':
-                show_ssh_key_guide(core); pause(core)
-            elif value == '6':
                 result = advanced_menu(core)
                 if result: return result
-            else: print('Выберите пункт 0–6.')
+            else: print('Выберите пункт 0–4.')
         except Cancelled:
             print('Отменено без сохранения.')
         except (OSError, ValueError, TypeError, KeyError, subprocess.SubprocessError) as exc:

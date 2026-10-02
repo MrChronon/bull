@@ -30,6 +30,12 @@ BULL_PIXEL_ART = (
 
 _startup_mark_shown = False
 
+PAGE_BULL_MARK = (
+    '       ▄▆          ▆▄',
+    '     ▟███▙  BULL  ▟███▙',
+    '       ▜██▄▄██▛',
+)
+
 
 def _load_chafa_mark():
     """Load the bounded, build-time Chafa render without trusting arbitrary escapes."""
@@ -71,6 +77,14 @@ def render_startup_mark(core):
     core.white()
     print('  B U L L  //  Benchmarking & Usage of Local LLMs\n')
     return True
+
+
+def render_page_mark(core):
+    """Draw a compact, stable bull head on every navigational page."""
+    core.matrix()
+    for row in PAGE_BULL_MARK:
+        print(row)
+    core.white()
 
 
 def selection(raw, rows):
@@ -115,61 +129,79 @@ def chat_menu(core):
         print('Выберите 1, 2 или 0.')
 
 
-def settings_menu(core):
+def experimental_menu(core):
     while True:
         core.clear_console()
-        core.ui_header('Настройки', 'Главная / Настройки')
-        core.ui_menu_item('1', 'Внешний вид', 'Яркость и цветовая тема')
-        core.ui_menu_item('2', 'Состояние программы', 'Подключение, ресурсы и диагностика')
-        core.ui_menu_item('3', 'Расширенные настройки движка', 'Ollama, llama.cpp, пути, запуск сервера и импорт конфигурации')
-        core.ui_menu_item('4', 'Как пользоваться', 'Короткая инструкция и справочник команд')
+        core.ui_header('Экспериментальные функции', 'Главная / Дополнительно / Эксперименты')
+        print('  Эти режимы полезны для опытных пользователей, но не нужны для обычного сравнения.')
+        core.ui_menu_item('1', 'Agent Benchmark', 'Многошаговые задачи с инструментами')
+        core.ui_menu_item('2', 'GPU Lab', 'Аппаратные сценарии для Windows + Ollama')
+        core.ui_menu_item('3', 'Расширенные настройки движка', 'Ollama, llama.cpp, пути и серверные инструменты')
         core.ui_menu_item('0', 'Назад')
         value = core.read_user_input('Выбор › ').strip()
-        if value == '1': core.appearance_menu()
-        elif value == '2': return '/dashboard'
-        elif value == '3': return core.backend_runtime_menu()
+        if value == '1': return 'agent'
+        if value == '2': return '/gpu'
+        if value == '3': return core.backend_runtime_menu()
+        if value in ('', '0'): return None
+        print('Выберите пункт 0–3.')
+
+
+def more_menu(core):
+    while True:
+        core.clear_console()
+        core.ui_header('Дополнительно', 'Главная / Дополнительно', 'Редкие и экспертные действия')
+        core.ui_menu_item('1', 'Сохранённые результаты', 'Посмотреть краткую сводку или открыть HTML')
+        core.ui_menu_item('2', 'Внешний вид и язык', 'Тема и настройки терминала')
+        core.ui_menu_item('3', 'Состояние и диагностика', 'Подключение, GPU, VRAM и проверки')
+        core.ui_menu_item('4', 'Как пользоваться', 'Короткий маршрут и справка')
+        core.ui_menu_item('5', 'Команды для опытных', 'Точные /bench и служебные команды')
+        core.ui_menu_item('6', 'Экспериментальные функции', 'Agent Benchmark, GPU Lab и настройки сервера')
+        core.ui_menu_item('0', 'Назад')
+        value = core.read_user_input('Выбор › ').strip()
+        if value == '1': return '/bench report'
+        if value == '2': core.appearance_menu()
+        elif value == '3': return '/dashboard'
         elif value == '4':
             print('\nЧат — переписка с моделью. Тесты — сравнение и агентские задачи.')
             print('Подключения — где запущены модели: здесь или на сервере по SSH.')
             print('В каждом меню 0 возвращает на предыдущий экран. В чате /home открывает главную.')
-            print('На главной можно сразу набрать /команду; весь справочник: /help all.')
             print('Управление выделено голубым; успех — зелёным; предупреждение — жёлтым.')
             print('Настройки подключения и результаты приватны: не публикуйте Runtime и Benchmarks.')
             pause(core)
+        elif value == '5':
+            command = command_menu(core)
+            if command: return command
+        elif value == '6':
+            action = experimental_menu(core)
+            if action: return action
         elif value in ('', '0'): return None
-        else: print('Выберите пункт 0–4.')
+        else: print('Выберите пункт 0–6.')
 
 
 def home_menu(core, backend_version, regression_summary):
     while True:
         core.clear_console()
-        render_startup_mark(core)
-        core.ui_header(f'BULL {core.APP_VERSION}', 'Главная', 'Чем займёмся?')
+        core.ui_header(f'BULL {core.APP_VERSION}', 'Главная', 'Выберите, что хотите сделать')
         offline = str(backend_version).casefold() in ('offline', 'недоступен', 'unavailable')
         core.ui_status_strip([('Модели', 'нет связи' if offline else core.backend_label(), 'warn' if offline else 'ok')])
         if offline:
             print('  Чат и запуск теста требуют подключения. Настройки и отчёты доступны.')
-        core.ui_menu_item('1', 'Чат', 'Выбрать модель или продолжить сохранённый диалог')
-        core.ui_menu_item('2', 'Тесты и результаты', 'Сравнение моделей, свой промпт, агентские задачи')
-        core.ui_menu_item('3', 'Подключения', 'Этот компьютер или сервер по SSH')
-        core.ui_menu_item('4', 'Настройки и помощь', 'Внешний вид, диагностика, расширенные параметры')
-        core.ui_menu_item('5', 'Ввести команду', 'Открыть строку команд и примеры')
+        core.ui_menu_item('1', 'Сравнить модели', 'Выбрать лучшую для ваших задач по качеству, скорости и памяти', 'ГЛАВНОЕ')
+        core.ui_menu_item('2', 'Чат с моделью', 'Выбрать модель и начать или продолжить диалог')
+        core.ui_menu_item('3', 'Подключение', 'Модели на этом компьютере или на сохранённом SSH-сервере')
+        core.ui_menu_item('4', 'Дополнительно', 'Результаты, справка, диагностика и эксперименты')
         core.ui_menu_item('0', 'Выйти')
-        core.cyan(); print('\n  Команда /… доступна прямо здесь, например /bench list.'); core.white()
-        raw = core.read_user_input('Номер или /команда › ').strip()
+        raw = core.read_user_input('Выбор [0–4] › ').strip()
         if raw.startswith('/'):
             return core.normalize_console_command(raw)
         value = raw.casefold()
-        if value == '1':
+        if value in ('1', 'bench', 'benchmark'): return 'benchmark'
+        if value == '2':
             action = chat_menu(core)
             if action: return action
-        elif value in ('2', 'bench', 'benchmark'): return 'benchmark'
         elif value in ('3', 'connection'): return 'connections'
         elif value == '4':
-            command = settings_menu(core)
-            if command: return command
-        elif value in ('5', '?', 'help'):
-            command = command_menu(core)
+            command = more_menu(core)
             if command: return command
         elif value in ('0', 'exit', 'quit'): return 'exit'
         # Named shortcuts remain compatible; old numeric shortcuts intentionally do not.
@@ -178,4 +210,4 @@ def home_menu(core, backend_version, regression_summary):
         elif value == 'backend': return '/backend'
         elif value == 'status': return '/dashboard'
         else:
-            core.yellow(); print('Введите номер 0–5 или команду с /.'); core.white()
+            core.yellow(); print('Введите номер 0–4.'); core.white()

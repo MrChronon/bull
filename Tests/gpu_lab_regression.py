@@ -158,10 +158,11 @@ class GPUContracts(unittest.TestCase):
 
     def test_navigation_gpu_does_not_require_running_primary_ollama(self):
         from Apps._bootstrap import load_compat_core
+        from Shared.bull_llm.terminal_ui import experimental_menu
         core=load_compat_core()
-        with patch.object(core,'clear_console'), patch.object(core,'read_user_input',return_value='7'), contextlib.redirect_stdout(io.StringIO()):
+        with patch.object(core,'clear_console'), patch.object(core,'read_user_input',return_value='2'), contextlib.redirect_stdout(io.StringIO()):
             guard=unittest.mock.Mock(side_effect=AssertionError('Do not probe global Ollama'))
-            self.assertEqual(core.startup_benchmark_wizard(guard),('/gpu',False))
+            self.assertEqual(experimental_menu(core),'/gpu')
             guard.assert_not_called()
 
     @unittest.skipUnless(os.name=='nt','Windows Job Object integration')

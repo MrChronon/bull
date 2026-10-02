@@ -202,8 +202,8 @@ BENCHMARK_PROFILE_PARAMETER_FIELDS=(
     'mirostat','mirostat_eta','mirostat_tau',
 )
 APP_NAME='BULL — Benchmark Lab'
-APP_VERSION='v0.26.0.0'
-APP_ICON='BULL-v0.26.0.0.ico'
+APP_VERSION='v0.27.0.0'
+APP_ICON='BULL-v0.27.0.0.ico'
 ATTACH_MAX_FILE_CHARS=80000
 ATTACH_CONTEXT_TOKENS=2800
 TOOL_MAX_LOOPS=5
@@ -6093,6 +6093,13 @@ def load_benchmarks():
     registered,_packs=_registry_benchmarks(built)
     built.update(registered)
     protected=set(registered)
+    from Shared.bull_llm.user_tests import load_user_tests
+    file_tests,_file_findings=load_user_tests(appdir()/'UserTests')
+    for name,item in file_tests.items():
+        if name in built:
+            raise PackValidationError('USER_CASE_CONFLICT',f'user file conflicts with registered case: {name}')
+        built[name]=item
+        protected.add(name)
     index,legacy=_read_prompt_index(strict=False)
     if index is None: return built
     if legacy:
@@ -8697,6 +8704,10 @@ def benchmark_score(name,item,answer):
     if score_type=='ru_dialogue_contract_v1':
         return _score_ru_dialogue_contract_v1(answer,item)
 
+    if score_type=='user_contract_v1':
+        from Shared.bull_llm.user_tests import score_user_test
+        return score_user_test(answer,item.get('scorer_config') or {})
+
     if score_type=='structured_reference_v1':
         obj,parse_error=_extract_json_after_marker(answer)
         reference=item.get('reference') or {}
@@ -10590,6 +10601,8 @@ def benchmark_visual_report_document(records,evidence_summary=None):
     records=list(records or [])
     model_rows=benchmark_model_summary_rows(records)
     detail_rows=benchmark_summary_rows(records)
+    from Shared.bull_llm.decision_support import build_decision_support
+    decision=build_decision_support(model_rows)
     generated=datetime.now().isoformat(timespec='seconds')
     ok=sum(_record_execution_ok(row) for row in records)
     errors=len(records)-ok
@@ -10825,6 +10838,51 @@ def benchmark_visual_report_document(records,evidence_summary=None):
         '</tr></thead><tbody>'+''.join(category_rows)+'</tbody></table></div></section>'
     ) if category_names else ''
 
+    decision_cards=[]
+    for profile in decision['profiles']:
+        winner=html_lib.escape(str(profile.get('winner') or 'нет данных'))
+        weights=', '.join(
+            f'{name} {float(value)*100:.0f}%'
+            for name,value in profile.get('weights',{}).items() if float(value)>0
+        )
+        metric=(
+            f'Native {_report_percent(profile.get("quality"))} · '
+            f'{_report_number(profile.get("speed"),1," tok/s")} · '
+            f'VRAM {_report_number(float(profile["vram_mib"])/1024.0,1," GiB") if profile.get("vram_mib") is not None else "—"}'
+            if profile.get('winner') else html_lib.escape(str(profile.get('reason') or ''))
+        )
+        decision_cards.append(
+            '<article class="decision-card">'
+            f'<span>{html_lib.escape(str(profile.get("label") or profile.get("id")))}</span>'
+            f'<strong>{winner}</strong><p>{metric}</p><small>{html_lib.escape(weights)}</small></article>'
+        )
+    scatter_points=[]
+    for index,point in enumerate(decision['points'],1):
+        if point.get('quality_norm') is None or point.get('speed_norm') is None:
+            continue
+        x=max(2.0,min(98.0,float(point['speed_norm'])*100.0))
+        y=max(2.0,min(98.0,float(point['quality_norm'])*100.0))
+        label=html_lib.escape(str(point.get('model') or '?'))
+        scatter_points.append(
+            f'<span class="scatter-point" style="left:{x:.2f}%;bottom:{y:.2f}%" '
+            f'title="{label}: Native {_report_percent(point.get("quality"))}, {_report_number(point.get("speed"),1," tok/s")}">'
+            f'{index}<b>{label}</b></span>'
+        )
+    decision_section=(
+        '<section><h2>Какая модель лучше для задачи</h2>'
+        '<p class="lead">Профили — это подсказка внутри этого прогона, а не новый score и не универсальный рейтинг.</p>'
+        '<div class="decision-grid">'+''.join(decision_cards)+'</div>'
+        '<h3 class="chart-title">Карта «качество ↔ время»</h3>'
+        '<p class="micro">Вправо — быстрее; вверх — выше Native quality. Оси нормированы только между моделями этого отчёта.</p>'
+        '<div class="scatter"><span class="zone z-quality">Качество</span><span class="zone z-all">Сильный баланс</span>'
+        '<span class="zone z-review">Нужна проверка</span><span class="zone z-speed">Скорость</span>'
+        +''.join(scatter_points)+'</div>'
+        '<p class="axis-x">медленнее ← время выполнения → быстрее</p></section>'
+    ) if scatter_points else (
+        '<section><h2>Какая модель лучше для задачи</h2>'
+        '<p class="lead">Недостаточно сопоставимых Native quality и warm speed. BULL не будет выдумывать победителя.</p></section>'
+    )
+
     return f'''<!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>BULL Benchmark Report</title>
@@ -10844,6 +10902,8 @@ section{{margin-top:20px;background:var(--panel);border:1px solid var(--line);bo
 .heat{{display:inline-block;min-width:58px;padding:4px 8px;border-radius:8px;background:linear-gradient(90deg,#dfece5 var(--heat),transparent var(--heat));font-weight:700}}
 .ci-row{{display:grid;grid-template-columns:minmax(190px,1.5fr) minmax(260px,4fr) minmax(210px,1.6fr);gap:14px;align-items:center;margin:13px 0}} .ci-row span small{{display:block;color:var(--muted);overflow-wrap:anywhere}} .ci-track{{height:16px;background:#e5efea;border-radius:999px;position:relative}} .ci-track.unavailable{{background:repeating-linear-gradient(135deg,#edf2ef 0 8px,#d9e5df 8px 16px)}} .ci-range{{position:absolute;top:4px;height:8px;border-radius:999px;background:linear-gradient(90deg,#0b9f55,#35ed8b)}} .ci-dot{{position:absolute;top:1px;width:4px;height:14px;border-radius:2px;background:#10231a;transform:translateX(-2px)}} .ci-track.latency .ci-range{{background:linear-gradient(90deg,#1769aa,#6cbcff)}}
 .curve-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:14px}} .curve-card{{border:1px solid var(--line);border-radius:15px;padding:16px;background:#fbfefd}} .curve-card svg{{width:100%;height:auto}} .axis{{stroke:#9cb5a8;stroke-width:1}} .curve{{fill:none;stroke:#0b9f55;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}}
+.decision-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:16px 0 24px}} .decision-card{{border:1px solid var(--line);border-radius:14px;padding:15px;background:#fbfefd}} .decision-card span,.decision-card strong{{display:block}} .decision-card span{{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}} .decision-card strong{{font-size:18px;margin:5px 0;overflow-wrap:anywhere}} .decision-card p,.decision-card small{{margin:0;color:var(--muted)}}
+.chart-title{{margin-top:22px}} .scatter{{height:360px;position:relative;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:linear-gradient(90deg,#fff8e7 0 50%,#edf9f3 50%),linear-gradient(0deg,#fff 0 50%,#edf5ff 50%)}} .scatter:before,.scatter:after{{content:"";position:absolute;background:#8ba79a66}} .scatter:before{{left:50%;top:0;bottom:0;width:1px}} .scatter:after{{left:0;right:0;top:50%;height:1px}} .zone{{position:absolute;padding:10px;color:#557066;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}} .z-quality{{left:0;top:0}} .z-all{{right:0;top:0}} .z-review{{left:0;bottom:0}} .z-speed{{right:0;bottom:0}} .scatter-point{{position:absolute;transform:translate(-50%,50%);width:28px;height:28px;border-radius:50%;background:#10231a;color:#fff;display:grid;place-items:center;font-weight:800;border:3px solid #35ed8b;box-shadow:0 4px 12px #10231a55}} .scatter-point b{{display:none;position:absolute;left:32px;top:-4px;background:#10231a;color:#fff;padding:5px 8px;border-radius:7px;white-space:nowrap;font-size:11px;z-index:3}} .scatter-point:hover b{{display:block}} .axis-x{{text-align:center;color:var(--muted);font-size:12px}}
 .notice{{border-left:5px solid #e5aa23;background:#fff9e9}} footer{{margin-top:18px;color:var(--muted);font-size:13px}}
 @media(max-width:700px){{.kpis{{grid-template-columns:1fr 1fr}}.speed-row{{grid-template-columns:1fr 80px}}.speed-row .metric-track{{grid-column:1/-1}}.ci-row{{grid-template-columns:1fr}}}}
 @media print{{body{{background:#fff}}main{{max-width:none;padding:0}}header,section{{box-shadow:none;break-inside:avoid}}}}
@@ -10853,6 +10913,7 @@ section{{margin-top:20px;background:var(--panel);border:1px solid var(--line);bo
 <div class="kpis"><div class="kpi"><span>Моделей</span><strong>{len(model_rows)}</strong></div><div class="kpi"><span>Сохранено runs</span><strong>{ok}/{len(records)}</strong></div><div class="kpi"><span>Ошибки records</span><strong>{errors}</strong></div><div class="kpi"><span>Сбои клиента</span><strong>{transport_failures+interrupted}</strong></div></div></header>
 <section><h2>Шкалы качества</h2><p class="lead">Native model quality — первый ответ модели. Final system quality — результат после разрешённого recovery/finalizer.</p><div class="cards">{''.join(quality_cards)}</div></section>
 <section><h2>Скорость warm-запусков</h2><p class="lead">Шкала нормирована только внутри этого отчёта; tok/s не входит в quality score.</p>{''.join(speed_cards)}</section>
+{decision_section}
 <section><h2>Сводная таблица</h2><div class="table-wrap"><table><thead><tr><th>Модель</th><th>Покрытие</th><th>Native</th><th>Final system</th><th>Generation</th><th>Task contract</th><th>Recovery used</th><th>Warm speed</th><th>SD quality</th><th>Worst seed</th><th>VRAM peak</th></tr></thead><tbody>{''.join(summary_rows)}</tbody></table></div></section>
 {category_section}
 <section><h2>95% confidence intervals</h2><p class="lead">Точка — среднее Native quality, полоса — интервал неопределённости. При недостаточной выборке вывод не строится.</p>{''.join(confidence_rows)}</section>
@@ -10901,20 +10962,58 @@ def ensure_benchmark_visual_report(path):
 
 def benchmark_report_browser():
     reports=sorted(benchmark_dir(create=False).glob('*_report.html'),key=lambda p:p.stat().st_mtime,reverse=True)
-    clear_console(); ui_header('РЕЗУЛЬТАТЫ BENCHMARK','Benchmark Lab > Результаты','Готовые автономные HTML-отчёты')
+    clear_console(); ui_header('РЕЗУЛЬТАТЫ','BULL > Результаты','Краткая сводка в BULL или полный HTML-отчёт')
     if not reports:
         yellow(); print('Готовых HTML-отчётов пока нет. Заверши benchmark или пересчитай raw JSON.'); white()
         read_user_input('\nEnter = назад › '); return None
     for index,path in enumerate(reports[:20],1):
         print(f'  {index:>2}. {path.name}')
-    raw=read_user_input('Открыть [номер, Enter=назад] › ').strip()
+    raw=read_user_input('Результ [номер, Enter=назад] › ').strip()
     if not raw:return None
     if not raw.isdigit() or not 1<=int(raw)<=min(20,len(reports)):
         yellow(); print('Некорректный номер.'); white(); return None
     report=reports[int(raw)-1]
-    open_benchmark_visual_report(report)
-    green(); print('Открыт отчёт: '+report.name); white()
-    return report
+    raw_json=report.with_name(report.name[:-len('_report.html')]+'.json')
+    while True:
+        clear_console(); ui_header('ПРОСМОТР РЕЗУЛЬТАТА','BULL > Результаты',report.name)
+        ui_menu_item('1','Показать сводку здесь','Качество, скорость, профили выбора и карта','ТЕРМИНАЛ')
+        ui_menu_item('2','Выбрать по моим приоритетам','Настроить важность качества, скорости, надёжности и памяти')
+        ui_menu_item('3','Открыть HTML-отчёт','Диаграммы и подробные таблицы','HTML')
+        ui_menu_item('4','Показать файлы','Summary JSON и HTML для экспорта; raw JSON помечен отдельно')
+        ui_menu_item('0','Назад','К списку результатов')
+        choice=read_user_input('Выбор [0–4] › ').strip()
+        if choice=='1':
+            if not raw_json.is_file():
+                yellow(); print('Raw JSON для этой сводки не найден.'); white()
+            else:
+                try:
+                    records=json.loads(raw_json.read_text(encoding='utf-8-sig'))
+                    if not isinstance(records,list): raise ValueError('raw JSON не содержит список records')
+                    clear_console(); ui_header('КРАТКАЯ СВОДКА','BULL > Результаты',raw_json.name)
+                    benchmark_summary(records)
+                except Exception as exc:
+                    yellow(); print('Не удалось показать сводку:',exc); white()
+            read_user_input('\nEnter = назад › ')
+        elif choice=='2':
+            if not raw_json.is_file():
+                yellow(); print('Raw JSON для этой сводки не найден.'); white()
+            else:
+                try:
+                    benchmark_custom_priorities(_load_benchmark_records_for_view(raw_json))
+                except Exception as exc:
+                    yellow(); print('Не удалось применить приоритеты:',exc); white()
+            read_user_input('\nEnter = назад › ')
+        elif choice=='3':
+            open_benchmark_visual_report(report)
+            green(); print('Открыт HTML: '+report.name); white()
+            read_user_input('\nEnter = назад › ')
+        elif choice=='4':
+            print_benchmark_export_paths(raw_json)
+            read_user_input('\nEnter = назад › ')
+        elif choice in ('','0'):
+            return report
+        else:
+            yellow(); print('Выбери 0–4.'); white()
 
 
 def save_benchmark_summary(raw_json_path,records,spec=None):
@@ -11600,6 +11699,68 @@ def benchmark_comparative_insights(models):
     return lines
 
 
+def benchmark_decision_summary(models,custom_weights=None):
+    from Shared.bull_llm.decision_support import build_decision_support
+    return build_decision_support(models,custom_weights=custom_weights)
+
+
+def _terminal_quality_speed_map(decision,width=38,height=10):
+    """Small relative map. X is faster; Y is higher native quality."""
+    points=[
+        point for point in (decision.get('points') or [])
+        if point.get('quality_norm') is not None and point.get('speed_norm') is not None
+    ]
+    if len(points)<2:
+        return []
+    width=max(24,min(58,int(width))); height=max(7,min(14,int(height)))
+    grid=[[' ' for _ in range(width)] for _ in range(height)]
+    mid_x=width//2; mid_y=height//2
+    for y in range(height): grid[y][mid_x]='│'
+    for x in range(width): grid[mid_y][x]='─'
+    grid[mid_y][mid_x]='┼'
+    legend=[]
+    alphabet='123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    for index,point in enumerate(points):
+        marker=alphabet[index] if index<len(alphabet) else '*'
+        x=min(width-1,max(0,round(float(point['speed_norm'])*(width-1))))
+        y=(height-1)-min(height-1,max(0,round(float(point['quality_norm'])*(height-1))))
+        grid[y][x]=marker if grid[y][x] in (' ','│','─','┼') else '*'
+        legend.append(
+            f"{marker} {point['model']} · Native {float(point['quality'])*100:.1f}% · "
+            f"{float(point['speed']):.1f} tok/s"
+        )
+    rows=['  выше quality ↑','  ┌'+'─'*width+'┐']
+    rows.extend('  │'+''.join(row)+'│' for row in grid)
+    rows.extend(['  └'+'─'*width+'┘','  медленнее ← время выполнения → быстрее'])
+    return rows+['  '+line for line in legend]
+
+
+def print_benchmark_decision_support(models,custom_weights=None):
+    decision=benchmark_decision_summary(models,custom_weights=custom_weights)
+    ui_section('ВЫБОР МОДЕЛИ // ДЛЯ ЭТОГО ПРОГОНА')
+    labels={
+        'quality':'Качество','speed':'Скорость','balance':'Баланс',
+        'low_memory':'Мало памяти','custom':'Мои приоритеты',
+    }
+    for profile in decision.get('profiles') or []:
+        label=labels.get(profile.get('id'),profile.get('label') or profile.get('id'))
+        winner=profile.get('winner')
+        if winner:
+            parts=[f'Native {float(profile["quality"])*100:.1f}%']
+            if profile.get('speed') is not None: parts.append(f'{float(profile["speed"]):.1f} tok/s')
+            if profile.get('vram_mib') is not None: parts.append(f'VRAM {float(profile["vram_mib"])/1024:.1f} GiB')
+            green(); ui_print(f'  ★ {label:<18} {winner}'); white()
+            gray(); ui_print('      '+' · '.join(parts)); white()
+        else:
+            yellow(); ui_print(f'  — {label:<18} недостаточно сопоставимых метрик'); white()
+    map_rows=_terminal_quality_speed_map(decision)
+    if map_rows:
+        ui_print(); ui_print('  Карта «качество ↔ время» (относительно внутри этого прогона)')
+        for row in map_rows: ui_print(row)
+    gray(); ui_print('  Профиль — это подсказка выбора, а не новый quality score и не универсальный рейтинг.'); white()
+    return decision
+
+
 def benchmark_summary(records):
     if not records:return
     white(); print('Результаты benchmark'); line()
@@ -11763,6 +11924,8 @@ def benchmark_summary(records):
         ui_section('СРАВНИТЕЛЬНАЯ АНАЛИТИКА // НАБЛЮДАЕМЫЕ РЕЗУЛЬТАТЫ')
         for insight in benchmark_comparative_insights(models):
             print('  • '+insight)
+        if len(models)>1:
+            print_benchmark_decision_support(models)
 
 
 def show_benchmark_answers(path):
@@ -14044,6 +14207,8 @@ def _ui_labeled_border(left,label,right,fill='─'):
 
 def ui_header(title,breadcrumb='',subtitle=''):
     from Shared.bull_llm.presentation import terminal_text
+    from Shared.bull_llm.terminal_ui import render_page_mark
+    render_page_mark(_agent_core_proxy())
     matrix(); ui_print('━'*min(UI_WIDTH,78)); white()
     ui_print('  '+terminal_text(tr(title,fragments=True)))
     if breadcrumb:
@@ -14090,6 +14255,7 @@ BENCHMARK_CATEGORY_LABELS={
     'ru_language_stress':'RU_LANGUAGE_STRESS: смысл, тон и современный русский',
     'groundedness_security':'Groundedness и безопасность',
     'custom':'Пользовательские тесты',
+    'user_tasks':'Мои задачи и промпты',
 }
 
 
@@ -14765,6 +14931,80 @@ def benchmark_chat_wizard(final=False):
     )
 
 
+def benchmark_user_file_wizard():
+    """Run a .txt or structured .yaml task discovered in UserTests."""
+    from Shared.bull_llm.user_tests import load_user_tests
+    tests,findings=load_user_tests(appdir()/'UserTests')
+    rows=list(tests.items())
+    clear_console(); ui_header(
+        'ЗАДАЧИ ИЗ USERTESTS','BULL > Сравнение > Мои задачи',
+        'Добавьте .txt или .yaml в папку UserTests'
+    )
+    if findings:
+        yellow(); ui_print(f'  Не загружено файлов: {len(findings)}'); white()
+        for finding in findings[:5]:
+            gray(); ui_print(f"    {finding['file']}: {finding['error']}"); white()
+    if not rows:
+        ui_print('  Пользовательских тестов пока нет.')
+        ui_print('  Откройте UserTests/README.md и скопируйте подходящий шаблон.')
+        read_user_input('\nEnter = назад › '); return None
+    ui_section('ВЫБЕРИТЕ ЗАДАЧУ')
+    for index,(name,item) in enumerate(rows,1):
+        mode='автопроверка' if item.get('score_type')=='user_contract_v1' else 'без автооценки'
+        ui_print(f"  {index}. {name}  ·  {mode}  ·  {item.get('source_name')}")
+        gray(); ui_print('     '+str(item.get('description') or '')); white()
+    raw=read_user_input('Задача [номер, Enter=назад] › ').strip()
+    if not raw:return None
+    if not raw.isdigit() or not 1<=int(raw)<=len(rows):
+        yellow(); ui_print('Некорректный номер.'); white(); return None
+    name,item=rows[int(raw)-1]
+
+    ui_section('МОДЕЛИ')
+    models=installed_models(); show_models(models,None)
+    selector=read_user_input('Модели: all или номера через запятую [all] › ').strip() or 'all'
+    try:
+        chosen=select_benchmark_models(selector,models)
+        if not chosen:raise ValueError('Не выбраны модели.')
+    except Exception as exc:
+        yellow(); ui_print('Некорректный выбор: '+str(exc)); white(); return None
+
+    ui_section('НАСТРОЙКИ')
+    ui_menu_item('1','Стандартные','3 seeds · native · единые параметры','РЕКОМЕНДУЕТСЯ')
+    ui_menu_item('2','Быстрая проверка','1 seed · без вывода о стабильности')
+    ui_menu_item('3','Изменить','Runs, pipeline и seeds','ДЛЯ ОПЫТНЫХ')
+    choice=read_user_input('Настройки [1] › ').strip().casefold()
+    if choice=='2': runs,mode,seed_mode=1,'native','fixed'
+    elif choice=='3': runs,mode,seed_mode=_startup_bench_options(3,'native','sweep')
+    else: runs,mode,seed_mode=3,'native','sweep'
+
+    ui_section('ПРОВЕРЬТЕ ПЛАН')
+    ui_print(f'  Задача:      {name} · {item.get("source_name")}')
+    ui_print(f'  Модели:      {", ".join(chosen)}')
+    ui_print(f'  Запуски:      {runs} · {mode} · {seed_mode}')
+    if item.get('score_type')=='user_contract_v1':
+        ui_print('  Оценка:       только явные детерминированные criteria из YAML')
+        if (item.get('scorer_config') or {}).get('manual_review'):
+            yellow(); ui_print('  Ручная проверка: есть пункты, которые нельзя честно автоматизировать.'); white()
+    else:
+        yellow(); ui_print('  Оценка:       .txt не имеет автоскоринга; сравните ответы вручную.'); white()
+    if read_user_input('Запустить? [Y/n] › ').strip().casefold() in ('n','no','нет','0'):
+        return None
+    return f'/bench compare {name} {selector} {runs} {mode} {seed_mode} profile=fair_default sampling_source=benchmark_override'
+
+
+def benchmark_user_tasks_menu():
+    while True:
+        clear_console(); ui_header('МОИ ЗАДАЧИ','BULL > Сравнение > Мои задачи','Простой .txt или строгий .yaml')
+        ui_menu_item('1','Задача из папки UserTests','Файл можно переиспользовать и хранить в Git')
+        ui_menu_item('2','Вставить один промпт','Быстрая задача и история версий')
+        ui_menu_item('0','Назад')
+        choice=read_user_input('Выбор [0–2] › ').strip()
+        if choice=='1': return benchmark_user_file_wizard()
+        if choice=='2': return benchmark_custom_prompt_wizard()
+        if choice in ('','0'):return None
+        yellow(); ui_print('Выбери 0–2.'); white()
+
+
 def benchmark_custom_prompt_wizard():
     """Simple end-to-end setup for comparing models on a user's prompt."""
     while True:
@@ -14980,18 +15220,16 @@ def startup_benchmark_wizard(runtime_guard=None):
     """Return an existing /bench command so menu and command mode share one engine."""
     while True:
         clear_console()
-        ui_header('Тесты и результаты','Главная / Тесты','Выберите задачу. Настройки появятся перед запуском.')
-        ui_menu_item('1','Сравнить модели','Стандартный CHAT-набор · 3 seeds · честные одинаковые настройки','РЕКОМЕНДУЕТСЯ')
-        ui_menu_item('2','Тест по своему промпту','Вставить задачу, выбрать модели и простые настройки')
+        ui_header('СРАВНЕНИЕ МОДЕЛЕЙ','Главная / Сравнение','BULL поможет выбрать модель под ваши задачи')
+        ui_menu_item('1','Стандартное сравнение','Готовые тесты BULL · 3 seeds · одинаковые условия','НАЧАТЬ ЗДЕСЬ')
+        ui_menu_item('2','Мои задачи и промпты','Файлы из UserTests или один вставленный промпт')
         resume_title,resume_detail,resume_tag=checkpoint_resume_menu_state()
         ui_menu_item('3','Восстановить и продолжить',resume_detail,resume_tag)
-        ui_menu_item('4','Открыть результаты','Наглядные диаграммы и сводные таблицы')
-        ui_menu_item('5','Агентская задача','Agent Benchmark: написать код, выполнить проверки, сохранить отчёт')
-        ui_menu_item('6','Расширенные тесты','Один тест, категория, CODE, полная матрица, пересчёт и sweep')
-        ui_menu_item('7','Экспериментальная GPU Lab','Windows + Ollama: одна карта или несколько · модели и сценарии')
+        ui_menu_item('4','Посмотреть результаты','Краткая сводка в BULL или полный HTML-отчёт')
+        ui_menu_item('5','Дополнительные тесты','Один тест, категория, пересчёт и инструменты для опытных')
         ui_menu_item('0','Назад','Вернуться в главное меню')
         ui_print(); ui_footer('benchmark')
-        choice=read_user_input('Выбор [0-7] › ').strip().casefold()
+        choice=read_user_input('Выбор [0-5] › ').strip().casefold()
 
         if choice in ('?','help'):
             clear_console(); ui_header('BENCHMARK HELP','Benchmark Lab > Help')
@@ -15007,7 +15245,7 @@ def startup_benchmark_wizard(runtime_guard=None):
         if choice=='2':
             if runtime_guard is not None and not runtime_guard('benchmark'):
                 continue
-            command=benchmark_custom_prompt_wizard()
+            command=benchmark_user_tasks_menu()
             if command: return command,True
             continue
 
@@ -15018,12 +15256,6 @@ def startup_benchmark_wizard(runtime_guard=None):
             benchmark_report_browser(); continue
 
         if choice=='5':
-            return '/agent',False
-
-        if choice=='7':
-            return '/gpu',False
-
-        if choice=='6':
             cmd,return_home=benchmark_advanced_menu()
             if cmd=='__benchmark_menu__':
                 continue
@@ -15032,7 +15264,62 @@ def startup_benchmark_wizard(runtime_guard=None):
         if choice in ('0','back',''):
             return '/home',False
 
-        yellow(); ui_print('Не понял выбор. Используй 0-7 или ?.'); white(); time.sleep(.6)
+        yellow(); ui_print('Не понял выбор. Используй 0-5 или ?.'); white(); time.sleep(.6)
+
+
+def _load_benchmark_records_for_view(path):
+    """Read a saved result without accepting unrelated JSON shapes."""
+    source=Path(path)
+    if not source.is_file():
+        raise FileNotFoundError(source)
+    payload=json.loads(source.read_text(encoding='utf-8-sig'))
+    if isinstance(payload,dict) and isinstance(payload.get('records'),dict):
+        payload=list(payload['records'].values())
+    if not isinstance(payload,list) or any(not isinstance(record,dict) for record in payload):
+        raise ValueError('Ожидался raw benchmark JSON или checkpoint со списком records.')
+    return payload
+
+
+def _decision_weight(prompt,default):
+    raw=read_user_input(f'{prompt} [0–100, Enter={default}] › ').strip()
+    if not raw:
+        return float(default)
+    value=float(raw.replace(',','.'))
+    if not 0<=value<=100:
+        raise ValueError('Каждый приоритет должен быть от 0 до 100.')
+    return value
+
+
+def benchmark_custom_priorities(records):
+    """Ask for transparent decision weights and print, never alter, quality."""
+    clear_console(); ui_header('МОИ ПРИОРИТЕТЫ','BULL > Результат > Мои приоритеты','Вес 0 отключает метрику; сумма нормируется автоматически')
+    ui_print('  Это фильтр выбора внутри одного прогона, а не новый benchmark score.')
+    weights={
+        'quality':_decision_weight('Качество ответа',50),
+        'speed':_decision_weight('Скорость генерации',30),
+        'reliability':_decision_weight('Выполнение контракта задачи',10),
+        'memory':_decision_weight('Экономия VRAM',10),
+    }
+    if sum(weights.values())<=0:
+        raise ValueError('Хотя бы один приоритет должен быть больше нуля.')
+    models=benchmark_model_summary_rows(records)
+    if len(models)<2:
+        raise ValueError('Для сравнения нужны результаты как минимум двух моделей.')
+    return print_benchmark_decision_support(models,custom_weights=weights)
+
+
+def print_benchmark_export_paths(path):
+    source=Path(path)
+    report=benchmark_visual_report_path(source)
+    summary=source.with_name(source.stem+'_summary.json')
+    share=source.with_name(source.stem+'_evidence_share.json')
+    ui_section('ФАЙЛЫ РЕЗУЛЬТАТА')
+    ui_print('  HTML (без raw-ответов): '+(str(report) if report.is_file() else 'не найден'))
+    ui_print('  Summary JSON:          '+(str(summary) if summary.is_file() else 'не найден'))
+    if share.is_file():
+        ui_print('  Share-safe evidence:   '+str(share))
+    ui_print('  Raw JSON (приватный):  '+str(source))
+    yellow(); ui_print('  Перед публикацией не выгружай raw JSON: он может содержать prompts и ответы.'); white()
 
 
 def benchmark_result_menu(last_command=None,last_benchmark_path=None):
@@ -15044,15 +15331,18 @@ def benchmark_result_menu(last_command=None,last_benchmark_path=None):
         ui_print()
         ui_section('BENCHMARK ЗАВЕРШЁН — ЧТО ДАЛЬШЕ')
         repeatable=bool(last_command and not str(last_command).casefold().startswith('/bench resume'))
-        ui_menu_item('1','Открыть наглядный отчёт','Диаграммы, шкалы и сводные таблицы','HTML')
-        ui_menu_item('2','Ответы моделей','Открыть raw-ответы и остаться на этом экране')
-        ui_menu_item('3','Повторить этот тест' if repeatable else 'Повтор недоступен','Resume уже завершил checkpoint' if not repeatable else 'С теми же моделями и параметрами')
-        ui_menu_item('4','Запустить другой тест','Вернуться в Benchmark Lab')
+        ui_menu_item('1','Краткая сводка в BULL','Качество, скорость, рекомендации и карта','ТЕРМИНАЛ')
+        ui_menu_item('2','Выбрать по моим приоритетам','Задать важность качества, скорости, надёжности и памяти')
+        ui_menu_item('3','Открыть полный отчёт','Диаграммы, шкалы и сводные таблицы','HTML')
+        ui_menu_item('4','Файлы для экспорта','Безопасный summary JSON и HTML; raw JSON помечен отдельно')
+        ui_menu_item('5','Ответы моделей','Открыть raw-ответы и остаться на этом экране')
+        ui_menu_item('6','Повторить этот тест' if repeatable else 'Повтор недоступен','Resume уже завершил checkpoint' if not repeatable else 'С теми же моделями и параметрами')
+        ui_menu_item('7','Запустить другой тест','Вернуться к выбору теста')
         ui_menu_item('0','Главное меню','Вернуться к основным действиям')
         ui_print()
 
         try:
-            choice=read_user_input('Выбор [0-4] › ').strip().casefold()
+            choice=read_user_input('Выбор [0-7] › ').strip().casefold()
         except (KeyboardInterrupt,EOFError):
             ui_print()
             return '/home'
@@ -15060,7 +15350,34 @@ def benchmark_result_menu(last_command=None,last_benchmark_path=None):
         if choice in ('0','home','главное меню'):
             return '/home'
 
-        if choice in ('1','report','отчёт','отчет'):
+        if choice in ('1','summary','сводка'):
+            ui_print()
+            if last_benchmark_path:
+                try:
+                    records=_load_benchmark_records_for_view(last_benchmark_path)
+                    clear_console(); ui_header('КРАТКАЯ СВОДКА','BULL > Результат','Результаты без выхода из программы')
+                    benchmark_summary(records)
+                except Exception as e:
+                    yellow(); ui_print('Не удалось показать сводку:',e); white()
+            else:
+                yellow(); ui_print('Нет сохранённого результата benchmark для просмотра.'); white()
+            read_user_input('\nEnter = назад › ')
+            continue
+
+        if choice in ('2','priorities','приоритеты'):
+            ui_print()
+            if last_benchmark_path:
+                try:
+                    records=_load_benchmark_records_for_view(last_benchmark_path)
+                    benchmark_custom_priorities(records)
+                except Exception as e:
+                    yellow(); ui_print('Не удалось применить приоритеты:',e); white()
+            else:
+                yellow(); ui_print('Нет сохранённого результата benchmark для просмотра.'); white()
+            read_user_input('\nEnter = назад › ')
+            continue
+
+        if choice in ('3','report','отчёт','отчет'):
             ui_print()
             if last_benchmark_path:
                 try:
@@ -15073,7 +15390,15 @@ def benchmark_result_menu(last_command=None,last_benchmark_path=None):
                 yellow(); ui_print('Нет сохранённого результата benchmark для просмотра.'); white()
             continue
 
-        if choice in ('2','answers','ответы'):
+        if choice in ('4','export','экспорт','файлы'):
+            if last_benchmark_path:
+                print_benchmark_export_paths(last_benchmark_path)
+            else:
+                yellow(); ui_print('Нет сохранённого результата benchmark для экспорта.'); white()
+            read_user_input('\nEnter = назад › ')
+            continue
+
+        if choice in ('5','answers','ответы'):
             ui_print()
             if last_benchmark_path:
                 try:
@@ -15085,21 +15410,21 @@ def benchmark_result_menu(last_command=None,last_benchmark_path=None):
             # Crucial UX rule: answers do not kick the user away from results.
             continue
 
-        if choice in ('3','repeat','повторить'):
+        if choice in ('6','repeat','повторить'):
             if repeatable:
                 return last_command
             yellow()
             if last_command and str(last_command).casefold().startswith('/bench resume'):
-                ui_print('Успешный resume уже завершил checkpoint. Выбери новый benchmark через пункт 4.')
+                ui_print('Успешный resume уже завершил checkpoint. Выбери новый benchmark через пункт 7.')
             else:
                 ui_print('Не удалось восстановить исходную benchmark-команду.')
             white()
             continue
 
-        if choice in ('4','benchmark','bench'):
+        if choice in ('7','benchmark','bench'):
             return '__benchmark_menu__'
 
-        yellow(); ui_print('Выбери 0, 1, 2, 3 или 4.'); white()
+        yellow(); ui_print('Выбери пункт 0–7.'); white()
 
 
 
