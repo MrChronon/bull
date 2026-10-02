@@ -138,7 +138,7 @@ class BridgeTests(unittest.TestCase):
         core = (ROOT / "bull_client_v0.27.0.0.py").read_text(encoding="utf-8")
         self.assertIn("APP_NAME='BULL — Benchmark Lab'", core)
         self.assertIn("APP_VERSION='v0.27.0.0'", core)
-        self.assertIn("'BULL CHAT DASHBOARD'", core)
+        self.assertIn("'СОСТОЯНИЕ BULL'", core)
         self.assertNotIn("'LOCAL LLM DASHBOARD'", core)
         notes = (ROOT / "Docs" / "RELEASE_NOTES_0.27.0.0.md").read_text(encoding="utf-8")
         for phrase in ("Built-in benchmark prompts", "scorers", "runtime"):

@@ -147,6 +147,7 @@ class UXTests(unittest.TestCase):
             try:
                 self.core.ui_settings_path = lambda: settings
                 for choice, expected in (('1', 'en'), ('2', 'ru')):
+                    settings.unlink(missing_ok=True)
                     with patch.object(self.core, 'clear_console'), patch.object(
                             terminal_ui, '_startup_mark_shown', False), patch.object(
                             terminal_ui, 'render_startup_mark', return_value=True), self.inputs([choice]):
@@ -154,10 +155,64 @@ class UXTests(unittest.TestCase):
                     self.assertEqual(get_language(), expected)
                     document = json.loads(settings.read_text(encoding='utf-8'))
                     self.assertEqual(document['language'], expected)
-                    self.assertEqual(document['version'], 2)
+                    self.assertEqual(document['version'], 3)
             finally:
                 self.core.ui_settings_path = old_path
                 set_language('ru')
+
+    def test_saved_language_skips_startup_question(self):
+        from Shared.bull_llm.i18n import get_language, set_language
+        with tempfile.TemporaryDirectory() as tmp:
+            settings = Path(tmp) / 'ui_settings.json'
+            settings.write_text(json.dumps({
+                'schema': self.core.UI_THEME_SCHEMA, 'version': 3,
+                'theme': 'bull_brand', 'language': 'en',
+            }), encoding='utf-8')
+            old_path = self.core.ui_settings_path
+            try:
+                self.core.ui_settings_path = lambda: settings
+                with patch.object(self.core, 'read_user_input', side_effect=AssertionError('language prompt repeated')):
+                    self.assertEqual(self.core.select_ui_language(), 'en')
+                self.assertEqual(get_language(), 'en')
+            finally:
+                self.core.ui_settings_path = old_path
+                set_language('ru')
+
+    def test_english_offline_startup_notice_has_no_russian_fallback(self):
+        from Shared.bull_llm.i18n import set_language
+        out = io.StringIO()
+        set_language('en')
+        try:
+            with patch.object(self.core, 'load_backend_settings', return_value={'target_mode': 'local'}), \
+                    contextlib.redirect_stdout(out):
+                self.core.render_startup_connection_result(False)
+            text = out.getvalue()
+            self.assertIn('No model connection', text)
+            self.assertIn('This computer', text)
+            self.assertFalse(any(('А' <= char <= 'я') or char in 'Ёё' for char in text), text)
+        finally:
+            set_language('ru')
+
+    def test_english_appearance_and_offline_status_do_not_mix_languages(self):
+        from Shared.bull_llm.i18n import set_language
+        has_cyrillic=lambda value:any(('А' <= char <= 'я') or char in 'Ёё' for char in value)
+        set_language('en')
+        try:
+            out=io.StringIO()
+            with self.inputs(['0']), contextlib.redirect_stdout(out):
+                self.assertIsNone(self.core.appearance_menu())
+            self.assertFalse(has_cyrillic(out.getvalue()), out.getvalue())
+
+            out=io.StringIO()
+            session=self.core.new_session_meta('fixture-model')
+            cfg=dict(self.core.THINK,model='fixture-model')
+            with patch.object(self.core,'load_backend_settings',return_value={'target_mode':'local'}), \
+                    contextlib.redirect_stdout(out):
+                self.core.dashboard(None,'think',cfg,True,Path('chat.json'),session,
+                                    [],'',[],{},backend_ready=False)
+            self.assertFalse(has_cyrillic(out.getvalue()), out.getvalue())
+        finally:
+            set_language('ru')
 
     def test_unknown_command_not_sent_as_prompt(self):
         from Shared.bull_llm.terminal_ui import command_menu
@@ -413,14 +468,45 @@ class UXTests(unittest.TestCase):
         with patch.object(self.core,'clear_console'), self.inputs(['1']):
             self.assertEqual(experimental_menu(self.core), 'agent')
 
-    def test_compact_bull_mark_is_available_on_every_page(self):
+    def test_full_bull_mark_and_expansion_are_available_on_every_page(self):
         from Shared.bull_llm.terminal_ui import render_page_mark
         out=io.StringIO()
         with patch.object(self.core,'matrix'), patch.object(self.core,'white'), contextlib.redirect_stdout(out):
             render_page_mark(self.core)
         text=out.getvalue()
-        self.assertIn('BULL',text)
-        self.assertGreaterEqual(len(text.splitlines()),3)
+        self.assertIn('▅▇▁▁▇▅',text)
+        self.assertIn('B U L L  //  Benchmarking & Usage of Local LLMs',text)
+        self.assertGreaterEqual(len(text.splitlines()),12)
+
+    def test_page_header_clears_previous_screen(self):
+        with patch.object(self.core, 'clear_console') as clear:
+            self.core.ui_header('Header')
+        clear.assert_called_once_with()
+
+    def test_red_theme_uses_red_brand_and_action_colors(self):
+        selected = self.core.set_ui_theme('bull_red', persist=False)
+        try:
+            self.assertEqual(selected, 'bull_red')
+            palette = self.core.ui_theme_palette()
+            self.assertEqual(palette['accent'], self.core.ANSI_BULL_RED)
+            self.assertEqual(palette['action'], self.core.ANSI_BULL_RED)
+            self.assertFalse(palette['matrix'])
+        finally:
+            self.core.set_ui_theme('bull_brand', persist=False)
+
+    def test_offline_dashboard_does_not_claim_a_live_backend_or_probe_telemetry(self):
+        out = io.StringIO()
+        session = self.core.new_session_meta('fixture-model')
+        cfg = dict(self.core.THINK, model='fixture-model')
+        with patch.object(self.core, 'clear_console'), \
+                patch.object(self.core, 'telemetry_snapshot', side_effect=AssertionError('offline telemetry probe')), \
+                contextlib.redirect_stdout(out):
+            self.core.dashboard(None, 'think', cfg, True, Path('chat.json'), session,
+                                [], '', [], {}, backend_ready=False)
+        text = out.getvalue()
+        self.assertIn('нет соединения', text)
+        self.assertIn('сохранённые настройки', text)
+        self.assertNotIn('OK · backend', text)
 
     def test_main_dispatch_home_commands_return_home_without_chat(self):
         import os

@@ -29,12 +29,7 @@ BULL_PIXEL_ART = (
 )
 
 _startup_mark_shown = False
-
-PAGE_BULL_MARK = (
-    '       ▄▆          ▆▄',
-    '     ▟███▙  BULL  ▟███▙',
-    '       ▜██▄▄██▛',
-)
+_WORDMARK = '  B U L L  //  Benchmarking & Usage of Local LLMs'
 
 
 def _load_chafa_mark():
@@ -61,30 +56,40 @@ def _load_chafa_mark():
     return rendered
 
 
+def _render_text_mark(core):
+    core.matrix()
+    for row in BULL_PIXEL_ART:
+        print(row)
+    core.white()
+
+
+def _render_wordmark(core):
+    core.white()
+    print(_WORDMARK)
+
+
 def render_startup_mark(core):
     """Draw the full-colour Chafa product mark once, with a safe text fallback."""
     global _startup_mark_shown
     if _startup_mark_shown:
         return False
     _startup_mark_shown = True
-    rendered = _load_chafa_mark()
+    # The bundled Chafa asset uses the default turquoise brand colours. Other
+    # themes use the complete text mark so the bull follows the chosen palette.
+    rendered = _load_chafa_mark() if getattr(core, 'UI_THEME', 'bull_brand') == 'bull_brand' else None
     if rendered:
         print(rendered, end='' if rendered.endswith('\n') else '\n')
     else:
-        core.matrix()
-        for row in BULL_PIXEL_ART:
-            print(row)
-    core.white()
-    print('  B U L L  //  Benchmarking & Usage of Local LLMs\n')
+        _render_text_mark(core)
+    _render_wordmark(core)
+    print()
     return True
 
 
 def render_page_mark(core):
-    """Draw a compact, stable bull head on every navigational page."""
-    core.matrix()
-    for row in PAGE_BULL_MARK:
-        print(row)
-    core.white()
+    """Draw the complete theme-coloured bull and product expansion on every page."""
+    _render_text_mark(core)
+    _render_wordmark(core)
 
 
 def selection(raw, rows):
@@ -151,8 +156,8 @@ def more_menu(core):
         core.clear_console()
         core.ui_header('Дополнительно', 'Главная / Дополнительно', 'Редкие и экспертные действия')
         core.ui_menu_item('1', 'Сохранённые результаты', 'Посмотреть краткую сводку или открыть HTML')
-        core.ui_menu_item('2', 'Внешний вид и язык', 'Тема и настройки терминала')
-        core.ui_menu_item('3', 'Состояние и диагностика', 'Подключение, GPU, VRAM и проверки')
+        core.ui_menu_item('2', 'Язык и внешний вид', 'Язык интерфейса, BULL, Matrix, красная и контрастная темы')
+        core.ui_menu_item('3', 'Состояние текущей сессии', 'Сохранённые настройки; live-метрики только при соединении')
         core.ui_menu_item('4', 'Как пользоваться', 'Короткий маршрут и справка')
         core.ui_menu_item('5', 'Команды для опытных', 'Точные /bench и служебные команды')
         core.ui_menu_item('6', 'Экспериментальные функции', 'Agent Benchmark, GPU Lab и настройки сервера')

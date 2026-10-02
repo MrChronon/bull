@@ -4234,7 +4234,8 @@ def test_startup_backend_failure_is_offline_first_and_does_not_switch_backend():
     startup=source[source.index("initialize_backend_from_settings()",source.index('def main():')):
                    source.index("models=installed_models() if backend_ready else []")]
     assert "backend_info={'backend':ACTIVE_BACKEND,'version':'offline','status':'offline'}" in startup
-    assert 'Главное меню доступно офлайн' in startup
+    assert 'render_startup_connection_result(False)' in startup
+    assert "append_client_debug('STARTUP_BACKEND_OFFLINE '" in startup
     assert 'connection_menu()' not in startup
     assert "set_backend('ollama',persist=False)" not in startup
 
@@ -4265,7 +4266,10 @@ def test_main_reaches_home_when_backend_is_offline():
         out=io.StringIO()
         with contextlib.redirect_stdout(out):
             eq(mod.main(),0)
-        assert 'Главное меню доступно офлайн' in out.getvalue()
+        startup_text=out.getvalue()
+        assert 'Нет соединения с моделями' in startup_text
+        assert 'Остальные функции BULL доступны офлайн' in startup_text
+        assert 'offline test' not in startup_text
     finally:
         for name,value in old.items():
             setattr(mod,name,value)
@@ -4488,7 +4492,7 @@ def test_wan_ssh_transport_has_keepalive_and_clear_internet_ui():
         assert marker in joined
     source=CLIENT.read_text(encoding='utf-8')
     connection_ui=(ROOT/'Shared/bull_llm/connections_ui.py').read_text(encoding='utf-8')
-    assert 'Инструкция по доступу через Интернет' in connection_ui
+    assert 'Как подключаться через Интернет' in connection_ui
     assert 'core.show_internet_access_guide()' in connection_ui
     assert 'Ollama остаётся доступна только через SSH-туннель' in source
 
@@ -4950,7 +4954,7 @@ def test_ui_theme_defaults_to_bull_brand_and_persists_language_atomically():
         eq(mod.set_ui_theme('bull',persist=True),'bull_brand')
         document=json.loads((root/'ui_settings.json').read_text(encoding='utf-8'))
         eq((document['schema'],document['version'],document['theme'],document['language']),
-           ('local-llm-ui-settings',2,'bull_brand','en'))
+           ('local-llm-ui-settings',3,'bull_brand','en'))
         assert not (root/'ui_settings.json.tmp').exists()
         mod.set_ui_theme('matrix_soft',persist=False)
         eq(mod.load_ui_theme(),'bull_brand')
@@ -4974,9 +4978,9 @@ def test_appearance_menu_changes_theme_and_returns():
         mod.clear_console=lambda:None
         result=_with_inputs(['4','0'],mod.appearance_menu)
         assert result is None
-        eq(mod.UI_THEME,'matrix_soft')
+        eq(mod.UI_THEME,'bull_red')
         document=json.loads((root/'ui_settings.json').read_text(encoding='utf-8'))
-        eq(document['theme'],'matrix_soft')
+        eq(document['theme'],'bull_red')
     finally:
         mod.ui_settings_path=old_path; mod.clear_console=old_clear
         mod.set_ui_theme(old_theme,persist=False)

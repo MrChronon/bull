@@ -444,61 +444,95 @@ def import_old(core):
     return None
 
 
-def advanced_menu(core):
+def import_and_migration_menu(core):
     while True:
-        core.ui_header('Экспериментальные подключения', 'Подключение / Дополнительно', 'Не нужно для локальной Ollama или уже сохранённого сервера')
-        core.ui_menu_item('1', 'Добавить SSH-сервер вручную', 'Адрес, порт, пользователь, ключ и fingerprint')
-        core.ui_menu_item('2', 'Как создать SSH-ключ и алиас', 'Пошаговая инструкция без изменения системы')
-        core.ui_menu_item('3', 'Импорт Connection JSON', 'Файл от администратора + ваш приватный ключ')
-        core.ui_menu_item('4', 'Перенести из старой версии', 'Выбрать папку предыдущего билда')
-        core.ui_menu_item('5', 'Проверить SSH выбранного сервера', 'Не запускает модели')
-        core.ui_menu_item('6', 'Инструкция по доступу через Интернет', 'Подготовка сервера, VPN и роутера')
-        core.ui_menu_item('7', 'Устаревшие SSH-профили', 'Совместимость: LAN, VPN, direct, auto')
-        core.ui_menu_item('8', 'Забыть сервер в личной папке', 'Не удаляет ключ и не отзывает доступ на сервере')
+        core.ui_header('ИМПОРТ И ПЕРЕНОС', 'Главная / Подключение / Импорт',
+                       'Используйте только файлы из доверенного источника')
+        core.ui_menu_item('1', 'Импортировать Connection JSON',
+                          'Публичные параметры сервера + ваш приватный ключ')
+        core.ui_menu_item('2', 'Перенести подключение из старой версии',
+                          'Выбрать папку предыдущего билда BULL')
         core.ui_menu_item('0', 'Назад')
         value = core.read_user_input('Выбор › ').strip()
-        if value in ('', '0'): return None
+        if value in ('', '0'):
+            return None
         if value == '1':
-            if new_ssh_connection(core): return '__connection_changed__'
-        elif value == '2': show_ssh_key_guide(core); pause(core)
-        elif value == '3':
             path = ask(core, 'Connection JSON (из доверенного источника)', required=True).strip('"')
             entry = core._validate_connection_bundle(read_document(path))
             entry['identity_file'] = str(private_key_path(ask(core, 'Ваш приватный ключ', required=True)))
-            if confirm_install(core, entry): return '__connection_changed__'
-        elif value == '4':
-            if import_old(core): return '__connection_changed__'
-        elif value == '5':
+            if confirm_install(core, entry):
+                return '__connection_changed__'
+        elif value == '2':
+            if import_old(core):
+                return '__connection_changed__'
+        else:
+            print('Выберите пункт 0–2.')
+
+
+def connection_help_menu(core):
+    while True:
+        core.ui_header('ПОМОЩЬ И ДИАГНОСТИКА', 'Главная / Подключение / Помощь',
+                       'Проверки выполняются только по вашему явному выбору')
+        core.ui_menu_item('1', 'Проверить выбранный SSH-сервер',
+                          'Проверяет SSH; модели не запускаются')
+        core.ui_menu_item('2', 'Как создать SSH-ключ и алиас',
+                          'Пошаговая инструкция без изменения системы')
+        core.ui_menu_item('3', 'Как подключаться через Интернет',
+                          'VPN, публичный SSH-порт и безопасная настройка роутера')
+        core.ui_menu_item('4', 'Забыть сохранённый сервер',
+                          'Удаляет только запись BULL; ключ и доступ на сервере остаются')
+        core.ui_menu_item('0', 'Назад')
+        value = core.read_user_input('Выбор › ').strip()
+        if value in ('', '0'):
+            return None
+        if value == '1':
             if core.load_backend_settings().get('target_mode') != 'remote':
-                print('Сейчас выбран локальный режим. SSH не используется.')
+                print('Выбран этот компьютер. SSH сейчас не используется и не проверяется.')
             else:
                 ok, detail = core._test_ssh_endpoint(core.resolve_remote_endpoint(force=True), timeout=6)
                 print(('SSH OK: ' if ok else 'SSH недоступен: ') + terminal_text(detail))
             pause(core)
-        elif value == '6': core.show_internet_access_guide(); pause(core)
-        elif value == '7':
-            result = core.remote_access_menu()
-            if result: return result
-        elif value == '8':
+        elif value == '2':
+            show_ssh_key_guide(core); pause(core)
+        elif value == '3':
+            core.show_internet_access_guide(); pause(core)
+        elif value == '4':
             entry = pick_entry(core, saved_connections(core), 'Забыть сервер')
             if entry and core.read_user_input('Введите DELETE для удаления только записи › ').strip() == 'DELETE':
                 (vault_dir() / (entry['id'] + '.json')).unlink(missing_ok=True)
-                print('Запись удалена из личной папки. Ключ и настройки текущего билда сохранены.')
+                print('Запись удалена из личной папки. Ключ и доступ на сервере не изменены.')
                 pause(core)
-        else: print('Выберите пункт 0–8.')
+        else:
+            print('Выберите пункт 0–4.')
+
+
+def advanced_menu(core):
+    """Compatibility entry point for callers from older UI tests and commands."""
+    return connection_help_menu(core)
 
 
 def connection_menu(core):
     while True:
-        core.clear_console()
-        core.ui_header('Подключение', 'Главная / Подключение', 'Где запущены модели?')
+        core.ui_header('ПОДКЛЮЧЕНИЕ К МОДЕЛЯМ', 'Главная / Подключение',
+                       'Сначала выберите, где запущены модели')
         settings = core.load_backend_settings()
         remote = settings.get('target_mode') == 'remote'
         core.ui_status_strip([('Выбрано', 'удалённый сервер' if remote else 'этот компьютер', 'info')])
-        core.ui_menu_item('1', 'Использовать этот компьютер', 'Ollama на localhost; не подключается к серверу')
-        core.ui_menu_item('2', 'Выбрать сохранённый сервер', 'Обычный способ для уже настроенного подключения','ПРОСТО')
-        core.ui_menu_item('3', 'Добавить по SSH-алиасу', 'Введите Host из ~/.ssh/config')
-        core.ui_menu_item('4', 'Дополнительно и экспериментально', 'Ручная настройка, импорт, диагностика и серверные инструкции')
+        core.ui_section('НА ЭТОМ КОМПЬЮТЕРЕ')
+        core.ui_menu_item('1', 'Локальная Ollama',
+                          'Использовать модели, установленные на этом компьютере')
+        core.ui_section('УДАЛЁННЫЙ СЕРВЕР')
+        core.ui_menu_item('2', 'Сохранённый сервер',
+                          'Выбрать уже настроенное подключение', 'ПРОСТО')
+        core.ui_menu_item('3', 'Новый сервер по SSH-алиасу',
+                          'Host из ~/.ssh/config; адрес и ключ подставятся автоматически', 'РЕКОМЕНДУЕТСЯ')
+        core.ui_menu_item('4', 'Новый сервер вручную',
+                          'Адрес, SSH-порт, пользователь, ключ и fingerprint')
+        core.ui_section('ИНСТРУМЕНТЫ')
+        core.ui_menu_item('5', 'Импорт или перенос',
+                          'Connection JSON или настройки из старой версии')
+        core.ui_menu_item('6', 'Помощь и диагностика',
+                          'Проверка SSH, настройка ключа и доступ через Интернет')
         core.ui_menu_item('0', 'Назад')
         try:
             value = core.read_user_input('Выбор › ').strip()
@@ -517,9 +551,15 @@ def connection_menu(core):
             elif value == '3':
                 if new_ssh_alias_connection(core): return '__connection_changed__'
             elif value == '4':
-                result = advanced_menu(core)
+                result = new_ssh_connection(core)
                 if result: return result
-            else: print('Выберите пункт 0–4.')
+            elif value == '5':
+                result = import_and_migration_menu(core)
+                if result: return result
+            elif value == '6':
+                result = connection_help_menu(core)
+                if result: return result
+            else: print('Выберите пункт 0–6.')
         except Cancelled:
             print('Отменено без сохранения.')
         except (OSError, ValueError, TypeError, KeyError, subprocess.SubprocessError) as exc:

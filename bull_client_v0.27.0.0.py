@@ -2592,6 +2592,8 @@ ANSI_GREEN_STANDARD='\033[32m'
 ANSI_MATRIX_DIM='\033[2;32m'
 ANSI_BULL_GREEN='\033[38;2;0;230;168m'
 ANSI_BULL_CYAN='\033[38;2;36;214;255m'
+ANSI_BULL_RED='\033[38;2;255;60;82m'
+ANSI_BULL_RED_SOFT='\033[38;2;210;70;86m'
 ANSI_BULL_GRAPHITE='\033[38;2;92;112;118m'
 ANSI_BULL_OFF_WHITE='\033[38;2;244;247;245m'
 ANSI_RESET = '\033[0m'
@@ -2599,13 +2601,14 @@ _COLOR_ENABLED = False
 UI_WIDTH=78
 UI_MATRIX_RAIL='01001100 01001100 01001101  //  4C 4C 4D  //  SIGNAL LOCKED'
 UI_THEME_SCHEMA='local-llm-ui-settings'
-UI_THEME_VERSION=2
+UI_THEME_VERSION=3
 UI_THEME_DEFAULT='bull_brand'
 UI_THEME_LABELS={
     'bull_brand':'Фирменная BULL',
     'matrix_bright':'Яркая Matrix',
     'matrix_balanced':'Сбалансированная Matrix',
     'matrix_soft':'Приглушённая Matrix',
+    'bull_red':'Красная BULL',
     'classic':'Классическая контрастная',
 }
 UI_THEME_PALETTES={
@@ -2626,6 +2629,11 @@ UI_THEME_PALETTES={
         'accent':ANSI_GREEN_STANDARD,'secondary':ANSI_MATRIX_DIM,'muted':ANSI_GRAY,
         'text':ANSI_WHITE,'action':ANSI_CYAN,'success':ANSI_GREEN,'matrix':True,
     },
+    'bull_red':{
+        'accent':ANSI_BULL_RED,'secondary':ANSI_BULL_RED_SOFT,
+        'muted':ANSI_LIGHT_GRAY,'text':ANSI_BULL_OFF_WHITE,
+        'action':ANSI_BULL_RED,'success':ANSI_GREEN,'matrix':False,
+    },
     'classic':{
         'accent':ANSI_CYAN,'secondary':ANSI_LIGHT_GRAY,'muted':ANSI_LIGHT_GRAY,
         'text':ANSI_WHITE,'action':ANSI_CYAN,'success':ANSI_GREEN,'matrix':False,
@@ -2640,6 +2648,7 @@ def normalize_ui_theme(value):
         'bright':'matrix_bright','matrix':'matrix_bright','matrix_bright':'matrix_bright',
         'balanced':'matrix_balanced','matrix_balanced':'matrix_balanced',
         'soft':'matrix_soft','dim':'matrix_soft','matrix_soft':'matrix_soft',
+        'red':'bull_red','bull_red':'bull_red','crimson':'bull_red',
         'classic':'classic','contrast':'classic','high_contrast':'classic',
     }
     return aliases.get(raw,UI_THEME_DEFAULT)
@@ -2657,7 +2666,7 @@ def _load_ui_settings_document():
         document=json.loads(p.read_text(encoding='utf-8-sig'))
         if not isinstance(document,dict) or document.get('schema')!=UI_THEME_SCHEMA:
             return {}
-        if int(document.get('version') or 0) not in (1,UI_THEME_VERSION):
+        if int(document.get('version') or 0) not in (1,2,UI_THEME_VERSION):
             return {}
         return document
     except Exception:
@@ -2726,11 +2735,14 @@ def initialize_ui_theme():
 
 
 def select_ui_language():
-    """Show the first, deliberately bilingual screen before any backend work."""
+    """Ask on the first run only; later changes live in Appearance settings."""
     forced=environment_language()
     if forced:
         return set_language(forced)
-    current=load_ui_language()
+    document=_load_ui_settings_document()
+    if document.get('language'):
+        return set_language(document['language'])
+    current='en'
     set_language(current)
     clear_console()
     from Shared.bull_llm.terminal_ui import render_startup_mark
@@ -13648,44 +13660,52 @@ def _terminal_gauge(value,width=22):
     return '█'*n+'░'*(width-n)
 
 
-def dashboard(tp,mode,cfg,trace,path,session,history,summary,archive,stats):
-    clear_console(); white()
+def dashboard(tp,mode,cfg,trace,path,session,history,summary,archive,stats,
+              backend_ready=True,backend_error=''):
+    white()
+    online=bool(backend_ready)
+    target_remote=load_backend_settings().get('target_mode')=='remote'
+    target=tr('удалённый сервер' if target_remote else 'этот компьютер')
     ui_header(
-        'BULL CHAT DASHBOARD',
-        'Главное меню > Рабочий чат > Dashboard',
-        f'{backend_label()} | {short_model(cfg["model"],38)}'
+        'СОСТОЯНИЕ BULL',
+        'Главная / Дополнительно / Состояние',
+        'Текущая конфигурация; live-метрики показываются только при соединении'
     )
 
-    snap=telemetry_snapshot(cfg['model'])
+    snap=telemetry_snapshot(cfg['model']) if online else {}
     ti=telemetry_inline(snap)
     used,frac=context_usage(history,summary,session.get('attachments'))
 
     ui_status_strip([
-        ('mode',mode,'info'),('backend',backend_label(),'ok'),
-        ('autosave','on' if session.get('autosave',True) else 'off','info'),
-        ('tools',session.get('tools_mode','off'),'info'),
+        ('соединение',tr('подключено') if online else tr('нет соединения'),'ok' if online else 'warn'),
+        ('выбрано',f'{target} · {backend_label()}','info'),
     ])
-    ui_section('СЕССИЯ')
-    print(f"  Модель        {cfg['model']}")
-    print(f"  Backend       {backend_label()} · remote {remote_access_summary()}")
-    print(
-        f"  Chat          {session.get('dialog_name') or '(без имени)'} | "
-        f"autosave {'ON' if session.get('autosave',True) else 'OFF'} | "
-        f"reasoning {'ON' if trace else 'OFF'}"
-    )
-    print(
-        f"  Tools         {session.get('tools_mode','off')} | "
-        f"files {len(session.get('attachments',[]))} | images {len(session.get('images',[]))}"
-    )
+    if not online:
+        ui_section('ОФЛАЙН')
+        yellow(); ui_print('  BULL не обращается к модели и не показывает выдуманную диагностику.'); white()
+        ui_print('  Ниже — только сохранённые настройки текущей сессии.')
+        ui_print('  Чтобы получить live-статус, откройте «Подключение» и выберите источник моделей.')
+
+    def pair(label,value):
+        ui_print(f"  {tr(label):<14} {value}")
+
+    ui_section('ТЕКУЩАЯ СЕССИЯ')
+    model_value=cfg['model'] if online else f"{cfg['model']} · {tr('не загружена')}"
+    pair('Модель',model_value)
+    pair('Режим',mode.upper())
+    pair('Диалог',session.get('dialog_name') or tr('(без имени)'))
+    pair('Автосохранение','ON' if session.get('autosave',True) else 'OFF')
+    pair('Reasoning','ON' if trace else 'OFF')
+    pair('Инструменты',session.get('tools_mode','off'))
     print()
-    ui_section('РЕСУРСЫ')
+    ui_section('КОНТЕКСТ')
     if frac>=.8: yellow()
     elif frac>=.6: cyan()
     else: green()
-    print(f"  Context  {_terminal_gauge(frac,28)} {frac*100:5.1f}%  ~{used}/{NUM_CTX} tok")
+    ui_print(f"  Context  {_terminal_gauge(frac,28)} {frac*100:5.1f}%  ~{used}/{NUM_CTX} tok")
     white()
 
-    if snap.get('vram_used_mib') is not None and snap.get('vram_total_mib'):
+    if online and snap.get('vram_used_mib') is not None and snap.get('vram_total_mib'):
         vr=snap['vram_used_mib']/snap['vram_total_mib']
         if vr>=.9: yellow()
         else: green()
@@ -13695,37 +13715,33 @@ def dashboard(tp,mode,cfg,trace,path,session,history,summary,archive,stats):
         )
         white()
 
-    print(f"  Profile       ctx {NUM_CTX} | threads {NUM_THREAD} | predict {cfg['num_predict']}")
-    if ACTIVE_BACKEND=='llama_cpp':
+    pair('Профиль',f"ctx {NUM_CTX} | threads {NUM_THREAD} | predict {cfg['num_predict']}")
+    if online and ACTIVE_BACKEND=='llama_cpp':
         st=llama_settings()
-        print(
-            f"  llama.cpp     FA {st.get('flash_attn')} | ngl {st.get('n_gpu_layers')} | "
-            f"spec {st.get('spec_type')} | batch {st.get('batch_size')}/{st.get('ubatch_size')}"
-        )
-    if ti:
-        print('  Hardware      '+ti)
+        pair('llama.cpp',
+             f"FA {st.get('flash_attn')} | ngl {st.get('n_gpu_layers')} | "
+             f"spec {st.get('spec_type')} | batch {st.get('batch_size')}/{st.get('ubatch_size')}")
+    if online and ti:
+        pair('Оборудование',ti)
     print()
-    ui_section('ПОСЛЕДНЯЯ РАБОТА')
+    ui_section('ПОСЛЕДНИЕ СОХРАНЁННЫЕ МЕТРИКИ')
     lm=stats.get('last_meta') or {}
     if lm:
         er=_rate(lm.get('eval_count'),lm.get('eval_duration'))
         linev=f"{er:.1f} tok/s" if er else 'n/a'
         if lm.get('_draft_acceptance') is not None:
             linev+=f" | draft accept {lm['_draft_acceptance']*100:.0f}%"
-        print(f"  Reply         {linev} | {lm.get('eval_count','?')} tok | {lm.get('done_reason','?')}")
+        pair('Ответ',f"{linev} | {lm.get('eval_count','?')} tok | {lm.get('done_reason','?')}")
     else:
-        gray(); print('  Reply         пока нет runtime-метрик'); white()
+        gray(); pair('Ответ',tr('пока нет runtime-метрик')); white()
     if stats.get('last_benchmark'):
-        print('  Benchmark     '+Path(stats['last_benchmark']).name)
+        pair('Benchmark',Path(stats['last_benchmark']).name)
     if stats.get('last_ultimate_cycles'):
-        print(
-            f"  ULTIMATE      cycles {stats.get('last_ultimate_cycles')} | "
-            f"stop {stats.get('last_ultimate_stop','-')}"
-        )
+        pair('ULTIMATE',f"cycles {stats.get('last_ultimate_cycles')} | stop {stats.get('last_ultimate_stop','-')}")
     print()
 
     gray()
-    print('  /menu   /status   /backend doctor   /model   /bench   /help')
+    ui_print('  Полная проверка соединения находится в меню «Подключение → Помощь и диагностика».')
     white()
 
 
@@ -14046,7 +14062,7 @@ def run_startup_regression(force=False):
         }
 
     white()
-    print('Проверка клиента')
+    ui_print('Проверка клиента')
     line()
     if not force:
         cached=_load_startup_regression_cache(identity)
@@ -14143,16 +14159,17 @@ def _startup_regression_failure_excerpt(output,max_lines=32,max_chars=6000):
 def show_startup_regression_failure(result):
     red()
     print()
-    print('Автоматическая проверка клиента не пройдена.')
+    ui_print('Автоматическая проверка клиента не пройдена.')
     white()
-    print('Рабочий режим и benchmark не запускаются, чтобы не получить недостоверные результаты.')
-    print(f"Причина: {result.get('summary') or 'неизвестная ошибка'}")
+    ui_print('Рабочий режим и benchmark не запускаются, чтобы не получить недостоверные результаты.')
+    reason=result.get('summary') or ('unknown error' if get_language()=='en' else 'неизвестная ошибка')
+    ui_print(('Reason: ' if get_language()=='en' else 'Причина: ')+str(reason))
     if result.get('output'):
         line()
         print(_startup_regression_failure_excerpt(result['output']))
         line()
-        print('Полный вывод сохранён в client_debug.log.')
-    print('Можно отдельно повторить проверку двойным кликом по Run-Tests.ps1.')
+        ui_print('Полный вывод сохранён в client_debug.log.')
+    ui_print('Можно отдельно повторить проверку двойным кликом по Run-Tests.ps1.')
     print()
 
 
@@ -14208,6 +14225,9 @@ def _ui_labeled_border(left,label,right,fill='─'):
 def ui_header(title,breadcrumb='',subtitle=''):
     from Shared.bull_llm.presentation import terminal_text
     from Shared.bull_llm.terminal_ui import render_page_mark
+    # A header is a page boundary. Clearing here prevents nested menus and
+    # setup wizards from being appended to the previous screen.
+    clear_console()
     render_page_mark(_agent_core_proxy())
     matrix(); ui_print('━'*min(UI_WIDTH,78)); white()
     ui_print('  '+terminal_text(tr(title,fragments=True)))
@@ -14268,41 +14288,65 @@ def ui_footer(help_topic=None):
     gray(); ui_print(tr('  Введите номер пункта.')); white()
 
 
+def change_ui_language_menu():
+    while True:
+        ui_header('ЯЗЫК ИНТЕРФЕЙСА','Главная / Дополнительно / Язык',
+                  'Выбор сохраняется и применяется сразу')
+        current=get_language()
+        ui_menu_item('1','English','Use English throughout the BULL interface',
+                     'CURRENT' if current=='en' else '')
+        ui_menu_item('2','Русский','Использовать русский язык во всём интерфейсе',
+                     'ТЕКУЩИЙ' if current=='ru' else '')
+        ui_menu_item('0','Назад')
+        choice=read_user_input('Language / Язык [0–2] › ').strip().casefold()
+        if choice in ('0','back',''):
+            return None
+        selected={'1':'en','en':'en','english':'en',
+                  '2':'ru','ru':'ru','rus':'ru','русский':'ru'}.get(choice)
+        if not selected:
+            yellow(); ui_print('Choose 1 or 2 / Выберите 1 или 2.'); white(); time.sleep(.5)
+            continue
+        set_language(selected)
+        try:
+            save_ui_language(selected)
+        except Exception as exc:
+            yellow(); ui_print(('Language changed for this session only: ' if selected=='en' else
+                                'Язык изменён только на этот сеанс: ')+str(exc)); white()
+        return selected
+
+
 def appearance_menu():
     while True:
-        clear_console()
-        ui_header('ВНЕШНИЙ ВИД','Главное меню > Интерфейс','Выбор применяется сразу и сохраняется между запусками')
+        ui_header('ЯЗЫК И ВНЕШНИЙ ВИД','Главная / Дополнительно / Настройки',
+                  'Изменения применяются сразу и сохраняются между запусками')
         ui_status_strip([('тема',UI_THEME_LABELS.get(UI_THEME,UI_THEME),'ok'),
-                         ('язык','English' if get_language()=='en' else 'Русский','ok'),
-                         ('анимация','выкл','ok')])
-        ui_section('ПРЕДПРОСМОТР')
-        matrix(); ui_print('  ███████████████  BULL // BRAND PALETTE PREVIEW'); white()
-        ui_print('  Основной текст и активные пункты меню')
-        gray(); ui_print('  Вторичный текст, пояснения и навигационные подсказки'); white()
-        yellow(); ui_print('  Предупреждение остаётся ярким и имеет текстовую подпись'); white()
-        ui_section('ТЕМА')
+                         ('язык','English' if get_language()=='en' else 'Русский','ok')])
         current=lambda key:'ТЕКУЩАЯ' if UI_THEME==key else ''
-        ui_menu_item('1','Фирменная BULL','Бирюзовый логотип, голубые действия, графитовые пояснения',current('bull_brand') or 'РЕКОМЕНДУЕТСЯ')
-        ui_menu_item('2','Яркая Matrix','Зелёный разделитель, светлый текст и голубые действия',current('matrix_bright'))
-        ui_menu_item('3','Сбалансированная Matrix','Яркие действия, спокойнее разделители и пояснения',current('matrix_balanced'))
-        ui_menu_item('4','Приглушённая Matrix','Прежний затемнённый вид',current('matrix_soft'))
-        ui_menu_item('5','Классическая контрастная','Голубые акценты без зелёного разделителя',current('classic'))
+        ui_menu_item('1','Язык интерфейса','English или Русский')
+        ui_section('ЦВЕТОВАЯ ТЕМА')
+        ui_menu_item('2','Фирменная BULL','Бирюзовый бык, голубые действия и светлый текст',
+                     current('bull_brand') or 'РЕКОМЕНДУЕТСЯ')
+        ui_menu_item('3','Matrix','Зелёный бык и зелёные терминальные акценты',
+                     current('matrix_bright') or ('ТЕКУЩАЯ' if UI_THEME in ('matrix_balanced','matrix_soft') else ''))
+        ui_menu_item('4','Красная BULL','Красный бык, красные действия и светлый текст',current('bull_red'))
+        ui_menu_item('5','Высокая контрастность','Голубые действия и максимально светлые пояснения',current('classic'))
         ui_menu_item('0','Назад','Вернуться к предыдущему экрану')
         if os.environ.get('BULL_UI_THEME','').strip():
             yellow(); ui_print('  ENV override BULL_UI_THEME активен и снова применится при следующем запуске.'); white()
-        ui_print(); ui_footer('интерфейс')
-        choice=read_user_input('Тема [0-5] › ').strip().casefold()
+        choice=read_user_input('Выбор [0–5] › ').strip().casefold()
         if choice in ('0','back',''):
             return None
+        if choice in ('1','language','lang','язык'):
+            change_ui_language_menu()
+            continue
         selected={
-            '1':'bull_brand','bull':'bull_brand','brand':'bull_brand',
-            '2':'matrix_bright','bright':'matrix_bright',
-            '3':'matrix_balanced','balanced':'matrix_balanced',
-            '4':'matrix_soft','soft':'matrix_soft',
+            '2':'bull_brand','bull':'bull_brand','brand':'bull_brand',
+            '3':'matrix_bright','matrix':'matrix_bright','green':'matrix_bright',
+            '4':'bull_red','red':'bull_red','crimson':'bull_red',
             '5':'classic','classic':'classic',
         }.get(choice)
         if not selected:
-            yellow(); ui_print('Выбери 0-5.'); white(); time.sleep(.6); continue
+            yellow(); ui_print('Выберите пункт 0–5.'); white(); time.sleep(.6); continue
         try:
             set_ui_theme(selected,persist=True)
             green(); ui_print('✓ Тема сохранена: '+UI_THEME_LABELS[selected]); white()
@@ -14625,6 +14669,38 @@ Direct SSH допустим как резерв с key authentication.
     if t:
         yellow(); ui_print(f'Неизвестная тема help: {topic}'); white()
     ui_print('Темы: modes | prompts | benchmark | backend | tools | remote | chat | all')
+
+
+def startup_connection_target_text():
+    remote=load_backend_settings().get('target_mode')=='remote'
+    if get_language()=='en':
+        location='Saved remote server' if remote else 'This computer'
+    else:
+        location='Сохранённый удалённый сервер' if remote else 'Этот компьютер'
+    return f'{location} · {backend_label()}'
+
+
+def render_startup_connection_attempt():
+    message='Checking model connection' if get_language()=='en' else 'Проверяю подключение к моделям'
+    gray(); ui_print(f'  {message}: {startup_connection_target_text()} ...'); white()
+
+
+def render_startup_connection_result(connected,version_text=''):
+    target=startup_connection_target_text()
+    if connected:
+        green()
+        message='Connected' if get_language()=='en' else 'Подключено'
+        ui_print(f'  ✓ {message}: {target}'+(f' · {version_text}' if version_text else ''))
+        white()
+        return
+    yellow()
+    if get_language()=='en':
+        ui_print(f'  ! No model connection. Selected: {target}.')
+        ui_print('  Start the selected backend or open Connection in the main menu. BULL otherwise works offline.')
+    else:
+        ui_print(f'  ! Нет соединения с моделями. Выбрано: {target}.')
+        ui_print('  Запустите выбранный backend или откройте «Подключение». Остальные функции BULL доступны офлайн.')
+    white()
 
 
 def startup_home_menu(backend_version,regression_summary):
@@ -15851,19 +15927,19 @@ def main():
             return 2
 
         initialize_backend_from_settings()
-        gray(); print(f'  Подключение: {backend_label()} ...',end='',flush=True); white()
+        render_startup_connection_attempt()
         try:
             tp,backend_info=connect_active_backend()
             backend_ready=True
             v=version(2) or {'version':backend_info.get('version','?')}
-            green(); print(f"\r  ✓ {backend_label()} {v.get('version','?')} connected                       "); white()
+            render_startup_connection_result(True,v.get('version','?'))
             time.sleep(.3)
         except Exception as first_error:
             startup_backend_error=str(first_error)
+            append_client_debug('STARTUP_BACKEND_OFFLINE '+startup_backend_error)
             backend_info={'backend':ACTIVE_BACKEND,'version':'offline','status':'offline'}
             v={'version':'offline'}
-            yellow(); print(f'\n  ! {backend_label()} сейчас недоступен: {first_error}'); white()
-            print('  Главное меню доступно офлайн. Подключение понадобится только для чата или нового benchmark.')
+            render_startup_connection_result(False)
             time.sleep(.6)
 
         # A bootstrap model is needed only for shared state/restoration.
@@ -16329,7 +16405,8 @@ def main():
                 status_text(tp,mode,cfg,trace,path,session,history,summary,archive,stats)
                 continue
             if u in ('/dashboard','/dash'):
-                dashboard(tp,mode,cfg,trace,path,session,history,summary,archive,stats); continue
+                dashboard(tp,mode,cfg,trace,path,session,history,summary,archive,stats,
+                          backend_ready=backend_ready,backend_error=startup_backend_error); continue
             if u=='/selftest':
                 selftest(tp); continue
             if u=='/paths':
