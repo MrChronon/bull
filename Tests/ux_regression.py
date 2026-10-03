@@ -87,7 +87,7 @@ class UXTests(unittest.TestCase):
 
     def test_versioned_startup_splash_is_safe_and_uses_stage_progress(self):
         from Shared.bull_llm import startup_splash
-        splash = startup_splash.load_splash('v0.27.0.1')
+        splash = startup_splash.load_splash('v0.28.0.0')
         self.assertIsNotNone(splash)
         plain = startup_splash._SGR_ESCAPE_RE.sub('', splash)
         self.assertNotIn('\x1b', plain)
@@ -99,10 +99,10 @@ class UXTests(unittest.TestCase):
         with patch.object(self.core, 'clear_console'), patch.object(self.core, 'white'), \
                 patch.object(self.core, 'gray'), contextlib.redirect_stdout(out):
             self.assertTrue(startup_splash.render(
-                self.core, 'v0.27.0.1', 'Запуск офлайн-регрессии', 2, 3
+                self.core, 'v0.28.0.0', 'Запуск офлайн-регрессии', 2, 3
             ))
         text = out.getvalue()
-        self.assertIn('BULL v0.27.0.1', text)
+        self.assertIn('BULL v0.28.0.0', text)
         self.assertIn('Запуск офлайн-регрессии', text)
         self.assertIn('2/3', text)
 

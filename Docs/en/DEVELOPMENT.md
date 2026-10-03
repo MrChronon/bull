@@ -14,11 +14,10 @@ readable through compatibility adapters and are never silently rewritten.
 
 ## Development roadmap
 
-The current release is v0.27.0.1. The following stages are planned, not shipped:
+The current release is v0.28.0.0. The following stages are planned, not shipped:
 
 | Stage | Target | Purpose |
 | --- | --- | --- |
-| U1 — Clear Choice | v0.28.0.0 | Correct recommendations and YAML checks; put decision cards first; improve installation, task templates and colleague exports |
 | U2 — Quick Compare | v0.28.1.0 | A separate candidate short pack, explicit language coverage and a confirmatory run |
 | Reliable Runs — T5.3/T5.2 | TBD | Full interruption recovery coverage, followed by hardware comparability and additional measurements |
 | P1 — Anywhere | TBD | Linux/macOS client after extracting the production backend/transport path |

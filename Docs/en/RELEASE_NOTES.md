@@ -1,27 +1,22 @@
-# BULL v0.27.0.1 — Simple Experience
+# BULL v0.28.0.0 — Clear Choice
 
-v0.27 makes the normal workflow task-oriented: connect to models, compare them,
-read the result, or open chat. Expert commands, server deployment, Agent Lab, and
-GPU Lab remain available under advanced and experimental sections.
+This release improves the trustworthiness of choosing among installed local
+models. It does not change built-in benchmark prompts, built-in scorers, or the
+inference and recovery runtime pipeline.
 
 ## Highlights
 
-- red public-release presentation for the repository wordmark, signal panel and social preview; the locked source logo remains unchanged;
-- four-item Home menu with clear local and remote connection routes;
-- language selected once on first launch and changed later in settings;
-- BULL, Matrix, Red, and high-contrast terminal themes;
-- canonical full-color bull mark and expanded name on every navigation page;
-- reusable `.txt` and strict `.yaml` tasks under `UserTests`;
-- concise in-app comparison after a run;
-- transparent Quality, Speed, Balance, Low-memory, and custom-weight choices;
-- relative quality/speed map in terminal and HTML;
-- explicit share-safe summary and private raw-artifact boundaries;
-- localized recovery guidance without leaking legacy-language backend exceptions;
-- atomic checkpoint/resume with completed-run preservation.
-
-Native model quality and final system quality remain separate. Recovery, runtime,
-and transport metrics do not modify native quality. Built-in prompts, scorers,
-and the inference pipeline were not rewritten as part of the Simple Experience UI.
+- Equal decision utilities display equal candidates instead of selecting a name
+  arbitrarily.
+- Native score mean and a conservative lower 95% confidence bound are clearly
+  separate values.
+- Missing VRAM is shown as unknown; **Low memory** stays unavailable without
+  comparable measurements.
+- New YAML tasks use strict `user_contract_v2`; old v1 artifacts remain readable
+  without silent rescoring.
+- Three synthetic, self-contained examples are included for extraction,
+  structured calculation, and business translation.
+- A new versioned red BULL splash is shown during the verified startup gate.
 
 The public bundle contains no models, chats, benchmark results, runtime state,
-private connections, keys, tokens, or local logs.
+private connections, keys, tokens, endpoints, or local logs.

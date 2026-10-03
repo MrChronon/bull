@@ -14,7 +14,7 @@ $env:CUA_DD_PYTHON_TOOL_WARM_SPREADSHEET_RUNTIME = "0"
 $env:CUA_DD_INIT_ARTIFACT_TOOL_V2_RECORD_OPERATIONS = "0"
 $env:CUA_DD_INIT_ARTIFACT_TOOL_V2 = "0"
 
-$client = Join-Path $PSScriptRoot "bull_client_v0.27.0.1.py"
+$client = Join-Path $PSScriptRoot "bull_client_v0.28.0.0.py"
 $test = Join-Path $PSScriptRoot "Tests\benchmark_regression.py"
 
 if (-not (Test-Path -LiteralPath $client)) { throw "Client file not found: $client" }
@@ -32,7 +32,7 @@ if (Get-Command python -ErrorAction SilentlyContinue) {
 }
 
 $oldPycachePrefix = $env:PYTHONPYCACHEPREFIX
-$testPycache = Join-Path ([IO.Path]::GetTempPath()) ('bull-v02700-pycache-' + [guid]::NewGuid().ToString('N'))
+$testPycache = Join-Path ([IO.Path]::GetTempPath()) ('bull-v02800-pycache-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $testPycache -Force | Out-Null
 $env:PYTHONPYCACHEPREFIX = $testPycache
 try {

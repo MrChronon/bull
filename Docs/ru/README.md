@@ -17,5 +17,4 @@ BULL — Benchmarking & Usage of Local LLMs — сравнивает локал�
 - [Безопасность](SECURITY.md)
 - [Экспериментальные функции](EXPERIMENTAL.md)
 - [Разработка](DEVELOPMENT.md)
-- [Описание релиза v0.27](RELEASE_NOTES.md)
-
+- [Описание релиза v0.28](RELEASE_NOTES.md)

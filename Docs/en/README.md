@@ -17,5 +17,4 @@ Additional guides:
 - [Security](SECURITY.md)
 - [Experimental features](EXPERIMENTAL.md)
 - [Development](DEVELOPMENT.md)
-- [v0.27 release notes](RELEASE_NOTES.md)
-
+- [v0.28 release notes](RELEASE_NOTES.md)

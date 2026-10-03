@@ -1,8 +1,8 @@
 schema: bull-llm-ai-context
 schema_version: 1
-document_version: 0.27.0.1
-client_version: v0.27.0.1
-documentation_version: v0.27.0.1
+document_version: 0.28.0.0
+client_version: v0.28.0.0
+documentation_version: v0.28.0.0
 updated: 2026-10-03
 language: ru
 
@@ -10,7 +10,7 @@ project:
   name: BULL
   qualified_name: BULL — Benchmark Lab
   legacy_name: Local LLM
-  release: v0.27.0.1
+  release: v0.28.0.0
   frozen_stable_baseline: v17.3.2
   platform:
     primary: Windows 11
@@ -42,16 +42,16 @@ agent_rules:
     - prefer small verifiable commits in a clean repository
 
 release_layout:
-  bundle: BULL-v0.27.0.1-Bundle
-  core: bull_client_v0.27.0.1.py
+  bundle: BULL-v0.28.0.0-Bundle
+  core: bull_client_v0.28.0.0.py
   launchers:
-    client: BULL-v0.27.0.1.cmd
-    benchmark_lab: BULL-Benchmark-Lab-v0.27.0.1.cmd
-    agent_lab: BULL-Agent-Lab-v0.27.0.1.cmd
+    client: BULL-v0.28.0.0.cmd
+    benchmark_lab: BULL-Benchmark-Lab-v0.28.0.0.cmd
+    agent_lab: BULL-Agent-Lab-v0.28.0.0.cmd
   apps:
-    client: Apps/bull_client_app_v0_27_0_1.py
-    benchmark_lab: Apps/benchmark_lab_v0_27_0_1.py
-    agent_lab: Apps/agent_benchmark_v0_27_0_1.py
+    client: Apps/bull_client_app_v0_28_0_0.py
+    benchmark_lab: Apps/benchmark_lab_v0_28_0_0.py
+    agent_lab: Apps/agent_benchmark_v0_28_0_0.py
   public_namespace: Shared/bull_llm
   shared_package: Shared/bull_llm
   schemas_directory: Schemas
@@ -652,8 +652,8 @@ agent_benchmark:
   maturity: MVP
   module: Shared/bull_llm/agent_benchmark
   guide: Docs/en/EXPERIMENTAL.md and Docs/ru/EXPERIMENTAL.md
-  entrypoint: Apps/agent_benchmark_v0_27_0_1.py
-  launcher: BULL-Agent-Lab-v0.27.0.1.cmd
+  entrypoint: Apps/agent_benchmark_v0_28_0_0.py
+  launcher: BULL-Agent-Lab-v0.28.0.0.cmd
   menu_path: More > Experimental features > Agent Benchmark
   config_schema: local-llm-agent-config
   run_schema: local-llm-agent-run
@@ -686,7 +686,7 @@ agent_benchmark:
 
 hardening_audit:
   version: v0.19.0.1 (retained)
-  report: Docs/AUDIT_v0.27.0.1.md
+  report: Docs/AUDIT_v0.28.0.0.md
   new_tests: Tests/hardening_regression.py
   benchmark_prompts_changed: false
   scorer_functions_changed: false
@@ -927,7 +927,7 @@ planned_roadmap:
   source: Docs/BULL_TRANSITION_ROADMAP.md
   revision: '1.2'
   approved_on: '2026-10-03'
-  scope: approved priorities and acceptance criteria; U1 is in progress, later stages are not implemented features
+  scope: approved priorities and acceptance criteria; U1 is released, later stages are not implemented features
   product_goal: help users choose installed models for their own tasks using trustworthy quality and timing evidence
   interface: terminal first; reuse the existing four-action Home
   delivery_order: [U1, U2, reliable_runs, P1]
@@ -935,7 +935,7 @@ planned_roadmap:
     U1:
       name: BULL Clear Choice
       target_version: v0.28.0.0
-      status: in_progress
+      status: released
       priorities:
         - correct tied recommendations and distinguish native mean from conservative decision values
         - show decision cards first in terminal and HTML with shared data and explicit gate policy
@@ -956,8 +956,7 @@ planned_roadmap:
         - substring checks are not presented as semantic or linguistic evaluation
         - new users can create a task compare models and export without expert menus
         - startup regression duration is measured before deciding on startup-gate changes
-      open_findings_from_v0_27_0_1:
-        - bundled numeric example lacks source data for its expected answer
+      open_findings_from_v0_27_0_1: []
       resolved_in_development:
         - equal decision utilities now return equal candidates rather than model-name tie breakers
         - observed Native mean and conservative lower CI are now separate decision-support fields
