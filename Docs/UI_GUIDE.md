@@ -1,4 +1,4 @@
-# Интерфейс BULL v0.27.0.0
+# Интерфейс BULL v0.27.0.1
 
 [Руководство на русском](ru/USER_GUIDE.md) · [English user guide](en/USER_GUIDE.md)
 

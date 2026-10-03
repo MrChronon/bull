@@ -1,8 +1,8 @@
-# BULL v0.27.0.0 — модель безопасности
+# BULL v0.27.0.1 — модель безопасности
 
 [Безопасность на русском](ru/SECURITY.md) · [Security in English](en/SECURITY.md)
 
-## Результат аудита v0.27.0.0
+## Результат аудита v0.27.0.1
 
 v0.27 сохраняет границу BULL Evidence. `*_evidence_private.json`
 содержит исходные records и считается приватным; `*_evidence_share_safe.json`
@@ -15,7 +15,7 @@ legacy artifacts создаёт новый файл и не переписыва
 числа тестов и критериев. Это не делает сами prompts доверенными и не превращает
 keyword checks в семантический verifier. `.txt` всегда требует ручной оценки.
 
-См. `AUDIT_v0.27.0.0.md`. Предыдущий hardening сохранил блокировку redirects
+См. `AUDIT_v0.27.0.1.md`. Предыдущий hardening сохранил блокировку redirects
 Ollama, ограничения HTTP bodies,
 неверное завершение stream, terminal controls при выводе модели, коллизии временных
 файлов и обходы privacy gate через непроверенные форматы/размеры. Server -WhatIf

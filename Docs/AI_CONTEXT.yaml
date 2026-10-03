@@ -1,8 +1,8 @@
 schema: bull-llm-ai-context
 schema_version: 1
-document_version: 0.27.0.0
-client_version: v0.27.0.0
-documentation_version: v0.27.0.0
+document_version: 0.27.0.1
+client_version: v0.27.0.1
+documentation_version: v0.27.0.1
 updated: 2026-10-03
 language: ru
 
@@ -10,7 +10,7 @@ project:
   name: BULL
   qualified_name: BULL — Benchmark Lab
   legacy_name: Local LLM
-  release: v0.27.0.0
+  release: v0.27.0.1
   frozen_stable_baseline: v17.3.2
   platform:
     primary: Windows 11
@@ -42,16 +42,16 @@ agent_rules:
     - prefer small verifiable commits in a clean repository
 
 release_layout:
-  bundle: BULL-v0.27.0.0-Bundle
-  core: bull_client_v0.27.0.0.py
+  bundle: BULL-v0.27.0.1-Bundle
+  core: bull_client_v0.27.0.1.py
   launchers:
-    client: BULL-v0.27.0.0.cmd
-    benchmark_lab: BULL-Benchmark-Lab-v0.27.0.0.cmd
-    agent_lab: BULL-Agent-Lab-v0.27.0.0.cmd
+    client: BULL-v0.27.0.1.cmd
+    benchmark_lab: BULL-Benchmark-Lab-v0.27.0.1.cmd
+    agent_lab: BULL-Agent-Lab-v0.27.0.1.cmd
   apps:
-    client: Apps/bull_client_app_v0_27_0_0.py
-    benchmark_lab: Apps/benchmark_lab_v0_27_0_0.py
-    agent_lab: Apps/agent_benchmark_v0_27_0_0.py
+    client: Apps/bull_client_app_v0_27_0_1.py
+    benchmark_lab: Apps/benchmark_lab_v0_27_0_1.py
+    agent_lab: Apps/agent_benchmark_v0_27_0_1.py
   public_namespace: Shared/bull_llm
   shared_package: Shared/bull_llm
   schemas_directory: Schemas
@@ -645,8 +645,8 @@ agent_benchmark:
   maturity: MVP
   module: Shared/bull_llm/agent_benchmark
   guide: Docs/en/EXPERIMENTAL.md and Docs/ru/EXPERIMENTAL.md
-  entrypoint: Apps/agent_benchmark_v0_27_0_0.py
-  launcher: BULL-Agent-Lab-v0.27.0.0.cmd
+  entrypoint: Apps/agent_benchmark_v0_27_0_1.py
+  launcher: BULL-Agent-Lab-v0.27.0.1.cmd
   menu_path: More > Experimental features > Agent Benchmark
   config_schema: local-llm-agent-config
   run_schema: local-llm-agent-run
@@ -679,7 +679,7 @@ agent_benchmark:
 
 hardening_audit:
   version: v0.19.0.1 (retained)
-  report: Docs/AUDIT_v0.27.0.0.md
+  report: Docs/AUDIT_v0.27.0.1.md
   new_tests: Tests/hardening_regression.py
   benchmark_prompts_changed: false
   scorer_functions_changed: false
@@ -848,7 +848,7 @@ t5_1_release:
 
 v0_27_release:
   name: BULL Simple Experience
-  version: v0.27.0.0
+  version: v0.27.0.1
   status: implemented_release_candidate
   scope: terminal usability, user-owned tasks, decision support, and report access
   main_navigation:

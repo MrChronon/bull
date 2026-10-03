@@ -1,4 +1,4 @@
-# BULL v0.27.0.0 — Simple Experience
+# BULL v0.27.0.1 — Simple Experience
 
 v0.27 makes the normal workflow task-oriented: connect to models, compare them,
 read the result, or open chat. Expert commands, server deployment, Agent Lab, and

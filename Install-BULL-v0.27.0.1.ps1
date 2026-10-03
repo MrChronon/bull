@@ -20,8 +20,8 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $base = $PSScriptRoot
-$client = Join-Path $base 'bull_client_v0.27.0.0.py'
-$shortcut = Join-Path $base 'Install-BULL-v0.27.0.0-Shortcut.ps1'
+$client = Join-Path $base 'bull_client_v0.27.0.1.py'
+$shortcut = Join-Path $base 'Install-BULL-v0.27.0.1-Shortcut.ps1'
 $nodeInstaller = Join-Path $base 'Server\Install-BULL-Node.ps1'
 $keyInstaller = Join-Path $base 'Client\New-BULL-ClientKey.ps1'
 
@@ -42,7 +42,7 @@ function Resolve-Python {
 
 if (-not $Role) {
     if ($NonInteractive) { throw '-Role is required with -NonInteractive.' }
-    Write-Host 'BULL v0.27.0.0 platform installer' -ForegroundColor Green
+    Write-Host 'BULL v0.27.0.1 platform installer' -ForegroundColor Green
     Write-Host '  1. Client      - connect to local or remote models'
     Write-Host '  2. Server      - OpenSSH + Ollama test node'
     Write-Host '  3. AllInOne    - client and local server on this PC'

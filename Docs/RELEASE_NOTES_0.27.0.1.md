@@ -1,4 +1,4 @@
-# BULL v0.27.0.0 — Simple Experience
+# BULL v0.27.0.1 — Simple Experience
 
 v0.27 makes the terminal application easier to learn and turns benchmark output
 into an immediate model-selection aid. Existing expert and experimental
@@ -58,9 +58,9 @@ Recommendations are relative to one run and are not a universal leaderboard.
 
 ## First run
 
-1. Verify and extract `BULL-v0.27.0.0-Bundle.zip`.
-2. Run `Install-BULL-v0.27.0.0.cmd`.
-3. Start `BULL-v0.27.0.0.cmd`.
+1. Verify and extract `BULL-v0.27.0.1-Bundle.zip`.
+2. Run `Install-BULL-v0.27.0.1.cmd`.
+3. Start `BULL-v0.27.0.1.cmd`.
 4. Choose English or Русский.
 5. Select **Compare models** and use the standard comparison, or put a copied
    template in `UserTests` for a task-specific comparison.

@@ -14,8 +14,8 @@ $env:CUA_DD_PYTHON_TOOL_WARM_SPREADSHEET_RUNTIME = "0"
 $env:CUA_DD_INIT_ARTIFACT_TOOL_V2_RECORD_OPERATIONS = "0"
 $env:CUA_DD_INIT_ARTIFACT_TOOL_V2 = "0"
 
-$expectedVersion = "v0.27.0.0"
-$client = Join-Path $PSScriptRoot "bull_client_v0.27.0.0.py"
+$expectedVersion = "v0.27.0.1"
+$client = Join-Path $PSScriptRoot "bull_client_v0.27.0.1.py"
 if (-not (Test-Path -LiteralPath $client)) { throw "Mandatory client missing: $client" }
 
 $code = Get-Content -LiteralPath $client -Raw -Encoding UTF8
@@ -36,8 +36,8 @@ $required = @(
     "Docs\CODE_AUDIT.md",
     "Docs\SECURITY.md",
     "Docs\PUBLIC_RELEASE_CHECKLIST.md",
-    "Docs\CHANGELOG_v0.27.0.0.md",
-    "Docs\RELEASE_NOTES_0.27.0.0.md",
+    "Docs\CHANGELOG_v0.27.0.1.md",
+    "Docs\RELEASE_NOTES_0.27.0.1.md",
     "Docs\MIGRATION_TO_BULL.md",
     "README.md",
     "README_RU.md",
@@ -96,10 +96,10 @@ $required = @(
     "Shared\bull_llm\storage.py",
     "Shared\bull_llm\presentation.py",
     "Shared\bull_llm\i18n.py",
-    "Docs\AUDIT_v0.27.0.0.md",
+    "Docs\AUDIT_v0.27.0.1.md",
     "Docs\AGENT_BENCHMARK.md",
-    "Apps\agent_benchmark_v0_27_0_0.py",
-    "BULL-Agent-Lab-v0.27.0.0.cmd",
+    "Apps\agent_benchmark_v0_27_0_1.py",
+    "BULL-Agent-Lab-v0.27.0.1.cmd",
     "Schemas\agent_config_v1.schema.json",
     "Schemas\agent_run_v1.schema.json",
     "Shared\bull_llm\agent_benchmark\contracts.py",
@@ -113,8 +113,8 @@ $required = @(
     "Tests\Fixtures\ru_language_stress_sanitized_v3.json",
     "Tests\Fixtures\benchmark_scorer_v3.json",
     "Apps\_bootstrap.py",
-    "Apps\benchmark_lab_v0_27_0_0.py",
-    "Apps\bull_client_app_v0_27_0_0.py",
+    "Apps\benchmark_lab_v0_27_0_1.py",
+    "Apps\bull_client_app_v0_27_0_1.py",
     "Shared\bull_llm\__init__.py",
     "Shared\bull_llm\schemas.py",
     "Shared\bull_llm\profiles.py",
@@ -137,12 +137,12 @@ $required = @(
     "backend_settings.json",
     "model_profiles.json",
     "benchmark_profiles.json",
-    "BULL-v0.27.0.0.cmd",
-    "BULL-Benchmark-Lab-v0.27.0.0.cmd",
-    "BULL-v0.27.0.0.ps1",
-    "BULL-v0.27.0.0.ico",
-    "BULL-v0.27.0.0.png",
-    "BULL-v0.27.0.0.svg",
+    "BULL-v0.27.0.1.cmd",
+    "BULL-Benchmark-Lab-v0.27.0.1.cmd",
+    "BULL-v0.27.0.1.ps1",
+    "BULL-v0.27.0.1.ico",
+    "BULL-v0.27.0.1.png",
+    "BULL-v0.27.0.1.svg",
     "Assets\Brand\bull-mark.svg",
     "Assets\Brand\bull-mark-light.svg",
     "Assets\Brand\bull-mark-mono.svg",
@@ -174,14 +174,14 @@ $required = @(
     "Assets\Brand\github-social-preview.png",
     "Assets\Brand\README.md",
     "Tools\build_brand_assets.py",
-    "Install-BULL-v0.27.0.0-Shortcut.ps1",
-    "Install-BULL-v0.27.0.0.ps1",
-    "Install-BULL-v0.27.0.0.cmd",
+    "Install-BULL-v0.27.0.1-Shortcut.ps1",
+    "Install-BULL-v0.27.0.1.ps1",
+    "Install-BULL-v0.27.0.1.cmd",
     "Server\Install-BULL-Node.ps1",
     "Server\Test-BULL-RemoteReadiness.ps1",
     "Server\connection.template.json",
     "Client\New-BULL-ClientKey.ps1",
-    "BULL-v0.27.0.0-README.txt",
+    "BULL-v0.27.0.1-README.txt",
     "Schemas\bull_benchmark_pack_manifest_v1.schema.json",
     "Schemas\bull_benchmark_record_v1.schema.json",
     "Schemas\bull_benchmark_summary_v1.schema.json",
@@ -230,7 +230,7 @@ if ($ai -notmatch ('documentation_version:\s*["'']?' + [regex]::Escape($version)
 Write-Host "Documentation gate: OK" -ForegroundColor Green
 
 $brandSvgs = @(
-    'BULL-v0.27.0.0.svg',
+    'BULL-v0.27.0.1.svg',
     'Assets\Brand\bull-logo-canonical.svg',
     'Assets\Brand\bull-mark.svg',
     'Assets\Brand\bull-mark-light.svg',
@@ -255,7 +255,7 @@ if ($brandLock.schema -ne 'bull-brand-lock' -or $brandLock.schema_version -ne 1 
     $canonicalHash -ne ([string]$brandLock.source_sha256).ToLowerInvariant()) {
     throw 'Canonical BULL logo or brand lock changed without approval.'
 }
-$iconBytes = [IO.File]::ReadAllBytes('BULL-v0.27.0.0.ico')
+$iconBytes = [IO.File]::ReadAllBytes('BULL-v0.27.0.1.ico')
 if ($iconBytes.Length -lt 6 -or $iconBytes[0] -ne 0 -or $iconBytes[1] -ne 0 -or
     $iconBytes[2] -ne 1 -or $iconBytes[3] -ne 0) {
     throw 'BULL Windows icon has an invalid ICO header.'
@@ -314,16 +314,16 @@ if ($LASTEXITCODE -ne 0) { throw "Public release audit failed with code $LASTEXI
 
 # Exact obsolete-version gate.
 $allowedVersioned = @(
-    "bull_client_v0.27.0.0.py",
-    "BULL-v0.27.0.0.cmd",
-    "BULL-v0.27.0.0.ps1",
-    "BULL-v0.27.0.0.ico",
-    "BULL-v0.27.0.0.png",
-    "BULL-v0.27.0.0.svg",
-    "BULL-v0.27.0.0-README.txt",
-    "Install-BULL-v0.27.0.0-Shortcut.ps1",
-    "Install-BULL-v0.27.0.0.ps1",
-    "Install-BULL-v0.27.0.0.cmd"
+    "bull_client_v0.27.0.1.py",
+    "BULL-v0.27.0.1.cmd",
+    "BULL-v0.27.0.1.ps1",
+    "BULL-v0.27.0.1.ico",
+    "BULL-v0.27.0.1.png",
+    "BULL-v0.27.0.1.svg",
+    "BULL-v0.27.0.1-README.txt",
+    "Install-BULL-v0.27.0.1-Shortcut.ps1",
+    "Install-BULL-v0.27.0.1.ps1",
+    "Install-BULL-v0.27.0.1.cmd"
 )
 $obsolete = Get-ChildItem -LiteralPath . -File | Where-Object {
     ($_.Name -match '^(bull_client_v|BULL-v|Install-BULL-v)') -and

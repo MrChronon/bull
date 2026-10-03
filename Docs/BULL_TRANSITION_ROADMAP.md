@@ -6,7 +6,7 @@
 
 **Дата:** 2026-09-28
 
-**Текущий продукт:** BULL v0.27.0.0
+**Текущий продукт:** BULL v0.27.0.1
 
 **Замороженная baseline:** v17.3.2
 
@@ -369,7 +369,7 @@ cross-model прогона и второго человеческого review.
 - [x] critical failures содержат evidence/reason и требуют manual review;
 - [x] CHAT Core, recovery и inference runtime не изменены.
 
-### UX Gate — Simple Experience, v0.27.0.0
+### UX Gate — Simple Experience, v0.27.0.1
 
 **Статус:** реализован как обязательный пользовательский этап перед T5.2.
 

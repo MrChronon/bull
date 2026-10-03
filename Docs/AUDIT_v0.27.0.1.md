@@ -1,4 +1,4 @@
-# Public release audit — BULL v0.27.0.0
+# Public release audit — BULL v0.27.0.1
 
 ## Scope
 

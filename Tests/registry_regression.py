@@ -49,7 +49,7 @@ def _policy(mod) -> RegistryPolicy:
     scorers = {"none"}
     scorers.update(str(row.get("score_type") or "none") for row in mod.builtin_benchmarks().values())
     return RegistryPolicy(
-        engine_version="0.27.0.0",
+        engine_version="0.27.0.1",
         runner_refs=frozenset({"single_turn_v1"}),
         scorer_refs=frozenset(scorers),
         verifier_refs=frozenset({"benchmark_contract_v1"}),
@@ -105,7 +105,7 @@ def _make_pack(
         "description": "Fixture demonstrating a task added without editing the client.",
         "status": "experimental",
         "visibility": visibility,
-        "engine": {"minimum_version": "0.27.0.0"},
+        "engine": {"minimum_version": "0.27.0.1"},
         "license": {"id": "LicenseRef-Test", "name": "Test notice", "file": "LICENSE.txt"},
         "provenance": {"source": "registry regression fixture"},
         "taxonomy": ["custom"],
@@ -148,7 +148,7 @@ def run_suite(mod) -> int:
         assert len(pack.cases) == len(mod.CHAT_CORE_TESTS) == 12
         summary = json.dumps(pack.inspect_summary(), ensure_ascii=False)
         assert '"prompt"' not in summary and '"definition"' not in summary
-        client_source = (ROOT / "bull_client_v0.27.0.0.py").read_text(encoding="utf-8")
+        client_source = (ROOT / "bull_client_v0.27.0.1.py").read_text(encoding="utf-8")
         for command in ("/bench pack list", "/bench pack validate", "/bench pack inspect"):
             assert command in client_source
 
@@ -312,7 +312,7 @@ def run_suite(mod) -> int:
 if __name__ == "__main__":
     import importlib.util
 
-    spec = importlib.util.spec_from_file_location("bull_registry_test_core", ROOT / "bull_client_v0.27.0.0.py")
+    spec = importlib.util.spec_from_file_location("bull_registry_test_core", ROOT / "bull_client_v0.27.0.1.py")
     if spec is None or spec.loader is None:
         raise RuntimeError("cannot load compatibility core")
     core = importlib.util.module_from_spec(spec)
