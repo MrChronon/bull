@@ -14057,7 +14057,7 @@ def run_startup_regression(force=False,progress_callback=None):
                 # terminal presentation is unavailable.
                 pass
 
-    progress('Checking bundled files',1)
+    progress('Проверка состава файлов',1)
     test_path=_startup_regression_path()
     if not test_path.exists():
         return {
@@ -14082,7 +14082,7 @@ def run_startup_regression(force=False,progress_callback=None):
         cached=_load_startup_regression_cache(identity)
         if cached:
             passed=cached['passed']; total=cached['total']
-            progress('Using verified regression cache',3)
+            progress('Используется проверенный кэш регрессии',3)
             green(); print(f'  ✓ Regression {passed}/{total} (cached)'); white()
             return {
                 'ok':True,'summary':f'{passed}/{total}','output':'cached exact-byte regression result',
@@ -14090,7 +14090,7 @@ def run_startup_regression(force=False,progress_callback=None):
             }
 
     gray()
-    progress('Running offline regression',2)
+    progress('Запуск офлайн-регрессии',2)
     print('  Offline regression ...',end='',flush=True)
     white()
 
@@ -14115,7 +14115,7 @@ def run_startup_regression(force=False,progress_callback=None):
 
         if ok:
             _save_startup_regression_cache(identity,passed,total)
-            progress('Regression passed',3)
+            progress('Регрессия пройдена',3)
             green()
             print(f'\r  ✓ Regression {passed}/{total}                              ')
             white()

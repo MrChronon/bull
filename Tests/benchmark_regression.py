@@ -1096,9 +1096,9 @@ def test_startup_regression_reports_truthful_stage_progress():
         result=mod.run_startup_regression(force=True,progress_callback=lambda *args:updates.append(args))
         assert result['ok'] is True
         eq(updates,[
-            ('Checking bundled files',1,3),
-            ('Running offline regression',2,3),
-            ('Regression passed',3,3),
+            ('Проверка состава файлов',1,3),
+            ('Запуск офлайн-регрессии',2,3),
+            ('Регрессия пройдена',3,3),
         ])
     finally:
         mod.subprocess.run=old_run

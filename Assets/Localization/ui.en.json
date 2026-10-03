@@ -4,6 +4,10 @@
   "target_language": "en",
   "translations": {
     "Проверка клиента": "Client check",
+    "Проверка состава файлов": "Checking bundled files",
+    "Используется проверенный кэш регрессии": "Using verified regression cache",
+    "Запуск офлайн-регрессии": "Running offline regression",
+    "Регрессия пройдена": "Regression passed",
     "Автоматическая проверка клиента не пройдена.": "The automatic client check failed.",
     "Рабочий режим и benchmark не запускаются, чтобы не получить недостоверные результаты.": "Chat and benchmarks are disabled to prevent unreliable results.",
     "Полный вывод сохранён в client_debug.log.": "Full output was saved to client_debug.log.",

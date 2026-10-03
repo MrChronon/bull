@@ -99,11 +99,11 @@ class UXTests(unittest.TestCase):
         with patch.object(self.core, 'clear_console'), patch.object(self.core, 'white'), \
                 patch.object(self.core, 'gray'), contextlib.redirect_stdout(out):
             self.assertTrue(startup_splash.render(
-                self.core, 'v0.27.0.1', 'Running offline regression', 2, 3
+                self.core, 'v0.27.0.1', 'Запуск офлайн-регрессии', 2, 3
             ))
         text = out.getvalue()
         self.assertIn('BULL v0.27.0.1', text)
-        self.assertIn('Running offline regression', text)
+        self.assertIn('Запуск офлайн-регрессии', text)
         self.assertIn('2/3', text)
 
     def test_home_is_english_after_language_choice_and_model_text_is_untouched(self):
