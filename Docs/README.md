@@ -1,39 +1,25 @@
-# Документация BULL v0.27.0.0
+# BULL v0.27 documentation
 
-Этот файл — актуальная карта документов. Если инструкция из старого changelog или
-аудита расходится с текущим руководством, приоритет имеют `USER_GUIDE.md`,
-`SECURITY.md` и `AI_CONTEXT.yaml` версии v0.27.0.0.
+[English documentation](en/README.md) · [Документация на русском](ru/README.md)
 
-## Начать работу
+The current documentation is maintained in two equivalent language trees:
 
-- `USER_GUIDE.md` — установка, интерфейс, Client, Benchmark Lab и диагностика.
-- `UI_GUIDE.md` — короткая карта экранов и однозначные пользовательские сценарии.
-- `USER_TESTS.md` — точный формат `.txt`/`.yaml`, критерии и правила prompt authoring.
-- `SSH_QUICKSTART.md` — создать ключ и alias, затем подключиться одним именем.
-- `BACKEND_SETUP.md` — роли Client, Server и AllInOne, Ollama и llama.cpp.
-- `REMOTE_ACCESS.md` — VPN, direct SSH, белый IP и безопасная схема tunnel.
+| Topic | English | Русский |
+| --- | --- | --- |
+| Installation, menus, chat and reports | [User guide](en/USER_GUIDE.md) | [Руководство пользователя](ru/USER_GUIDE.md) |
+| Built-in and user-owned benchmarks | [Benchmarks](en/BENCHMARKS.md) | [Бенчмарки](ru/BENCHMARKS.md) |
+| Local, SSH and Internet connections | [Connections](en/CONNECTIONS.md) | [Подключения](ru/CONNECTIONS.md) |
+| Privacy and threat model | [Security](en/SECURITY.md) | [Безопасность](ru/SECURITY.md) |
+| Agent Lab and GPU Lab | [Experimental features](en/EXPERIMENTAL.md) | [Экспериментальные функции](ru/EXPERIMENTAL.md) |
+| Architecture, tests and release process | [Development](en/DEVELOPMENT.md) | [Разработка](ru/DEVELOPMENT.md) |
+| v0.27 release | [Release notes](en/RELEASE_NOTES.md) | [Описание релиза](ru/RELEASE_NOTES.md) |
 
-## Безопасность и публикация
+`AI_CONTEXT.yaml` is the machine-readable engineering contract used by coding
+agents. It is language-neutral and does not replace the user guides.
 
-- `SECURITY.md` — границы доверия, ключи, host pinning, tools и остаточные риски.
-- `PUBLIC_RELEASE_CHECKLIST.md` — что проверить перед GitHub/release.
-- `AUDIT_v0.27.0.0.md` — текущий аудит Simple Experience, user tests и export boundary.
-- `CODE_AUDIT.md` — текущая верхняя сводка и подробная историческая база.
+## Reference and archive
 
-## Benchmark-разработка
-
-- `BENCHMARK_PACK_AUTHORING.md` — безопасные data-only benchmark packs.
-- `../BenchmarkPacks/bull_ru_dialogue/README.md` — методика candidate pack BULL RU Dialogue.
-- `AGENT_BENCHMARK.md` — Agent Benchmark MVP и его ограничения.
-- `GPU_LAB.md` — экспериментальная Windows + Ollama GPU Lab.
-- `PROMPTING_GUIDE.md` — prompts, версии и воспроизводимость.
-- `RELEASE_NOTES_0.27.0.0.md` — изменения, ограничения и первый запуск v0.27.
-- `BULL_TARGET_ARCHITECTURE.md` и `BULL_TRANSITION_ROADMAP.md` — архитектура и этапы перехода.
-- `AI_CONTEXT.yaml` — машиночитаемый контекст и правила для LLM-разработчика.
-
-## История, не текущая инструкция
-
-Файлы `RELEASE_NOTES_0.21.0.0.md`–`RELEASE_NOTES_0.26.0.0.md`, старые changelog и
-`AUDIT_v0.21.0.0.md`–`AUDIT_v0.26.0.0.md` сохранены для проверки происхождения
-решений. Упомянутые в них имена файлов, namespaces, номера тестов и меню могут быть
-устаревшими. Не используйте их для настройки v0.27.0.0.
+The documents stored directly in `Docs/` provide detailed technical reference,
+design history, audits and earlier release records. Current product behavior and
+menu names are defined by the paired guides above. Files named `AUDIT_*`,
+`CHANGELOG_*` and release notes before v0.27 are immutable historical records.

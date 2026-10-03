@@ -16,7 +16,7 @@ master. Do not redraw, stretch, rotate or recolour the canonical artwork.
 
 Use `bull-mark-on-light.png` or `bull-mark-on-dark.png` when a fixed background is
 needed and `bull-mark-mono.png` where only one colour is available. Use the
-qualified name “BULL — Local LLM Benchmark Lab” on first mention.
+qualified name “BULL — Benchmarking & Usage of Local LLMs” on first mention.
 
 `bull-mark-chafa-full-30.ansi.b64` is the UTF-8/ANSI terminal render generated
 from `bull-mark-512.png` with Chafa 1.18.3 using
@@ -30,3 +30,17 @@ are verified project facts, while the lower section is a conceptual measurement
 map rather than benchmark data or model scores. Update the displayed counts only
 after the corresponding regression, benchmark-pack and artifact contracts have
 been verified.
+
+## Русский
+
+Утверждённый силуэт быка обозначает измерение производительности, внутренние
+узлы — LLM inference, а зелёные элементы рогов — результаты бенчмарков.
+Неизменяемый исходник — `bull-logo-canonical.png`; его контрольная сумма,
+размеры и допустимые области кадрирования записаны в `brand-lock.json`.
+Варианты для релиза воспроизводятся командой `Tools/build_brand_assets.py`.
+
+Терминальный ресурс `bull-mark-chafa-full-30.ansi.b64` получен из
+`bull-mark-512.png` с помощью Chafa 1.18.3. Chafa не входит в поставку и не
+требуется при запуске. Инфографика `readme-signal-panel.svg` содержит только
+проверяемые сведения о проекте; нижняя схема объясняет пространство метрик и
+не является результатом сравнения моделей.

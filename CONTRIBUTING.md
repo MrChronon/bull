@@ -35,8 +35,8 @@ Search existing Issues and Discussions before opening a new thread.
 3. Preserve behavior with regression tests before extracting modules.
 4. Keep native-model metrics separate from client-recovery metrics.
 5. Prefer one verifiable semantic change per pull request.
-6. Update `Docs/USER_GUIDE.md` and `Docs/AI_CONTEXT.yaml` when release behavior
-   changes.
+6. Update the matching `Docs/en` and `Docs/ru` guides plus
+   `Docs/AI_CONTEXT.yaml` when release behavior changes.
 
 Run the relevant gates on Windows:
 
@@ -79,3 +79,15 @@ BULL is released under MIT. By submitting a pull request, you confirm that you
 have the right to contribute the work under the MIT License. External code,
 datasets and benchmark packs require a compatible license and explicit
 provenance.
+
+## Кратко на русском
+
+- Для обсуждения методики используйте Discussions, для воспроизводимого дефекта — Issue.
+- Перед публикацией удалите keys, tokens, endpoints, usernames, личные пути,
+  private prompts, model responses и необработанные логи.
+- Не меняйте benchmark prompt, scorer и runtime pipeline в одном pull request.
+- Добавляйте regression test и обновляйте соответствующие документы в `Docs/en`
+  и `Docs/ru`.
+- Для проверки запустите `Run-Tests.ps1` и
+  `Test-Public-Release.ps1 -AuditReleaseCandidatesOnly`.
+- Отправляя pull request, автор подтверждает право передать изменения по MIT.

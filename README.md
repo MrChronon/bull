@@ -8,16 +8,23 @@
 </p>
 
 <p align="center">
+  <a href="README.md"><strong>English</strong></a> ·
+  <a href="README_RU.md"><strong>Русский</strong></a>
+</p>
+
+<p align="center">
   <a href="https://github.com/MrChronon/bull/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/MrChronon/bull?style=for-the-badge&color=00E6A8&label=release"></a>
   <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/github/license/MrChronon/bull?style=for-the-badge&color=24D6FF"></a>
-  <a href="https://github.com/MrChronon/bull/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/MrChronon/bull/total?style=for-the-badge&color=00E6A8"></a>
+  <a href="https://github.com/MrChronon/bull/releases"><img alt="Release asset downloads" src="https://img.shields.io/github/downloads/MrChronon/bull/total?style=for-the-badge&color=00E6A8&label=release%20downloads"></a>
   <img alt="Windows 11" src="https://img.shields.io/badge/Windows_11-supported-24D6FF?style=for-the-badge&logo=windows11&logoColor=white">
 </p>
 
 <p align="center">
+  <a href="https://github.com/MrChronon/bull/releases/latest/download/BULL-v0.27.0.0-Bundle.zip"><strong>Download BULL v0.27 for Windows</strong></a><br><br>
   <a href="#quick-start">Quick start</a> ·
-  <a href="Docs/USER_GUIDE.md">User guide</a> ·
-  <a href="Docs/BENCHMARK_PACK_AUTHORING.md">Build a benchmark pack</a> ·
+  <a href="Docs/en/USER_GUIDE.md">User guide</a> ·
+  <a href="Docs/ru/USER_GUIDE.md">Руководство</a> ·
+  <a href="Docs/en/BENCHMARKS.md">Build a benchmark</a> ·
   <a href="https://github.com/MrChronon/bull/discussions">Discuss methodology</a> ·
   <a href="CONTRIBUTING.md">Contribute</a>
 </p>
@@ -34,7 +41,7 @@ server**. Run chat, compare selected models, resume interrupted suites, inspect
 offline reports and move a tested profile into the working client.
 
 <p align="center">
-  <img src="Assets/Brand/readme-signal-panel.svg" alt="BULL evaluation signal panel: 379 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases, private and share-safe evidence, and nine separated metric spaces" width="100%">
+  <img src="Assets/Brand/readme-signal-panel.svg" alt="BULL evaluation signal panel: 380 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases, private and share-safe evidence, and nine separated metric spaces" width="100%">
 </p>
 
 ## Why BULL
@@ -75,7 +82,7 @@ quality/task gate, and never become a new benchmark score or universal ranking.
 For your own work, copy a template into [`UserTests`](UserTests). A `.txt` file
 runs the same prompt across selected models without fabricating quality. A
 structured `.yaml` file can declare bounded deterministic checks. See the
-[user-test authoring guide](Docs/USER_TESTS.md).
+[user-test authoring guide](Docs/en/BENCHMARKS.md).
 
 The bundled `bull_chat_core@1.0.0` pack contains the stable 12-case CHAT Core.
 The new `bull_ru_dialogue@1.0.0` candidate adds 10 public parameterized cases for
@@ -129,7 +136,7 @@ flowchart LR
 
 If `ssh bull-home` already works with your key, choose
 **Connections → SSH alias** and enter `bull-home`. See the
-[SSH quick start](Docs/SSH_QUICKSTART.md). Never expose Ollama `11434` or
+[connection guide](Docs/en/CONNECTIONS.md). Never expose Ollama `11434` or
 llama.cpp `8080` directly to the Internet.
 
 ## Reproducible outputs
@@ -146,7 +153,7 @@ output, client assistance and recovery behavior in distinct metric spaces.
 .\Build-Release.ps1
 ```
 
-The current release passes **379/379 offline regressions**, including clean
+The current release passes **380/380 offline regressions**, including clean
 Python without site packages, forced `cp1251`, startup integration, manifest
 hashes and ZIP verification.
 
@@ -175,7 +182,7 @@ Language models are not bundled. Generated-code execution is not an OS sandbox;
 use a disposable VM without secrets or network access for untrusted output.
 Public release gates exclude `Chats`, `Runtime`, `Benchmarks`, `Exports`,
 `Workspace`, keys, endpoints and local logs. Read the
-[security model](Docs/SECURITY.md) before exposing any server role.
+[security model](Docs/en/SECURITY.md) before exposing any server role.
 
 ## Project status
 
@@ -184,7 +191,7 @@ compare, chat, connection and more; adds reusable user-owned tasks; and presents
 transparent model-choice profiles in the terminal and offline HTML. Existing
 expert features remain under advanced/experimental menus. Built-in prompts,
 scorers, recovery and runtime inference behavior remain unchanged. See the
-[release notes](Docs/RELEASE_NOTES_0.27.0.0.md) and
+[release notes](Docs/en/RELEASE_NOTES.md) and
 [documentation index](Docs/README.md).
 
 ## License and naming

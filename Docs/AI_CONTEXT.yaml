@@ -3,7 +3,7 @@ schema_version: 1
 document_version: 0.27.0.0
 client_version: v0.27.0.0
 documentation_version: v0.27.0.0
-updated: 2026-10-02
+updated: 2026-10-03
 language: ru
 
 project:
@@ -212,7 +212,8 @@ ssh_alias_onboarding:
 terminal_brand:
   startup_mark: pre-rendered Chafa 1.18.3 full-color pixel bull at width 30
   display_count: once per process
-  page_mark: complete 11-line theme-coloured bull plus expanded product name on every ui_header
+  page_mark: the same canonical bounded Chafa render plus expanded product name on every ui_header
+  theme_behavior: default preserves the source asset exactly; other themes recolour saturated brand pixels without changing geometry
   source_asset: Assets/Brand/bull-mark-512.png
   render_asset: Assets/Brand/bull-mark-chafa-full-30.ansi.b64
   runtime_chafa_dependency: false
@@ -226,6 +227,15 @@ localization:
   persisted_in: ui_settings.json
   later_change: More -> Language and appearance
   english_catalog: Assets/Localization/ui.en.json
+  current_documentation:
+    index: Docs/README.md
+    english: Docs/en
+    russian: Docs/ru
+    paired_topics: [user_guide, benchmarks, connections, security, experimental, development, release_notes]
+  dynamic_error_policy:
+    - localize recovery guidance at the UI boundary
+    - never echo legacy-language exception text into a different selected language
+    - retain original technical detail in client_debug.log
   excluded_from_translation:
     - benchmark prompts
     - scorers and reference answers
@@ -558,7 +568,7 @@ schemas:
   evidence_provenance: bull-evidence-provenance@1
 
 verification:
-  current_offline_regression: 379/379
+  current_offline_regression: 380/380
   clean_python_no_site_packages: pass
   runtime_third_party_python_dependencies: none_on_windows
   scorer_gold_set: 15/15
@@ -626,10 +636,10 @@ known_limits:
 agent_benchmark:
   maturity: MVP
   module: Shared/bull_llm/agent_benchmark
-  guide: Docs/AGENT_BENCHMARK.md
+  guide: Docs/en/EXPERIMENTAL.md and Docs/ru/EXPERIMENTAL.md
   entrypoint: Apps/agent_benchmark_v0_27_0_0.py
   launcher: BULL-Agent-Lab-v0.27.0.0.cmd
-  menu_path: home > tests (2) > agent (5)
+  menu_path: More > Experimental features > Agent Benchmark
   config_schema: local-llm-agent-config
   run_schema: local-llm-agent-run
   schema_version: 1
@@ -706,8 +716,8 @@ ux_v0_20_0_0:
 
 gpu_lab:
   maturity: experimental v1
-  guide: Docs/GPU_LAB.md
-  menu: home > tests > 7
+  guide: Docs/en/EXPERIMENTAL.md and Docs/ru/EXPERIMENTAL.md
+  menu: More > Experimental features > GPU Lab
   command: /gpu
   module: Shared/bull_llm/gpu_lab
   server: Server/Gpu-Lab-Worker.ps1
@@ -844,7 +854,7 @@ v0_27_release:
     server_setup_on_primary_path: false
   branding:
     startup: full-colour bounded Chafa asset
-    pages: complete theme-coloured bull and expanded BULL name on every ui_header
+    pages: same canonical Chafa geometry and expanded BULL name on every ui_header
   page_transition: ui_header clears the previous terminal page before drawing
   connections:
     visible_groups: [this computer, remote server, tools]
@@ -856,7 +866,7 @@ v0_27_release:
     saved_values_labelled_as_saved: true
   user_tests:
     directory: UserTests
-    guide: Docs/USER_TESTS.md
+    guide: Docs/en/BENCHMARKS.md and Docs/ru/BENCHMARKS.md
     module: Shared/bull_llm/user_tests.py
     formats:
       txt: prompt-only; runtime plus manual review; no automatic quality score

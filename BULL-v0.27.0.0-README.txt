@@ -1,52 +1,52 @@
 BULL v0.27.0.0 — Benchmarking & Usage of Local LLMs
-=========================================
+====================================================
 
-Релиз Simple Experience упрощает основной маршрут: сравнение моделей, чат,
-подключение и дополнительные функции. После теста сводка, профили выбора и
-карта quality/speed доступны прямо в терминале и в автономном HTML.
+ENGLISH
+-------
 
-Свои задачи можно положить в UserTests: .txt не получает выдуманного quality
-score, а строгий .yaml использует только объявленные детерминированные criteria.
+Simple Experience keeps the primary route focused on model comparison, chat,
+connection, and additional features. After a run, the concise comparison,
+decision profiles, and quality/speed map are available in the terminal and the
+offline HTML report.
 
-УСТАНОВКА
----------
+Put reusable tasks in UserTests. A .txt prompt receives runtime measurements and
+manual review without a fabricated quality score. A strict .yaml task uses only
+declared deterministic criteria.
 
-  Install-BULL-v0.27.0.0.cmd
+Install:       Install-BULL-v0.27.0.0.cmd
+Application:   BULL-v0.27.0.0.cmd
+Benchmark Lab: BULL-Benchmark-Lab-v0.27.0.0.cmd
+Agent Lab:     BULL-Agent-Lab-v0.27.0.0.cmd
 
-Основной клиент:
+Documentation: Docs\en\README.md
 
-  BULL-v0.27.0.0.cmd
+РУССКИЙ
+-------
 
-Benchmark Lab:
+Simple Experience оставляет на основном маршруте сравнение моделей, чат,
+подключение и дополнительные функции. После прогона краткая сводка, профили
+выбора и карта качества/скорости доступны в терминале и автономном HTML.
 
-  BULL-Benchmark-Lab-v0.27.0.0.cmd
+Повторно используемые задачи помещаются в UserTests. Для .txt измеряется runtime,
+но не создаётся выдуманный quality score. Строгий .yaml использует только явно
+заданные детерминированные критерии.
 
-Agent Lab:
+Установка:     Install-BULL-v0.27.0.0.cmd
+Приложение:    BULL-v0.27.0.0.cmd
+Benchmark Lab: BULL-Benchmark-Lab-v0.27.0.0.cmd
+Agent Lab:     BULL-Agent-Lab-v0.27.0.0.cmd
 
-  BULL-Agent-Lab-v0.27.0.0.cmd
+Документация: Docs\ru\README.md
 
-В релизе используются только launchers с именем BULL; старые алиасы удалены.
-Подробности: Docs\MIGRATION_TO_BULL.md.
-
-ПРОВЕРКА
---------
+CHECKS / ПРОВЕРКА
+-----------------
 
   Run-Tests.ps1
   Test-Public-Release.ps1 -AuditReleaseCandidatesOnly
 
-Существующие benchmark prompts, scorers, recovery и runtime не изменены; новый
-scorer относится только к пользовательским YAML-контрактам. Chats, Runtime,
-Benchmarks, Exports, Workspace, ключи
-и client_debug.log нельзя публиковать.
+Do not publish / Не публикуйте:
+  Chats, Runtime, Benchmarks, Exports, Workspace, private keys or SSH-ключи,
+  tokens, endpoints, and client_debug.log.
 
-Исходный код BULL распространяется по лицензии MIT. Полный текст: LICENSE.
-Модели, движки и внешние benchmark packs сохраняют собственные лицензии.
-
-Документация:
-
-  Docs\USER_GUIDE.md
-  Docs\RELEASE_NOTES_0.27.0.0.md
-  Docs\USER_TESTS.md
-  Docs\BENCHMARK_PACK_AUTHORING.md
-  Docs\SECURITY.md
-  Docs\AI_CONTEXT.yaml
+BULL source code is licensed under MIT. Models, engines, and external benchmark
+packs keep their own licenses.

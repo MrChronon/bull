@@ -1,5 +1,7 @@
 # BULL v0.27.0.0 — модель безопасности
 
+[Безопасность на русском](ru/SECURITY.md) · [Security in English](en/SECURITY.md)
+
 ## Результат аудита v0.27.0.0
 
 v0.27 сохраняет границу BULL Evidence. `*_evidence_private.json`
