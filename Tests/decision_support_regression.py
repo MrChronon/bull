@@ -65,6 +65,14 @@ class DecisionSupportTests(unittest.TestCase):
         self.assertEqual(point["decision_quality"], .82)
         self.assertEqual(point["decision_quality_basis"], "ci95_low")
 
+    def test_unknown_vram_never_becomes_a_low_memory_recommendation(self):
+        row = dict(model="unknown-memory", chat_native_score=.9, primary_eval_warm_avg=20,
+                   native_task_completion_rate=1.0)
+        result = build_decision_support([row])
+        low_memory = next(item for item in result["profiles"] if item["id"] == "low_memory")
+        self.assertIsNone(low_memory["winner"])
+        self.assertTrue(any("Memory is unknown" in warning for warning in result["warnings"]))
+
 
 if __name__ == "__main__":
     unittest.main()

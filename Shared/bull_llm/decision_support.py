@@ -212,6 +212,10 @@ def build_decision_support(
         warnings.append("Some recommendations use non-CHAT selected-test quality; compare only like-for-like runs.")
     if any(row["decision_quality_basis"] == "ci95_low" for row in prepared):
         warnings.append("Native score is the observed mean; the lower 95% CI is used separately as a conservative decision value.")
+    if any(row["vram_mib"] is None for row in prepared):
+        warnings.append("Memory is unknown for one or more models; the Low memory profile stays unavailable without comparable VRAM measurements.")
+    if any(row["speed"] is None for row in prepared):
+        warnings.append("Speed is unknown for one or more models; profiles requiring speed stay unavailable for those rows.")
     return {"schema": "bull-model-decision-support", "version": 1, "points": prepared, "profiles": results, "warnings": warnings}
 
 

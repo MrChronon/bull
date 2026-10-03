@@ -26,6 +26,8 @@ The terminal and HTML report provide transparent relative choices:
 - custom weights for quality, speed, reliability, and memory.
 
 These choices apply only to the compared models and conditions in that report.
+Unknown VRAM is not treated as low usage: the **Low memory** choice remains
+unavailable until the report has comparable memory measurements.
 
 ## `.txt` user task
 
