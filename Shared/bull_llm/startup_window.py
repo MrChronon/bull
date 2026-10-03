@@ -14,6 +14,7 @@ import re
 
 _ASSET_DIR = Path(__file__).resolve().parents[2] / "Assets" / "Brand"
 _MAX_STAGE_LENGTH = 96
+_MAX_DETAIL_LENGTH = 140
 
 
 def splash_image_path(version: str) -> Path:
@@ -26,6 +27,19 @@ def _stage_label(stage: object) -> str:
     """Keep UI-only stage text bounded and free from control characters."""
     value = " ".join(str(stage or "").split())
     return value[:_MAX_STAGE_LENGTH] or "Starting verification"
+
+
+def _stage_parts(stage: object) -> tuple[str, str]:
+    """Split a bounded, presentation-only stage into heading and detail.
+
+    The startup gate supplies the detail itself; the splash never guesses a
+    test name or invents a progress counter.
+    """
+    lines = [" ".join(line.split()) for line in str(stage or "").splitlines()]
+    lines = [line for line in lines if line]
+    heading = (lines[0] if lines else "Starting verification")[:_MAX_STAGE_LENGTH]
+    detail = " ".join(lines[1:])[:_MAX_DETAIL_LENGTH]
+    return heading, detail
 
 
 def _progress(current: object, total: object) -> tuple[int, int, float]:
@@ -44,9 +58,10 @@ def _progress(current: object, total: object) -> tuple[int, int, float]:
 class _DesktopSplash:
     """Thin Tk wrapper kept private so startup can fail open, never fail closed."""
 
-    def __init__(self, root, stage, bar, *, width: int):
+    def __init__(self, root, stage, detail, bar, *, width: int):
         self._root = root
         self._stage = stage
+        self._detail = detail
         self._bar = bar
         self._width = width
         self._closed = False
@@ -56,7 +71,9 @@ class _DesktopSplash:
             return False
         completed, maximum, fraction = _progress(current, total)
         try:
-            self._stage.configure(text=f"{_stage_label(stage)}  ·  {completed}/{maximum}")
+            heading, detail = _stage_parts(stage)
+            self._stage.configure(text=f"{heading}  ·  {completed}/{maximum}")
+            self._detail.configure(text=detail)
             self._bar.coords("fill", 0, 0, round(self._width * fraction), 8)
             self._root.update_idletasks()
             self._root.update()
@@ -114,7 +131,11 @@ def _create_window(version: str, stage: object, current: object, total: object):
         stage_label = tk.Label(
             panel, text="", fg="#B7C6C8", bg="#111820", font=("Consolas", 9), anchor="w"
         )
-        stage_label.pack(fill="x", padx=16, pady=(0, 8))
+        stage_label.pack(fill="x", padx=16, pady=(0, 2))
+        detail_label = tk.Label(
+            panel, text="", fg="#F4F7F5", bg="#111820", font=("Consolas", 9), anchor="w"
+        )
+        detail_label.pack(fill="x", padx=16, pady=(0, 8))
         bar_width = max(300, image.width() - 32)
         canvas = tk.Canvas(panel, width=bar_width, height=8, bg="#26323A", highlightthickness=0)
         canvas.create_rectangle(0, 0, 0, 8, fill="#FF3C52", outline="", tags="fill")
@@ -124,7 +145,7 @@ def _create_window(version: str, stage: object, current: object, total: object):
         x = max(0, (root.winfo_screenwidth() - root.winfo_reqwidth()) // 2)
         y = max(0, (root.winfo_screenheight() - root.winfo_reqheight()) // 2)
         root.geometry(f"+{x}+{y}")
-        window = _DesktopSplash(root, stage_label, canvas, width=bar_width)
+        window = _DesktopSplash(root, stage_label, detail_label, canvas, width=bar_width)
         window.update(stage, current, total)
         return window
     except Exception:

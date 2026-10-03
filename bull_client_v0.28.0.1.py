@@ -2605,14 +2605,13 @@ _COLOR_ENABLED = False
 UI_WIDTH=78
 UI_MATRIX_RAIL='01001100 01001100 01001101  //  4C 4C 4D  //  SIGNAL LOCKED'
 UI_THEME_SCHEMA='local-llm-ui-settings'
-UI_THEME_VERSION=3
-UI_THEME_DEFAULT='bull_brand'
+UI_THEME_VERSION=4
+UI_THEME_DEFAULT='bull_red'
 UI_THEME_LABELS={
-    'bull_brand':'Фирменная BULL',
-    'matrix_bright':'Яркая Matrix',
+    'bull_red':'Красная BULL',
+    'matrix_bright':'Matrix BULL',
     'matrix_balanced':'Сбалансированная Matrix',
     'matrix_soft':'Приглушённая Matrix',
-    'bull_red':'Красная BULL',
     'classic':'Классическая контрастная',
 }
 UI_THEME_PALETTES={
@@ -2648,7 +2647,9 @@ UI_THEME_PALETTES={
 def normalize_ui_theme(value):
     raw=str(value or '').strip().casefold().replace('-','_')
     aliases={
-        '':'bull_brand','bull':'bull_brand','brand':'bull_brand','bull_brand':'bull_brand',
+        # bull_brand was the old default.  It now migrates to the requested
+        # red BULL presentation without invalidating an existing settings file.
+        '':'bull_red','bull':'bull_red','brand':'bull_red','bull_brand':'bull_red',
         'bright':'matrix_bright','matrix':'matrix_bright','matrix_bright':'matrix_bright',
         'balanced':'matrix_balanced','matrix_balanced':'matrix_balanced',
         'soft':'matrix_soft','dim':'matrix_soft','matrix_soft':'matrix_soft',
@@ -2670,7 +2671,7 @@ def _load_ui_settings_document():
         document=json.loads(p.read_text(encoding='utf-8-sig'))
         if not isinstance(document,dict) or document.get('schema')!=UI_THEME_SCHEMA:
             return {}
-        if int(document.get('version') or 0) not in (1,2,UI_THEME_VERSION):
+        if int(document.get('version') or 0) not in (1,2,3,UI_THEME_VERSION):
             return {}
         return document
     except Exception:
@@ -13557,7 +13558,12 @@ def open_startup_verification_window():
     """
     try:
         from Shared.bull_llm.startup_window import open_startup_window
-        return open_startup_window(APP_VERSION, 'Starting verification', 0, 3)
+        return open_startup_window(
+            APP_VERSION,
+            'Подготовка проверки запуска\nОжидание запуска обязательной проверки',
+            0,
+            3,
+        )
     except Exception:
         return None
 
@@ -14081,7 +14087,7 @@ def run_startup_regression(force=False,progress_callback=None):
                 # terminal presentation is unavailable.
                 pass
 
-    progress('Проверка состава файлов',1)
+    progress('Подготовка проверки запуска\nПроверяются обязательные файлы и манифест регрессии',1)
     test_path=_startup_regression_path()
     if not test_path.exists():
         return {
@@ -14106,7 +14112,7 @@ def run_startup_regression(force=False,progress_callback=None):
         cached=_load_startup_regression_cache(identity)
         if cached:
             passed=cached['passed']; total=cached['total']
-            progress('Используется проверенный кэш регрессии',3)
+            progress('Используется проверенный кэш регрессии\nТекущий набор: точный кэш предыдущей проверки',3)
             green(); print(f'  ✓ Regression {passed}/{total} (cached)'); white()
             return {
                 'ok':True,'summary':f'{passed}/{total}','output':'cached exact-byte regression result',
@@ -14114,7 +14120,7 @@ def run_startup_regression(force=False,progress_callback=None):
             }
 
     gray()
-    progress('Запуск офлайн-регрессии',2)
+    progress('Запуск офлайн-регрессии\nТекущий набор: Tests/benchmark_regression.py',2)
     print('  Offline regression ...',end='',flush=True)
     white()
 
@@ -14139,7 +14145,7 @@ def run_startup_regression(force=False,progress_callback=None):
 
         if ok:
             _save_startup_regression_cache(identity,passed,total)
-            progress('Регрессия пройдена',3)
+            progress('Проверка запуска пройдена\nЗавершён: Tests/benchmark_regression.py',3)
             green()
             print(f'\r  ✓ Regression {passed}/{total}                              ')
             white()
@@ -14464,29 +14470,27 @@ def appearance_menu():
         current=lambda key:'ТЕКУЩАЯ' if UI_THEME==key else ''
         ui_menu_item('1','Язык интерфейса','English или Русский')
         ui_section('ЦВЕТОВАЯ ТЕМА')
-        ui_menu_item('2','Фирменная BULL','Бирюзовый бык, голубые действия и светлый текст',
-                     current('bull_brand') or 'РЕКОМЕНДУЕТСЯ')
-        ui_menu_item('3','Matrix','Зелёный бык и зелёные терминальные акценты',
+        ui_menu_item('2','Красная BULL','Стандартная тема: красный бык, красные действия и светлый текст',
+                     current('bull_red') or 'ПО УМОЛЧАНИЮ')
+        ui_menu_item('3','Matrix BULL','Зелёный бык и зелёные терминальные акценты',
                      current('matrix_bright') or ('ТЕКУЩАЯ' if UI_THEME in ('matrix_balanced','matrix_soft') else ''))
-        ui_menu_item('4','Красная BULL','Красный бык, красные действия и светлый текст',current('bull_red'))
-        ui_menu_item('5','Высокая контрастность','Голубые действия и максимально светлые пояснения',current('classic'))
+        ui_menu_item('4','Высокая контрастность','Голубые действия и максимально светлые пояснения',current('classic'))
         ui_menu_item('0','Назад','Вернуться к предыдущему экрану')
         if os.environ.get('BULL_UI_THEME','').strip():
             yellow(); ui_print('  ENV override BULL_UI_THEME активен и снова применится при следующем запуске.'); white()
-        choice=read_user_input('Выбор [0–5] › ').strip().casefold()
+        choice=read_user_input('Выбор [0–4] › ').strip().casefold()
         if choice in ('0','back',''):
             return None
         if choice in ('1','language','lang','язык'):
             change_ui_language_menu()
             continue
         selected={
-            '2':'bull_brand','bull':'bull_brand','brand':'bull_brand',
+            '2':'bull_red','bull':'bull_red','brand':'bull_red','red':'bull_red','crimson':'bull_red',
             '3':'matrix_bright','matrix':'matrix_bright','green':'matrix_bright',
-            '4':'bull_red','red':'bull_red','crimson':'bull_red',
-            '5':'classic','classic':'classic',
+            '4':'classic','classic':'classic',
         }.get(choice)
         if not selected:
-            yellow(); ui_print('Выберите пункт 0–5.'); white(); time.sleep(.6); continue
+            yellow(); ui_print('Выберите пункт 0–4.'); white(); time.sleep(.6); continue
         try:
             set_ui_theme(selected,persist=True)
             green(); ui_print('✓ Тема сохранена: '+UI_THEME_LABELS[selected]); white()

@@ -19,8 +19,9 @@ launchers open their respective sections directly.
 
 On the first launch, choose English or Russian. This question is shown once.
 Change the saved language or color theme later under **More → Language and
-appearance**. The available themes are BULL turquoise, Matrix green, BULL Red,
-and high contrast.
+appearance**. BULL Red is the default. Matrix BULL is the green alternative;
+high contrast remains available. During the startup check, the separate splash
+shows the active stage and the exact regression-suite file being run.
 
 The client performs an offline regression check before enabling inference. A
 small separate desktop window shows the version, release artwork, and the three

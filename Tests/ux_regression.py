@@ -92,6 +92,10 @@ class UXTests(unittest.TestCase):
         self.assertEqual(startup_window._progress(2, 3), (2, 3, 2 / 3))
         self.assertEqual(startup_window._progress(9, 3), (3, 3, 1.0))
         self.assertEqual(startup_window._stage_label('run\n\tregression'), 'run regression')
+        self.assertEqual(
+            startup_window._stage_parts('Run suite\nCurrent suite: Tests/benchmark_regression.py'),
+            ('Run suite', 'Current suite: Tests/benchmark_regression.py'),
+        )
 
         events = []
         class FakeWindow:
@@ -187,7 +191,7 @@ class UXTests(unittest.TestCase):
                     self.assertEqual(get_language(), expected)
                     document = json.loads(settings.read_text(encoding='utf-8'))
                     self.assertEqual(document['language'], expected)
-                    self.assertEqual(document['version'], 3)
+                    self.assertEqual(document['version'], 4)
             finally:
                 self.core.ui_settings_path = old_path
                 set_language('ru')
@@ -556,7 +560,7 @@ class UXTests(unittest.TestCase):
                 terminal_ui._SGR_ESCAPE_RE.sub('',canonical),
             )
         finally:
-            self.core.set_ui_theme('bull_brand', persist=False)
+            self.core.set_ui_theme('bull_red', persist=False)
 
     def test_offline_dashboard_does_not_claim_a_live_backend_or_probe_telemetry(self):
         out = io.StringIO()

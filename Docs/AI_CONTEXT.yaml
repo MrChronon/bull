@@ -223,7 +223,7 @@ terminal_brand:
     module: Shared/bull_llm/startup_window.py
     asset_pattern: Assets/Brand/splash-{APP_VERSION}.png
     behavior: separate native desktop window during the mandatory startup gate; closes before offline-first connection handling
-    progress: observed startup stages only; no inferred per-test counter
+    progress: observed startup stages only; identifies the exact active regression file without an inferred per-test counter
     runtime_dependencies: Python stdlib Tk only; GUI absence fails open without weakening the gate
     safety: exact versioned local PNG only; no shell, renderer, external URL, or user-provided path
   display_count: once per process
@@ -258,11 +258,11 @@ localization:
     - raw benchmark artifacts
 
 ui_theme:
-  default: bull_brand
-  visible_choices: [bull_brand, matrix, bull_red, high_contrast]
+  default: bull_red
+  visible_choices: [bull_red, matrix_bull, high_contrast]
   brand_colors:
-    primary: '#00E6A8'
-    action: '#24D6FF'
+    primary: '#FF3C52'
+    action: '#FF3C52'
     graphite: '#111820'
     text: '#F4F7F5'
 

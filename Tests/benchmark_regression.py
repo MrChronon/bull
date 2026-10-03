@@ -1096,9 +1096,9 @@ def test_startup_regression_reports_truthful_stage_progress():
         result=mod.run_startup_regression(force=True,progress_callback=lambda *args:updates.append(args))
         assert result['ok'] is True
         eq(updates,[
-            ('Проверка состава файлов',1,3),
-            ('Запуск офлайн-регрессии',2,3),
-            ('Регрессия пройдена',3,3),
+            ('Подготовка проверки запуска\nПроверяются обязательные файлы и манифест регрессии',1,3),
+            ('Запуск офлайн-регрессии\nТекущий набор: Tests/benchmark_regression.py',2,3),
+            ('Проверка запуска пройдена\nЗавершён: Tests/benchmark_regression.py',3,3),
         ])
     finally:
         mod.subprocess.run=old_run
@@ -4975,19 +4975,20 @@ def test_benchmark_scorer_selftest_section_is_mandatory_and_serializable():
     json.dumps(result,ensure_ascii=False)
 
 
-def test_ui_theme_defaults_to_bull_brand_and_persists_language_atomically():
+def test_ui_theme_defaults_to_bull_red_and_migrates_legacy_brand_atomically():
     root=Path(tempfile.mkdtemp()); old_path=mod.ui_settings_path
     old_theme=mod.UI_THEME; old_override=os.environ.pop('BULL_UI_THEME',None)
     try:
         mod.ui_settings_path=lambda:root/'ui_settings.json'
-        eq(mod.normalize_ui_theme(None),'bull_brand')
-        eq(mod.set_ui_theme('bull',persist=True),'bull_brand')
+        eq(mod.normalize_ui_theme(None),'bull_red')
+        eq(mod.normalize_ui_theme('bull_brand'),'bull_red')
+        eq(mod.set_ui_theme('bull',persist=True),'bull_red')
         document=json.loads((root/'ui_settings.json').read_text(encoding='utf-8'))
         eq((document['schema'],document['version'],document['theme'],document['language']),
-           ('local-llm-ui-settings',3,'bull_brand','en'))
+           ('local-llm-ui-settings',4,'bull_red','en'))
         assert not (root/'ui_settings.json.tmp').exists()
         mod.set_ui_theme('matrix_soft',persist=False)
-        eq(mod.load_ui_theme(),'bull_brand')
+        eq(mod.load_ui_theme(),'bull_red')
         mod.set_ui_theme(mod.load_ui_theme(),persist=False)
         palette=mod.ui_theme_palette()
         assert '\033[2;' not in palette['secondary']
@@ -5006,7 +5007,7 @@ def test_appearance_menu_changes_theme_and_returns():
     try:
         mod.ui_settings_path=lambda:root/'ui_settings.json'
         mod.clear_console=lambda:None
-        result=_with_inputs(['4','0'],mod.appearance_menu)
+        result=_with_inputs(['2','0'],mod.appearance_menu)
         assert result is None
         eq(mod.UI_THEME,'bull_red')
         document=json.loads((root/'ui_settings.json').read_text(encoding='utf-8'))
@@ -5371,7 +5372,7 @@ test('v18 connection bundle fails closed',test_v18_connection_bundle_fails_close
 test('v18 installer roles + release secret gate',test_v18_platform_installer_roles_and_release_secret_gate)
 test('WAN installer passes route/port and keeps inference private',test_wan_installer_propagates_route_port_and_keeps_inference_private)
 test('WAN SSH keepalive + clear Internet UI',test_wan_ssh_transport_has_keepalive_and_clear_internet_ui)
-test('UI theme defaults to BULL Brand + persists language atomically',test_ui_theme_defaults_to_bull_brand_and_persists_language_atomically)
+test('UI theme defaults to BULL Red + migrates legacy brand atomically',test_ui_theme_defaults_to_bull_red_and_migrates_legacy_brand_atomically)
 test('appearance menu changes theme + returns',test_appearance_menu_changes_theme_and_returns)
 test('resume reconnects before catalog + audits attempts',test_resume_reconnects_before_model_catalog_and_records_audit_events)
 test('resume finalization skips backend reconnect',test_resume_skips_backend_when_only_finalization_is_pending)
