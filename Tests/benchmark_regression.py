@@ -1077,6 +1077,36 @@ def test_startup_regression_cache_is_exact_and_avoids_repeat_suite():
         shutil.rmtree(root,ignore_errors=True)
 
 
+def test_startup_regression_reports_truthful_stage_progress():
+    class CP:
+        returncode=0
+        stdout='PASS 7/7\n'
+        stderr=''
+    root=Path(tempfile.mkdtemp())
+    test_file=root/'regression.py'
+    test_file.write_text('print("PASS 7/7")\n',encoding='utf-8')
+    old_run=mod.subprocess.run
+    old_path=mod._startup_regression_path
+    old_cache=mod._startup_regression_cache_path
+    updates=[]
+    try:
+        mod._startup_regression_path=lambda:test_file
+        mod._startup_regression_cache_path=lambda:root/'Runtime'/'cache.json'
+        mod.subprocess.run=lambda *a,**k:CP()
+        result=mod.run_startup_regression(force=True,progress_callback=lambda *args:updates.append(args))
+        assert result['ok'] is True
+        eq(updates,[
+            ('Checking bundled files',1,3),
+            ('Running offline regression',2,3),
+            ('Regression passed',3,3),
+        ])
+    finally:
+        mod.subprocess.run=old_run
+        mod._startup_regression_path=old_path
+        mod._startup_regression_cache_path=old_cache
+        shutil.rmtree(root,ignore_errors=True)
+
+
 
 
 def test_utf8_subprocess_environment():
@@ -4255,7 +4285,7 @@ def test_main_reaches_home_when_backend_is_offline():
                      'white','gray','yellow','green','set_console_title','clear_console','set_active_model'):
             setattr(mod,name,noop)
         mod.newfile=lambda mode:Path('offline-startup-test.json')
-        mod.run_startup_regression=lambda:{'ok':True,'summary':'208/208','output':''}
+        mod.run_startup_regression=lambda **kwargs:{'ok':True,'summary':'208/208','output':''}
         mod.initialize_backend_from_settings=noop
         mod.connect_active_backend=lambda *a,**k:(_ for _ in ()).throw(RuntimeError('offline test'))
         mod.version=lambda timeout=2:None
@@ -5167,6 +5197,7 @@ test('red color helper exists',test_red_color_helper_exists)
 test('startup regression failure path renders safely',test_startup_regression_failure_path_does_not_crash)
 test('startup regression failure excerpt keeps root cause',test_startup_regression_failure_excerpt_keeps_root_cause)
 test('startup regression exact-byte cache',test_startup_regression_cache_is_exact_and_avoids_repeat_suite)
+test('startup regression reports truthful stage progress',test_startup_regression_reports_truthful_stage_progress)
 test('UTF-8 subprocess environment',test_utf8_subprocess_environment)
 test('Unicode progress bar survives child process',test_unicode_progress_bar_under_forced_utf8_child)
 test('Simpson v3 separates balance state from check action',test_simpson_v3_disambiguates_balance_and_check)

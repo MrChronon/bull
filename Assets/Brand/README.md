@@ -53,3 +53,17 @@ been verified.
 требуется при запуске. Инфографика `readme-signal-panel.svg` содержит только
 проверяемые сведения о проекте; нижняя схема объясняет пространство метрик и
 не является результатом сравнения моделей.
+# Versioned startup splashes
+
+`splash-v*.png` is the release artwork for the integrity-check screen shown
+before BULL opens its main menu. `splash-v*.ansi.b64` is the bounded terminal
+render consumed at runtime. The application never invokes Chafa or an image
+viewer at startup. Create the ANSI derivative at release-authoring time with:
+
+```powershell
+python -B Tools/build_startup_splash.py Assets/Brand/splash-vX.Y.Z.png Assets/Brand/splash-vX.Y.Z.ansi.b64
+```
+
+The client uses the asset matching `APP_VERSION`, verifies that its decoded
+terminal output contains only colour SGR sequences, and falls back to text if
+the asset is unavailable or malformed.

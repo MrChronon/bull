@@ -85,6 +85,27 @@ class UXTests(unittest.TestCase):
         self.assertIn('▗▆            ▆▖', text)
         self.assertIn('▅▇▁▁▇▅', text)
 
+    def test_versioned_startup_splash_is_safe_and_uses_stage_progress(self):
+        from Shared.bull_llm import startup_splash
+        splash = startup_splash.load_splash('v0.27.0.1')
+        self.assertIsNotNone(splash)
+        plain = startup_splash._SGR_ESCAPE_RE.sub('', splash)
+        self.assertNotIn('\x1b', plain)
+        self.assertEqual(len(plain.splitlines()), 27)
+        self.assertLessEqual(max(map(len, plain.splitlines())), 38)
+        self.assertEqual(startup_splash.progress_bar(2, 3), '[###################---------] 2/3')
+
+        out = io.StringIO()
+        with patch.object(self.core, 'clear_console'), patch.object(self.core, 'white'), \
+                patch.object(self.core, 'gray'), contextlib.redirect_stdout(out):
+            self.assertTrue(startup_splash.render(
+                self.core, 'v0.27.0.1', 'Running offline regression', 2, 3
+            ))
+        text = out.getvalue()
+        self.assertIn('BULL v0.27.0.1', text)
+        self.assertIn('Running offline regression', text)
+        self.assertIn('2/3', text)
+
     def test_home_is_english_after_language_choice_and_model_text_is_untouched(self):
         from Shared.bull_llm.i18n import set_language, tr
         out = io.StringIO()

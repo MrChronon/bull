@@ -14041,13 +14041,23 @@ def _save_startup_regression_cache(identity,passed,total):
         pass
 
 
-def run_startup_regression(force=False):
+def run_startup_regression(force=False,progress_callback=None):
     """Run or reuse the bundled offline regression before SSH/model selection.
 
     A successful result is cached only for the exact client bytes, test bytes,
     Python executable and Python version. This preserves the fail-closed startup
     gate while avoiding a full 100+ test suite on every unchanged launch.
     """
+    def progress(stage,current,total=3):
+        if callable(progress_callback):
+            try:
+                progress_callback(stage,current,total)
+            except Exception:
+                # The startup gate remains authoritative even when optional
+                # terminal presentation is unavailable.
+                pass
+
+    progress('Checking bundled files',1)
     test_path=_startup_regression_path()
     if not test_path.exists():
         return {
@@ -14072,6 +14082,7 @@ def run_startup_regression(force=False):
         cached=_load_startup_regression_cache(identity)
         if cached:
             passed=cached['passed']; total=cached['total']
+            progress('Using verified regression cache',3)
             green(); print(f'  ✓ Regression {passed}/{total} (cached)'); white()
             return {
                 'ok':True,'summary':f'{passed}/{total}','output':'cached exact-byte regression result',
@@ -14079,6 +14090,7 @@ def run_startup_regression(force=False):
             }
 
     gray()
+    progress('Running offline regression',2)
     print('  Offline regression ...',end='',flush=True)
     white()
 
@@ -14103,6 +14115,7 @@ def run_startup_regression(force=False):
 
         if ok:
             _save_startup_regression_cache(identity,passed,total)
+            progress('Regression passed',3)
             green()
             print(f'\r  ✓ Regression {passed}/{total}                              ')
             white()
@@ -16017,9 +16030,11 @@ def main():
         set_console_title()
 
         # v16.2: regression is automatic and runs before SSH/model selection.
-        clear_console()
-        print(f'{APP_NAME} {APP_VERSION}')
-        startup_regression=run_startup_regression()
+        def startup_splash_progress(stage,current,total):
+            from Shared.bull_llm.startup_splash import render
+            render(_agent_core_proxy(),APP_VERSION,tr(stage,fragments=True),current,total)
+
+        startup_regression=run_startup_regression(progress_callback=startup_splash_progress)
         if not startup_regression.get('ok'):
             append_client_debug(
                 'STARTUP_REGRESSION_FAILED '
@@ -16028,6 +16043,12 @@ def main():
             )
             show_startup_regression_failure(startup_regression)
             return 2
+
+        # The complete splash stays visible while the gate is running.  After
+        # a successful gate, the ordinary offline-first startup flow begins on
+        # a clean terminal page.
+        time.sleep(.2)
+        clear_console()
 
         initialize_backend_from_settings()
         render_startup_connection_attempt()

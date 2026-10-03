@@ -219,6 +219,13 @@ ssh_alias_onboarding:
 
 terminal_brand:
   startup_mark: pre-rendered Chafa 1.18.3 full-color pixel bull at width 30
+  startup_verification_splash:
+    asset_pattern: Assets/Brand/splash-{APP_VERSION}.ansi.b64
+    source_pattern: Assets/Brand/splash-{APP_VERSION}.png
+    behavior: shown during the mandatory startup gate, then cleared before offline-first connection handling
+    progress: observed startup stages only; no inferred per-test counter
+    runtime_dependencies: none; build-time PNG is rendered to bounded ANSI SGR asset
+    safety: base64 decoded output accepts bounded SGR colour sequences only
   display_count: once per process
   page_mark: the same canonical bounded Chafa render plus expanded product name on every ui_header
   theme_behavior: default preserves the source asset exactly; other themes recolour saturated brand pixels without changing geometry
