@@ -12,6 +12,30 @@ BULL keeps three product boundaries:
 The public Python namespace is `bull_llm`. Historical artifact schemas remain
 readable through compatibility adapters and are never silently rewritten.
 
+## Development roadmap
+
+The current release is v0.27.0.1. The following stages are planned, not shipped:
+
+| Stage | Target | Purpose |
+| --- | --- | --- |
+| U1 — Clear Choice | v0.28.0.0 | Correct recommendations and YAML checks; put decision cards first; improve installation, task templates and colleague exports |
+| U2 — Quick Compare | v0.28.1.0 | A separate candidate short pack, explicit language coverage and a confirmatory run |
+| Reliable Runs — T5.3/T5.2 | TBD | Full interruption recovery coverage, followed by hardware comparability and additional measurements |
+| P1 — Anywhere | TBD | Linux/macOS client after extracting the production backend/transport path |
+
+Minimum resume safety and execution permissions belong to U1. Equal results must
+not produce an arbitrary winner; missing evidence must remain visible. The
+8–15-minute quick-comparison target applies to a documented setup, not every
+machine. User demand may move Anywhere ahead of the full hardware Matrix.
+
+Field Lab and Open Range have no assigned release versions. GUI, a hosted
+leaderboard and a marketplace remain outside the near-term scope. The stable
+CHAT Core content and hashes stay frozen; scorer corrections, new tasks and
+runtime changes are independently versioned and reviewed.
+
+See the [detailed roadmap and acceptance criteria](../BULL_TRANSITION_ROADMAP.md)
+and the `planned_roadmap` section in [AI context](../AI_CONTEXT.yaml).
+
 ## Change rules
 
 - no big-bang rewrite;
@@ -52,4 +76,3 @@ Use Discussions for methodology proposals and Issues for reproducible defects.
 Explain the decision a change supports, the metric affected, the evidence, and
 compatibility impact. Keep prompts, scorers, and runtime changes independently
 reviewable.
-

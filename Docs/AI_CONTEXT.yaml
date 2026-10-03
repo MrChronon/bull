@@ -849,7 +849,9 @@ t5_1_release:
 v0_27_release:
   name: BULL Simple Experience
   version: v0.27.0.1
-  status: implemented_release_candidate
+  status: published
+  feature_release: v0.27.0.0
+  visual_patch: v0.27.0.1
   scope: terminal usability, user-owned tasks, decision support, and report access
   main_navigation:
     - Compare models
@@ -908,3 +910,92 @@ v0_27_release:
     recovery_pipeline: unchanged
     inference_runtime: unchanged
   postponed: BULL Local System Matrix T5.2
+
+planned_roadmap:
+  source: Docs/BULL_TRANSITION_ROADMAP.md
+  revision: '1.2'
+  approved_on: '2026-10-03'
+  scope: approved priorities and acceptance criteria; not implemented features
+  product_goal: help users choose installed models for their own tasks using trustworthy quality and timing evidence
+  interface: terminal first; reuse the existing four-action Home
+  delivery_order: [U1, U2, reliable_runs, P1]
+  stages:
+    U1:
+      name: BULL Clear Choice
+      target_version: v0.28.0.0
+      status: planned
+      priorities:
+        - correct tied recommendations and distinguish native mean from conservative decision values
+        - show decision cards first in terminal and HTML with shared data and explicit gate policy
+        - distinguish unqualified speed from insufficient data and never infer missing VRAM
+        - label task latency generation speed and measured cold warm or unknown state separately
+        - version YAML scorer corrections independently of prompt and runtime changes
+        - provide self-contained extraction structured-output and translation templates with manual semantic review
+        - exclude templates from discovery until the user creates a task copy
+        - keep task preparation and reports available offline and allow single-model evaluation
+        - improve Python preflight portable launch and optional shortcuts using the existing installer
+        - provide colleague HTML and share-safe JSON export with model-label preview
+        - enforce code-execution capabilities across menus commands and standalone entrypoints
+        - verify concurrent-resume exclusion completed-record preservation and clear paused state
+      acceptance:
+        - tied metrics do not produce a winner chosen by model name
+        - recommendation reasons and limitations match between terminal and HTML
+        - strict JSON claims have explicit type and terminal-boundary checks
+        - substring checks are not presented as semantic or linguistic evaluation
+        - new users can create a task compare models and export without expert menus
+        - startup regression duration is measured before deciding on startup-gate changes
+      open_findings_from_v0_27_0_1:
+        - equal decision utilities currently use model names as a tie breaker
+        - conservative CI bounds can be displayed as Native score without a separate label
+        - user_contract_v1 equality can accept numeric one for expected boolean true
+        - terminal JSON trailing text can leave full field-check credit despite a structural failure
+        - substring ban for Russian informal address can reject valid words
+        - bundled numeric example lacks source data for its expected answer
+      change_policy: separate scorer template report installer permissions and orchestration PRs; never silently rescore old artifacts
+    U2:
+      name: BULL Quick Compare
+      target_version: v0.28.1.0
+      status: planned
+      depends_on: [U1]
+      candidate_pack: bull_choose@1.0.0
+      target_case_count: '5-8'
+      modes: [quick_overview, confirm_result]
+      language_coverage: explicit versioned EN and RU variants; no assumed score equivalence
+      runtime_budget: '8-15 minutes is a target on a declared 2-3-model setup, not a universal guarantee'
+      acceptance:
+        - validate inspect manifest lock and gold fixtures before inference
+        - preserve bull_chat_core@1.0.0 content and hashes
+        - declare the same planned comparison coverage before execution
+        - incomplete or single-seed runs cannot imply proven ranking stability
+        - compare short and confirmatory runs before promoting the pack to default
+    reliable_runs:
+      name: BULL Reliable Runs
+      target_version: TBD
+      status: planned
+      architecture_stages: [T5.3, T5.2]
+      scope: full resilience coverage followed by hardware comparability and additional measurements
+      minimum_reliability_gate: U1
+      delivery: separate fault-injection and hardware-metric changes
+      acceptance: live local SSH disconnect restart and observed-placement evidence supplements mocks
+    P1:
+      name: BULL Anywhere
+      target_version: TBD
+      status: planned
+      prerequisite: extract production backend and transport through existing BackendAdapter contracts
+      initial_scope: [Linux client, macOS client, chat, compare, UserTests, local reports, HTTP, pinned SSH]
+      excluded: [GPU Lab parity, Windows installer parity, server OS deployment, implicit MLX equivalence]
+      controls_preserved: [SSH pinning, no untrusted ProxyCommand, data-only packs, offline-first]
+      acceptance: separate Unix CI and documented live client-server matrix; no certified label without validation
+      scheduling: may precede full T5.2 when supported by user demand; does not displace U1 correctness
+  later_stages:
+    T6: Field Lab after isolated executor foundation; version TBD
+    T7: Open Range SDK and external adapters; version TBD
+    T8: BULL One v1.0.0 after the existing stability and release gates
+  product_validation:
+    external_telemetry: false
+    method: manual clean-machine protocol with installation startup setup and inference timed separately
+    usability_target: at least four of five new users explain the recommendation and its limitation
+    conditions: two installed models; no user guide or expert menu needed for the primary scenario
+    excluded_success_proxies: [test count alone, GitHub stars, pack count]
+  deferred: [GUI, hosted leaderboard, marketplace, branding redesign, automatic model downloads]
+  implementation_or_publication_completed_by_this_plan: false
