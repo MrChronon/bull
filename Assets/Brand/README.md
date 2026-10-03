@@ -1,13 +1,19 @@
 # BULL brand assets
 
 The approved bull silhouette represents decisive performance testing. Neural
-nodes inside the head represent LLM inference; the green horn bars represent
-measured benchmark results.
+nodes inside the head represent LLM inference; the red horn bars represent
+measured benchmark results in the public v0.27 presentation.
 
-- Primary: `#00E6A8`
-- Secondary: `#24D6FF`
+- Base primary: `#00E6A8`
+- Base secondary: `#24D6FF`
 - Graphite: `#111820`
 - Off-white: `#F4F7F5`
+
+The source master stays unchanged. The public GitHub presentation uses the
+generated `bull-wordmark-red.png`, `bull-mark-red.png` and red social preview:
+
+- Release red: `#FF3C52`
+- Release red soft: `#FF8A94`
 
 `bull-logo-canonical.png` is the immutable source. Its SHA-256, dimensions and
 approved crop boxes are recorded in `brand-lock.json`. Run
@@ -34,10 +40,13 @@ been verified.
 ## Русский
 
 Утверждённый силуэт быка обозначает измерение производительности, внутренние
-узлы — LLM inference, а зелёные элементы рогов — результаты бенчмарков.
+узлы — LLM inference, а красные элементы рогов — результаты бенчмарков в
+публичном оформлении v0.27.
 Неизменяемый исходник — `bull-logo-canonical.png`; его контрольная сумма,
 размеры и допустимые области кадрирования записаны в `brand-lock.json`.
 Варианты для релиза воспроизводятся командой `Tools/build_brand_assets.py`.
+Красные файлы `bull-wordmark-red.png`, `bull-mark-red.png` и social preview —
+производные от неизменяемого исходника, а не замена master-файла.
 
 Терминальный ресурс `bull-mark-chafa-full-30.ansi.b64` получен из
 `bull-mark-512.png` с помощью Chafa 1.18.3. Chafa не входит в поставку и не

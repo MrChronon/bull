@@ -16,6 +16,7 @@ MASTER = BRAND / "bull-logo-canonical.png"
 LOCK = BRAND / "brand-lock.json"
 VERSION = "v0.27.0.0"
 EXPECTED_SHA256 = "60d91a700b9cd91ad3fd6ad598287a8e2cccd067f2ab0ed7515dd52af44b2269"
+RELEASE_RED = (255, 60, 82)
 
 
 def sha256(path: Path) -> str:
@@ -28,6 +29,27 @@ def contain(image: Image.Image, size: tuple[int, int], padding: int = 0) -> Imag
     canvas = Image.new("RGBA", size, (0, 0, 0, 0))
     canvas.alpha_composite(fitted, ((size[0] - fitted.width) // 2, (size[1] - fitted.height) // 2))
     return canvas
+
+
+def recolour_brand_pixels(image: Image.Image, target: tuple[int, int, int]) -> Image.Image:
+    """Create a release-colour derivative without modifying the locked master."""
+    result = image.convert("RGBA").copy()
+    remapped = []
+    for red, green, blue, alpha in result.getdata():
+        saturated = max(red, green, blue) - min(red, green, blue) >= 24
+        brand_coloured = max(red, green, blue) >= 48 and (green > red + 16 or blue > red + 16)
+        if alpha and saturated and brand_coloured:
+            intensity = max(red, green, blue) / 255.0
+            remapped.append((
+                round(target[0] * intensity),
+                round(target[1] * intensity),
+                round(target[2] * intensity),
+                alpha,
+            ))
+        else:
+            remapped.append((red, green, blue, alpha))
+    result.putdata(remapped)
+    return result
 
 
 def ui_font(size: int, *, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
@@ -71,8 +93,13 @@ def main() -> None:
 
     logo.save(BRAND / "bull-logo.png", optimize=True)
     wordmark.save(BRAND / "bull-wordmark.png", optimize=True)
+    red_wordmark = recolour_brand_pixels(wordmark, RELEASE_RED)
+    red_wordmark.save(BRAND / "bull-wordmark-red.png", optimize=True)
     mark = contain(mark_source, (1024, 1024), padding=64)
     mark.save(BRAND / "bull-mark.png", optimize=True)
+    red_mark_source = recolour_brand_pixels(mark_source, RELEASE_RED)
+    red_mark = contain(red_mark_source, (1024, 1024), padding=64)
+    red_mark.save(BRAND / "bull-mark-red.png", optimize=True)
 
     for size in (16, 24, 32, 48, 64, 128, 256, 512):
         contain(mark_source, (size, size), padding=max(1, round(size / 16))).save(
@@ -97,8 +124,14 @@ def main() -> None:
     (BRAND / "bull-wordmark.svg").write_text(
         svg_wrapper("bull-wordmark.png", wordmark.width, wordmark.height, label="BULL wordmark"), encoding="utf-8"
     )
+    (BRAND / "bull-wordmark-red.svg").write_text(
+        svg_wrapper("bull-wordmark-red.png", wordmark.width, wordmark.height, label="BULL red release wordmark"), encoding="utf-8"
+    )
     (BRAND / "bull-mark.svg").write_text(
         svg_wrapper("bull-mark.png", 1024, 1024, label="BULL mark"), encoding="utf-8"
+    )
+    (BRAND / "bull-mark-red.svg").write_text(
+        svg_wrapper("bull-mark-red.png", 1024, 1024, label="BULL red release mark"), encoding="utf-8"
     )
     (BRAND / "bull-mark-light.svg").write_text(
         svg_wrapper("bull-mark-on-light.png", 1024, 1024, label="BULL mark on light background"), encoding="utf-8"
@@ -116,19 +149,19 @@ def main() -> None:
         svg_wrapper("bull-mark.png", 1024, 1024, label=f"BULL {VERSION}"), encoding="utf-8"
     )
 
-    social = Image.new("RGBA", (1280, 640), "#07120F")
+    social = Image.new("RGBA", (1280, 640), "#15090E")
     draw = ImageDraw.Draw(social, "RGBA")
     for y in range(640):
         blend = y / 639
-        draw.line((0, y, 1280, y), fill=(7, 18 + round(5 * blend), 15 + round(10 * blend), 255))
+        draw.line((0, y, 1280, y), fill=(21 + round(8 * blend), 9, 14 + round(7 * blend), 255))
     for x in range(0, 1281, 40):
-        draw.line((x, 0, x, 640), fill=(88, 150, 135, 13))
+        draw.line((x, 0, x, 640), fill=(255, 96, 112, 15))
     for y in range(0, 641, 40):
-        draw.line((0, y, 1280, y), fill=(88, 150, 135, 13))
-    draw.rounded_rectangle((24, 24, 1256, 616), radius=30, outline=(31, 92, 79, 230), width=2)
-    draw.ellipse((40, 112, 476, 548), fill=(5, 42, 35, 255),
-                 outline=(0, 230, 168, 150), width=3)
-    social_mark = contain(mark_source, (430, 430), padding=22)
+        draw.line((0, y, 1280, y), fill=(255, 96, 112, 15))
+    draw.rounded_rectangle((24, 24, 1256, 616), radius=30, outline=(128, 35, 50, 230), width=2)
+    draw.ellipse((40, 112, 476, 548), fill=(53, 10, 20, 255),
+                 outline=(255, 60, 82, 150), width=3)
+    social_mark = contain(red_mark_source, (430, 430), padding=22)
     social.alpha_composite(social_mark, (42, 105))
 
     title_font = ui_font(58, bold=True)
@@ -136,12 +169,12 @@ def main() -> None:
     body_font = ui_font(25)
     stat_font = ui_font(17, bold=True)
     x = 505
-    draw.text((x, 112), "BULL", font=title_font, fill="#00E6A8")
+    draw.text((x, 112), "BULL", font=title_font, fill="#FF3C52")
     bull_width = draw.textbbox((0, 0), "BULL", font=title_font)[2]
     draw.text((x + bull_width + 24, 112), "SIMPLE EXPERIENCE", font=title_font, fill="#F4F7F5")
     draw.text((x, 190), "v0.27.0.0  ·  LOCAL MODEL COMPARISON",
-              font=label_font, fill="#82AA9F")
-    draw.line((x, 232, 1200, 232), fill="#24D6FF", width=3)
+              font=label_font, fill="#D8919A")
+    draw.line((x, 232, 1200, 232), fill="#FF6B7A", width=3)
 
     cards = (
         ("COMPARE YOUR MODELS", "Quality · speed · stability · memory"),
@@ -151,16 +184,16 @@ def main() -> None:
     card_y = 262
     for title, detail in cards:
         draw.rounded_rectangle((x, card_y, 1200, card_y + 72), radius=14,
-                               fill=(15, 31, 32, 235), outline=(31, 92, 79, 230), width=2)
-        draw.rectangle((x, card_y + 12, x + 6, card_y + 60), fill="#00E6A8")
-        draw.text((x + 26, card_y + 12), title, font=label_font, fill="#24D6FF")
+                               fill=(38, 14, 21, 235), outline=(128, 35, 50, 230), width=2)
+        draw.rectangle((x, card_y + 12, x + 6, card_y + 60), fill="#FF3C52")
+        draw.text((x + 26, card_y + 12), title, font=label_font, fill="#FF8A94")
         draw.text((x + 26, card_y + 38), detail, font=body_font, fill="#F4F7F5")
         card_y += 88
 
-    draw.line((62, 565, 1218, 565), fill=(36, 214, 255, 110), width=2)
-    draw.text((62, 582), "380/380 REGRESSIONS", font=stat_font, fill="#00E6A8")
+    draw.line((62, 565, 1218, 565), fill=(255, 107, 122, 110), width=2)
+    draw.text((62, 582), "380/380 REGRESSIONS", font=stat_font, fill="#FF3C52")
     draw.text((330, 582), "OLLAMA  ·  LLAMA.CPP  ·  WINDOWS  ·  MIT",
-              font=stat_font, fill="#82AA9F")
+              font=stat_font, fill="#D8919A")
     social.save(BRAND / "github-social-preview.png", optimize=True)
 
     lock = {

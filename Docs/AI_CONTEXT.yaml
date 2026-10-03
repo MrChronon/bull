@@ -122,8 +122,16 @@ architecture:
   brand:
     canonical_master: Assets/Brand/bull-logo-canonical.png
     lock: Assets/Brand/brand-lock.json
-    canonical_sha256: 60d91a700b9cd91ad3fd6ad598287a8e2cccd067f2ab0ed7515dd52af44b2269
-    derivation: crop_resize_only_no_redraw
+  canonical_sha256: 60d91a700b9cd91ad3fd6ad598287a8e2cccd067f2ab0ed7515dd52af44b2269
+  derivation: crop_resize_only_no_redraw
+  public_release_presentation:
+    palette: red
+    primary: '#FF3C52'
+    derivatives:
+      - Assets/Brand/bull-wordmark-red.png
+      - Assets/Brand/bull-mark-red.png
+      - Assets/Brand/github-social-preview.png
+    source_master_unchanged: true
   backend_boundary:
     supported:
       - ollama

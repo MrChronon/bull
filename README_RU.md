@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="Assets/Brand/bull-wordmark.png" alt="BULL" width="720">
+  <img src="Assets/Brand/bull-wordmark-red.png" alt="BULL" width="720">
 </p>
 
 <p align="center">
@@ -13,9 +13,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/MrChronon/bull/releases/latest"><img alt="Последний релиз" src="https://img.shields.io/github/v/release/MrChronon/bull?style=for-the-badge&color=00E6A8&label=release"></a>
-  <a href="LICENSE"><img alt="Лицензия MIT" src="https://img.shields.io/github/license/MrChronon/bull?style=for-the-badge&color=24D6FF"></a>
-  <a href="https://github.com/MrChronon/bull/releases"><img alt="Загрузки assets" src="https://img.shields.io/github/downloads/MrChronon/bull/total?style=for-the-badge&color=00E6A8&label=release%20downloads"></a>
+  <a href="https://github.com/MrChronon/bull/releases/latest"><img alt="Последний релиз" src="https://img.shields.io/github/v/release/MrChronon/bull?style=for-the-badge&color=FF3C52&label=release"></a>
+  <a href="LICENSE"><img alt="Лицензия MIT" src="https://img.shields.io/github/license/MrChronon/bull?style=for-the-badge&color=FF6B7A"></a>
+  <a href="https://github.com/MrChronon/bull/releases"><img alt="Загрузки assets" src="https://img.shields.io/github/downloads/MrChronon/bull/total?style=for-the-badge&color=FF3C52&label=release%20downloads"></a>
 </p>
 
 <p align="center">
@@ -106,4 +106,3 @@ OS-песочницей. Публичный релиз исключает `Chats
 предварительно удалив endpoints, usernames, пути, prompts и ответы моделей.
 
 BULL распространяется по [лицензии MIT](LICENSE).
-

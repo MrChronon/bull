@@ -3,16 +3,16 @@
   <desc id="desc">Project facts and a conceptual map of BULL evaluation coverage. The panel shows 380 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases and nine separated metric spaces. It is not a model score chart.</desc>
   <defs>
     <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#07110f"/>
-      <stop offset="0.58" stop-color="#0b1519"/>
-      <stop offset="1" stop-color="#081015"/>
+      <stop offset="0" stop-color="#16090f"/>
+      <stop offset="0.58" stop-color="#1d0d15"/>
+      <stop offset="1" stop-color="#120a10"/>
     </linearGradient>
     <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#00e6a8"/>
-      <stop offset="1" stop-color="#24d6ff"/>
+      <stop offset="0" stop-color="#ff3c52"/>
+      <stop offset="1" stop-color="#ff8a94"/>
     </linearGradient>
     <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
-      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#5f857d" stroke-opacity="0.08" stroke-width="1"/>
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#c06a76" stroke-opacity="0.08" stroke-width="1"/>
     </pattern>
     <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
       <feGaussianBlur stdDeviation="6" result="blur"/>
@@ -25,77 +25,77 @@
 
   <rect width="1280" height="620" rx="28" fill="url(#background)"/>
   <rect width="1280" height="620" rx="28" fill="url(#grid)"/>
-  <rect x="1" y="1" width="1278" height="618" rx="27" fill="none" stroke="#1f4f47" stroke-width="2"/>
+  <rect x="1" y="1" width="1278" height="618" rx="27" fill="none" stroke="#6b2735" stroke-width="2"/>
 
   <g font-family="Segoe UI, Inter, Arial, sans-serif">
-    <text x="56" y="64" fill="#00e6a8" font-size="18" font-weight="700" letter-spacing="4">BULL // EVALUATION SIGNAL PANEL</text>
+    <text x="56" y="64" fill="#ff3c52" font-size="18" font-weight="700" letter-spacing="4">BULL // EVALUATION SIGNAL PANEL</text>
     <text x="56" y="99" fill="#f4f7f5" font-size="26" font-weight="650">Reproducible signals, separated by what they actually measure.</text>
     <line x1="56" y1="124" x2="1224" y2="124" stroke="url(#accent)" stroke-width="2" opacity="0.8"/>
 
     <!-- Verified project facts. -->
     <g>
-      <rect x="56" y="154" width="274" height="132" rx="18" fill="#101d20" stroke="#1d554b"/>
-      <rect x="348" y="154" width="274" height="132" rx="18" fill="#101d20" stroke="#1d554b"/>
-      <rect x="640" y="154" width="274" height="132" rx="18" fill="#101d20" stroke="#1d554b"/>
-      <rect x="932" y="154" width="292" height="132" rx="18" fill="#101d20" stroke="#1d554b"/>
+      <rect x="56" y="154" width="274" height="132" rx="18" fill="#211017" stroke="#722a39"/>
+      <rect x="348" y="154" width="274" height="132" rx="18" fill="#211017" stroke="#722a39"/>
+      <rect x="640" y="154" width="274" height="132" rx="18" fill="#211017" stroke="#722a39"/>
+      <rect x="932" y="154" width="292" height="132" rx="18" fill="#211017" stroke="#722a39"/>
 
       <text x="80" y="217" fill="#f4f7f5" font-size="42" font-weight="750">380/380</text>
-      <text x="80" y="252" fill="#82aa9f" font-size="14" font-weight="650" letter-spacing="2">OFFLINE REGRESSIONS</text>
-      <circle cx="300" cy="188" r="8" fill="#00e6a8" filter="url(#glow)"/>
+      <text x="80" y="252" fill="#d899a3" font-size="14" font-weight="650" letter-spacing="2">OFFLINE REGRESSIONS</text>
+      <circle cx="300" cy="188" r="8" fill="#ff3c52" filter="url(#glow)"/>
 
       <text x="372" y="217" fill="#f4f7f5" font-size="42" font-weight="750">12</text>
-      <text x="372" y="252" fill="#82aa9f" font-size="14" font-weight="650" letter-spacing="2">CHAT CORE CASES</text>
-      <circle cx="592" cy="188" r="8" fill="#24d6ff" filter="url(#glow)"/>
+      <text x="372" y="252" fill="#d899a3" font-size="14" font-weight="650" letter-spacing="2">CHAT CORE CASES</text>
+      <circle cx="592" cy="188" r="8" fill="#ff8a94" filter="url(#glow)"/>
 
       <text x="664" y="217" fill="#f4f7f5" font-size="42" font-weight="750">10</text>
-      <text x="664" y="252" fill="#82aa9f" font-size="14" font-weight="650" letter-spacing="2">RU DIALOGUE CASES</text>
-      <circle cx="884" cy="188" r="8" fill="#00e6a8" filter="url(#glow)"/>
+      <text x="664" y="252" fill="#d899a3" font-size="14" font-weight="650" letter-spacing="2">RU DIALOGUE CASES</text>
+      <circle cx="884" cy="188" r="8" fill="#ff3c52" filter="url(#glow)"/>
 
       <text x="956" y="217" fill="#f4f7f5" font-size="42" font-weight="750">9</text>
-      <text x="956" y="252" fill="#82aa9f" font-size="14" font-weight="650" letter-spacing="2">METRIC SPACES</text>
-      <circle cx="1194" cy="188" r="8" fill="#24d6ff" filter="url(#glow)"/>
+      <text x="956" y="252" fill="#d899a3" font-size="14" font-weight="650" letter-spacing="2">METRIC SPACES</text>
+      <circle cx="1194" cy="188" r="8" fill="#ff8a94" filter="url(#glow)"/>
     </g>
 
     <!-- Conceptual coverage map; bars indicate distinct dimensions, not scores. -->
     <text x="56" y="337" fill="#f4f7f5" font-size="18" font-weight="700" letter-spacing="2">MEASUREMENT COVERAGE</text>
-    <text x="1224" y="337" fill="#6f958b" font-size="13" text-anchor="end" letter-spacing="1.5">CONCEPTUAL MAP · NOT MODEL SCORES</text>
+    <text x="1224" y="337" fill="#c9838d" font-size="13" text-anchor="end" letter-spacing="1.5">CONCEPTUAL MAP · NOT MODEL SCORES</text>
 
     <g>
-      <rect x="56" y="365" width="274" height="174" rx="18" fill="#0d191b" stroke="#1b4c43"/>
-      <text x="80" y="405" fill="#00e6a8" font-size="16" font-weight="750" letter-spacing="2">QUALITY</text>
+      <rect x="56" y="365" width="274" height="174" rx="18" fill="#1b0d13" stroke="#642735"/>
+      <text x="80" y="405" fill="#ff3c52" font-size="16" font-weight="750" letter-spacing="2">QUALITY</text>
       <text x="80" y="440" fill="#f4f7f5" font-size="18" font-weight="600">Native model</text>
       <text x="80" y="468" fill="#f4f7f5" font-size="18" font-weight="600">Final system</text>
-      <line x1="80" y1="497" x2="192" y2="497" stroke="#00e6a8" stroke-width="8" stroke-linecap="round"/>
-      <line x1="80" y1="517" x2="252" y2="517" stroke="#24d6ff" stroke-width="8" stroke-linecap="round" opacity="0.75"/>
+      <line x1="80" y1="497" x2="192" y2="497" stroke="#ff3c52" stroke-width="8" stroke-linecap="round"/>
+      <line x1="80" y1="517" x2="252" y2="517" stroke="#ff8a94" stroke-width="8" stroke-linecap="round" opacity="0.75"/>
 
-      <rect x="348" y="365" width="274" height="174" rx="18" fill="#0d191b" stroke="#1b4c43"/>
-      <text x="372" y="405" fill="#24d6ff" font-size="16" font-weight="750" letter-spacing="2">STABILITY</text>
+      <rect x="348" y="365" width="274" height="174" rx="18" fill="#1b0d13" stroke="#642735"/>
+      <text x="372" y="405" fill="#ff8a94" font-size="16" font-weight="750" letter-spacing="2">STABILITY</text>
       <text x="372" y="440" fill="#f4f7f5" font-size="18" font-weight="600">SD · min / max</text>
       <text x="372" y="468" fill="#f4f7f5" font-size="18" font-weight="600">Worst seed · rank</text>
       <polyline points="376,514 411,493 446,504 481,482 516,501 551,475 590,489" fill="none" stroke="url(#accent)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-      <line x1="376" y1="521" x2="590" y2="521" stroke="#2b514b"/>
+      <line x1="376" y1="521" x2="590" y2="521" stroke="#6b3340"/>
 
-      <rect x="640" y="365" width="274" height="174" rx="18" fill="#0d191b" stroke="#1b4c43"/>
-      <text x="664" y="405" fill="#00e6a8" font-size="16" font-weight="750" letter-spacing="2">PERFORMANCE</text>
+      <rect x="640" y="365" width="274" height="174" rx="18" fill="#1b0d13" stroke="#642735"/>
+      <text x="664" y="405" fill="#ff3c52" font-size="16" font-weight="750" letter-spacing="2">PERFORMANCE</text>
       <text x="664" y="440" fill="#f4f7f5" font-size="18" font-weight="600">Load · warm tok/s</text>
       <text x="664" y="468" fill="#f4f7f5" font-size="18" font-weight="600">VRAM · GPU telemetry</text>
-      <rect x="664" y="499" width="214" height="10" rx="5" fill="#18342f"/>
-      <rect x="664" y="499" width="62" height="10" rx="5" fill="#00e6a8"/>
-      <rect x="731" y="499" width="76" height="10" rx="5" fill="#24d6ff" opacity="0.82"/>
-      <rect x="812" y="499" width="66" height="10" rx="5" fill="#00e6a8" opacity="0.55"/>
+      <rect x="664" y="499" width="214" height="10" rx="5" fill="#4a1f2a"/>
+      <rect x="664" y="499" width="62" height="10" rx="5" fill="#ff3c52"/>
+      <rect x="731" y="499" width="76" height="10" rx="5" fill="#ff8a94" opacity="0.82"/>
+      <rect x="812" y="499" width="66" height="10" rx="5" fill="#ff3c52" opacity="0.55"/>
 
-      <rect x="932" y="365" width="292" height="174" rx="18" fill="#0d191b" stroke="#1b4c43"/>
-      <text x="956" y="405" fill="#24d6ff" font-size="16" font-weight="750" letter-spacing="2">RESILIENCE</text>
+      <rect x="932" y="365" width="292" height="174" rx="18" fill="#1b0d13" stroke="#642735"/>
+      <text x="956" y="405" fill="#ff8a94" font-size="16" font-weight="750" letter-spacing="2">RESILIENCE</text>
       <text x="956" y="440" fill="#f4f7f5" font-size="18" font-weight="600">Checkpoint · resume</text>
       <text x="956" y="468" fill="#f4f7f5" font-size="18" font-weight="600">Recovery attribution</text>
-      <circle cx="977" cy="510" r="13" fill="none" stroke="#00e6a8" stroke-width="4"/>
-      <line x1="993" y1="510" x2="1053" y2="510" stroke="#31635a" stroke-width="4"/>
-      <circle cx="1070" cy="510" r="13" fill="none" stroke="#24d6ff" stroke-width="4"/>
-      <line x1="1086" y1="510" x2="1146" y2="510" stroke="#31635a" stroke-width="4"/>
-      <circle cx="1163" cy="510" r="13" fill="#00e6a8" filter="url(#glow)"/>
+      <circle cx="977" cy="510" r="13" fill="none" stroke="#ff3c52" stroke-width="4"/>
+      <line x1="993" y1="510" x2="1053" y2="510" stroke="#713442" stroke-width="4"/>
+      <circle cx="1070" cy="510" r="13" fill="none" stroke="#ff8a94" stroke-width="4"/>
+      <line x1="1086" y1="510" x2="1146" y2="510" stroke="#713442" stroke-width="4"/>
+      <circle cx="1163" cy="510" r="13" fill="#ff3c52" filter="url(#glow)"/>
     </g>
 
-    <text x="56" y="583" fill="#6f958b" font-size="13" letter-spacing="1.6">BULL · BENCHMARKING &amp; USAGE OF LOCAL LLMs · v0.27.0.0</text>
-    <text x="1224" y="583" fill="#6f958b" font-size="13" text-anchor="end">Verified project facts · no model results shown</text>
+    <text x="56" y="583" fill="#c9838d" font-size="13" letter-spacing="1.6">BULL · BENCHMARKING &amp; USAGE OF LOCAL LLMs · v0.27.0.0</text>
+    <text x="1224" y="583" fill="#c9838d" font-size="13" text-anchor="end">Verified project facts · no model results shown</text>
   </g>
 </svg>

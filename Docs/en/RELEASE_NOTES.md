@@ -6,6 +6,7 @@ GPU Lab remain available under advanced and experimental sections.
 
 ## Highlights
 
+- red public-release presentation for the repository wordmark, signal panel and social preview; the locked source logo remains unchanged;
 - four-item Home menu with clear local and remote connection routes;
 - language selected once on first launch and changed later in settings;
 - BULL, Matrix, Red, and high-contrast terminal themes;
@@ -24,4 +25,3 @@ and the inference pipeline were not rewritten as part of the Simple Experience U
 
 The public bundle contains no models, chats, benchmark results, runtime state,
 private connections, keys, tokens, or local logs.
-

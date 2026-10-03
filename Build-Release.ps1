@@ -151,7 +151,11 @@ $required = @(
     "Assets\Brand\bull-logo-canonical.svg",
     "Assets\Brand\bull-logo.png",
     "Assets\Brand\bull-wordmark.png",
+    "Assets\Brand\bull-wordmark-red.png",
+    "Assets\Brand\bull-wordmark-red.svg",
     "Assets\Brand\bull-mark.png",
+    "Assets\Brand\bull-mark-red.png",
+    "Assets\Brand\bull-mark-red.svg",
     "Assets\Brand\bull-mark-on-light.png",
     "Assets\Brand\bull-mark-on-dark.png",
     "Assets\Brand\bull-mark-mono.png",
@@ -231,7 +235,9 @@ $brandSvgs = @(
     'Assets\Brand\bull-mark.svg',
     'Assets\Brand\bull-mark-light.svg',
     'Assets\Brand\bull-mark-mono.svg',
-    'Assets\Brand\bull-wordmark.svg'
+    'Assets\Brand\bull-wordmark.svg',
+    'Assets\Brand\bull-wordmark-red.svg',
+    'Assets\Brand\bull-mark-red.svg'
 )
 foreach ($svgPath in $brandSvgs) {
     [xml]$svg = Get-Content -LiteralPath $svgPath -Raw -Encoding UTF8
