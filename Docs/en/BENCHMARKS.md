@@ -36,6 +36,10 @@ score is created because no deterministic contract was supplied.
 Use `.txt` for exploration, creative work, consultation, or a new task whose
 success criteria are not yet formalized.
 
+`UserTests` contains three self-contained synthetic examples: field extraction,
+a structured calculation, and business translation. Their names contain
+`.example.`, so BULL never runs them until you copy and rename one.
+
 ## `.yaml` user test
 
 A structured test uses the safe `bull-user-test` version 1 format. New files use

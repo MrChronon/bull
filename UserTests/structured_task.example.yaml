@@ -5,7 +5,10 @@ title: Synthetic beam calculation
 description: Demonstrates deterministic numeric and text criteria
 language: en
 prompt: |
-  For this synthetic fixture, calculate the declared maximum stress.
+  This is a self-contained synthetic calculation, not a construction design.
+  A rectangular specimen has a bending moment M = 5 kN*m and a section modulus
+  W = 40,000 mm^3. Use sigma = M / W. Convert 5 kN*m to 5,000,000 N*mm before
+  dividing by W. Calculate sigma in MPa.
   Explain the method and state that a real design requires project-specific review.
   Use the exact terminal JSON path result.stress_mpa.
 criteria:
@@ -33,4 +36,3 @@ criteria:
       - approved for construction
 manual_review:
   - Check whether assumptions and units are useful for the real intended task.
-

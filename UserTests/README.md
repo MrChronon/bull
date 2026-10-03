@@ -6,8 +6,10 @@ open **Compare models → My tasks and prompts → Task from UserTests**.
 - Copy `simple_prompt.example.txt` to `my_task.txt` for a prompt-only test.
   BULL runs it on every selected model and reports speed, but does not invent a
   quality score. Compare the answers manually.
-- Copy `structured_task.example.yaml` to `my_task.yaml` when the answer has
-  deterministic facts or a terminal JSON contract that BULL can verify.
+- Copy `structured_task.example.yaml`, `field_extraction.example.yaml`, or
+  `business_translation.example.yaml` to a new `.yaml` file when the answer has
+  deterministic facts or a terminal JSON contract that BULL can verify. The
+  examples themselves are never discovered as runnable tasks.
 
 Read `Docs/USER_TESTS.md` before writing YAML criteria. Unsupported or invalid
 files are isolated and shown as validation errors; they do not execute code.
@@ -21,8 +23,10 @@ files are isolated and shown as validation errors; they do not execute code.
   одним промптом. BULL запустит его на всех выбранных моделях и измерит
   скорость, но не станет придумывать оценку качества. Ответы сравниваются
   вручную.
-- Скопируйте `structured_task.example.yaml` в `my_task.yaml`, если ответ
-  содержит проверяемые факты или финальный JSON-контракт.
+- Скопируйте `structured_task.example.yaml`, `field_extraction.example.yaml`
+  или `business_translation.example.yaml` в новый `.yaml`-файл, если ответ
+  содержит проверяемые факты или финальный JSON-контракт. Сами примеры никогда
+  не подхватываются как запускаемые задачи.
 
 Перед созданием YAML-критериев прочитайте `Docs/ru/BENCHMARKS.md`. Неподдерживаемые
 или некорректные файлы изолируются и показываются как ошибки проверки; код из

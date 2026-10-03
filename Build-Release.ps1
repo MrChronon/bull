@@ -209,7 +209,9 @@ $required = @(
     "BenchmarkPacks\bull_ru_dialogue\LICENSE.txt",
     "UserTests\README.md",
     "UserTests\simple_prompt.example.txt",
-    "UserTests\structured_task.example.yaml"
+    "UserTests\structured_task.example.yaml",
+    "UserTests\field_extraction.example.yaml",
+    "UserTests\business_translation.example.yaml"
 )
 foreach ($rel in $required) {
     if (-not (Test-Path -LiteralPath $rel)) {

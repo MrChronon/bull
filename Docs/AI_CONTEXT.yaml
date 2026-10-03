@@ -963,6 +963,7 @@ planned_roadmap:
         - observed Native mean and conservative lower CI are now separate decision-support fields
         - user_contract_v2 keeps JSON booleans distinct from numbers and requires a terminal JSON boundary
         - user_contract_v2 matches one-word literal criteria at Unicode word boundaries; it is not a semantic-language scorer
+        - bundled user-test examples are self-contained synthetic extraction calculation and translation tasks excluded from discovery
       change_policy: separate scorer template report installer permissions and orchestration PRs; never silently rescore old artifacts
     U2:
       name: BULL Quick Compare

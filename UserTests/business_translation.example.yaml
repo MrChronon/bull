@@ -1,0 +1,47 @@
+schema: bull-user-test
+version: 1
+id: business_translation_fixture
+title: Synthetic business translation
+description: Translate a short synthetic notice while retaining its stated facts
+language: ru
+prompt: |
+  Translate this synthetic internal notice into natural Russian for a colleague:
+  "The maintenance window is scheduled for Tuesday, 10:00–11:00. The dashboard
+  may be unavailable during that period. No action is required from users."
+  Keep the time window, the possible dashboard unavailability, and the fact that
+  users need not act. Do not add a cause, a new deadline, or an apology.
+  Finish with terminal JSON containing result.target_language equal to "ru" and
+  result.source_facts equal to 3.
+criteria:
+  - id: target_language
+    type: terminal_json_equals
+    description: Declares the requested target language
+    weight: 25
+    path: result.target_language
+    expected: ru
+    critical: true
+  - id: source_fact_count
+    type: terminal_json_number
+    description: Declares the three source facts supplied by the task
+    weight: 25
+    path: result.source_facts
+    expected: 3
+    tolerance_abs: 0
+    critical: true
+  - id: time_window_retained
+    type: contains_any
+    description: Keeps the stated maintenance time in the Russian prose
+    weight: 25
+    values:
+      - 10:00–11:00
+      - 10:00-11:00
+  - id: no_invented_apology
+    type: forbidden_any
+    description: Does not add an apology absent from the source
+    weight: 25
+    values:
+      - приносим извинения
+      - извините за неудобства
+manual_review:
+  - Check that the Russian is natural and preserves all three source facts.
+  - Check that the translation does not add a cause, deadline, or apology.

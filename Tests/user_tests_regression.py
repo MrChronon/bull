@@ -104,6 +104,20 @@ class UserTestsRegression(unittest.TestCase):
         self.assertTrue(tests["user_my_task"]["manual_review_required"])
         self.assertEqual(findings[0]["file"], "broken.yaml")
 
+    def test_bundled_templates_are_valid_and_not_discovered(self):
+        root = Path(__file__).resolve().parents[1] / "UserTests"
+        templates = sorted(root.glob("*.example.yaml"))
+        self.assertEqual(
+            {path.name for path in templates},
+            {"structured_task.example.yaml", "field_extraction.example.yaml", "business_translation.example.yaml"},
+        )
+        for path in templates:
+            document = validate_user_test(parse_user_test_yaml(path.read_text(encoding="utf-8")), path.name)
+            self.assertTrue(document["result_instruction"])
+        discovered, findings = load_user_tests(root)
+        self.assertEqual(discovered, {})
+        self.assertEqual(findings, [])
+
     def test_weights_and_yaml_features_fail_closed(self):
         invalid = STRUCTURED.replace("weight: 20", "weight: 10", 1)
         with self.assertRaisesRegex(UserTestError, "sum to exactly 100"):

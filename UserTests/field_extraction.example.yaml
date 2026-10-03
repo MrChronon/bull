@@ -1,0 +1,37 @@
+schema: bull-user-test
+version: 1
+id: field_extraction_fixture
+title: Synthetic field extraction
+description: Extract three declared fields from a self-contained synthetic record
+language: en
+prompt: |
+  Extract only the requested facts from this synthetic record:
+  "Work order WO-2048 concerns pump P-17. The planned inspection is 2026-11-04.
+  Its status is pending review."
+  Briefly state the extracted facts. Do not invent an owner, priority, or result.
+  Return the exact fields in the terminal JSON paths result.work_order,
+  result.asset, and result.status.
+criteria:
+  - id: work_order
+    type: terminal_json_equals
+    description: Returns the stated work-order identifier
+    weight: 35
+    path: result.work_order
+    expected: WO-2048
+    critical: true
+  - id: asset
+    type: terminal_json_equals
+    description: Returns the stated asset identifier
+    weight: 35
+    path: result.asset
+    expected: P-17
+    critical: true
+  - id: status
+    type: terminal_json_equals
+    description: Returns the stated status without inventing a result
+    weight: 30
+    path: result.status
+    expected: pending review
+    critical: true
+manual_review:
+  - Check that the prose does not imply facts absent from the source record.
