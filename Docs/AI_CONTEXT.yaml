@@ -220,12 +220,12 @@ ssh_alias_onboarding:
 terminal_brand:
   startup_mark: pre-rendered Chafa 1.18.3 full-color pixel bull at width 30
   startup_verification_splash:
-    asset_pattern: Assets/Brand/splash-{APP_VERSION}.ansi.b64
-    source_pattern: Assets/Brand/splash-{APP_VERSION}.png
-    behavior: shown during the mandatory startup gate, then cleared before offline-first connection handling
+    module: Shared/bull_llm/startup_window.py
+    asset_pattern: Assets/Brand/splash-{APP_VERSION}.png
+    behavior: separate native desktop window during the mandatory startup gate; closes before offline-first connection handling
     progress: observed startup stages only; no inferred per-test counter
-    runtime_dependencies: none; build-time PNG is rendered to bounded ANSI SGR asset
-    safety: base64 decoded output accepts bounded SGR colour sequences only
+    runtime_dependencies: Python stdlib Tk only; GUI absence fails open without weakening the gate
+    safety: exact versioned local PNG only; no shell, renderer, external URL, or user-provided path
   display_count: once per process
   page_mark: the same canonical bounded Chafa render plus expanded product name on every ui_header
   theme_behavior: default preserves the source asset exactly; other themes recolour saturated brand pixels without changing geometry
@@ -583,7 +583,7 @@ schemas:
   evidence_provenance: bull-evidence-provenance@1
 
 verification:
-  current_offline_regression: 380/380
+  current_offline_regression: 389/389
   clean_python_no_site_packages: pass
   runtime_third_party_python_dependencies: none_on_windows
   scorer_gold_set: 15/15

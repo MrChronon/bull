@@ -13530,11 +13530,13 @@ def session_label(session,path):
 
 def clear_console():
     """Очистить только окно/scrollback консоли. Состояние диалога не меняется."""
-    white()
     try:
         # ANSI: clear screen + scrollback + cursor home.
         if _COLOR_ENABLED:
-            sys.stdout.write('\033[2J\033[3J\033[H')
+            # Reset both foreground and background before clearing. This keeps
+            # an interrupted ANSI renderer or a custom terminal palette from
+            # leaking a background colour into the ordinary BULL interface.
+            sys.stdout.write(ANSI_RESET+'\033[2J\033[3J\033[H')
             sys.stdout.flush()
         elif os.name == 'nt':
             os.system('cls')
@@ -13544,6 +13546,21 @@ def clear_console():
         # Безопасный fallback.
         print('\n' * 80)
     white()
+
+
+def open_startup_verification_window():
+    """Open a best-effort desktop splash for the startup gate.
+
+    The verification itself never depends on GUI availability. The helper is
+    intentionally a narrow boundary so the terminal client remains usable in
+    headless sessions and offline regression tests.
+    """
+    try:
+        from Shared.bull_llm.startup_window import open_startup_window
+        return open_startup_window(APP_VERSION, 'Starting verification', 0, 3)
+    except Exception:
+        return None
+
 
 def all_dialog_messages(history,archive):
     # archive содержит дословные сообщения, удалённые из активного контекста
@@ -15981,6 +15998,7 @@ def main():
     command_return_home=False
     benchmark_return_home=False
     startup_regression=None
+    startup_window=None
     backend_ready=False
     startup_backend_error=''
 
@@ -16037,12 +16055,18 @@ def main():
         set_console_title()
 
         # v16.2: regression is automatic and runs before SSH/model selection.
-        def startup_splash_progress(stage,current,total):
-            from Shared.bull_llm.startup_splash import render
-            render(_agent_core_proxy(),APP_VERSION,tr(stage,fragments=True),current,total)
+        # Presentation is a separate native window, never terminal art. It is
+        # optional and cannot affect the authoritative verification gate.
+        startup_window=open_startup_verification_window()
+        def startup_window_progress(stage,current,total):
+            if startup_window is not None:
+                startup_window.update(tr(stage,fragments=True),current,total)
 
-        startup_regression=run_startup_regression(progress_callback=startup_splash_progress)
+        startup_regression=run_startup_regression(progress_callback=startup_window_progress)
         if not startup_regression.get('ok'):
+            if startup_window is not None:
+                startup_window.close()
+                startup_window=None
             append_client_debug(
                 'STARTUP_REGRESSION_FAILED '
                 f"summary={startup_regression.get('summary') or 'unknown'}\n"
@@ -16051,10 +16075,11 @@ def main():
             show_startup_regression_failure(startup_regression)
             return 2
 
-        # The complete splash stays visible while the gate is running.  After
-        # a successful gate, the ordinary offline-first startup flow begins on
-        # a clean terminal page.
-        time.sleep(.2)
+        # The splash is only an overlay for the mandatory test gate. It closes
+        # before connection handling and before the terminal menu.
+        if startup_window is not None:
+            startup_window.close()
+            startup_window=None
         clear_console()
 
         initialize_backend_from_settings()
@@ -17618,6 +17643,8 @@ def main():
         append_client_debug('STARTUP_ERROR',e,include_traceback=True)
         return 1
     finally:
+        if startup_window is not None:
+            startup_window.close()
         white()
         try:
             if session.get('autosave',True):

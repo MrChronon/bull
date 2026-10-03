@@ -56,14 +56,13 @@ been verified.
 # Versioned startup splashes
 
 `splash-v*.png` is the release artwork for the integrity-check screen shown
-before BULL opens its main menu. `splash-v*.ansi.b64` is the bounded terminal
-render consumed at runtime. The application never invokes Chafa or an image
-viewer at startup. Create the ANSI derivative at release-authoring time with:
+before BULL opens its main menu. The terminal application never invokes Chafa
+or an image viewer for this screen.
 
-```powershell
-python -B Tools/build_startup_splash.py Assets/Brand/splash-vX.Y.Z.png Assets/Brand/splash-vX.Y.Z.ansi.b64
-```
+`splash-vX.Y.Z.png` is the versioned native desktop startup image. BULL opens
+it in a small stdlib-Tk window only while the mandatory offline verification
+runs; it is never rendered into the terminal.
 
-The client uses the asset matching `APP_VERSION`, verifies that its decoded
-terminal output contains only colour SGR sequences, and falls back to text if
-the asset is unavailable or malformed.
+The client uses the asset matching `APP_VERSION`, verifies that the requested
+asset is an exact local versioned file, and never accepts a user-provided image
+path for this screen.

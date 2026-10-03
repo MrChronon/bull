@@ -22,8 +22,12 @@ Change the saved language or color theme later under **More → Language and
 appearance**. The available themes are BULL turquoise, Matrix green, BULL Red,
 and high contrast.
 
-The client performs an offline regression check before enabling inference. If
-it fails, run `Run-Tests.ps1` and inspect `client_debug.log`.
+The client performs an offline regression check before enabling inference. A
+small separate desktop window shows the version, release artwork, and the three
+observed verification stages. It closes before the terminal menu opens and
+never changes terminal colours. If Windows GUI facilities are unavailable, the
+check still runs normally in the terminal. If it fails, run `Run-Tests.ps1` and
+inspect `client_debug.log`.
 
 ## Home
 

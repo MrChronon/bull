@@ -85,26 +85,37 @@ class UXTests(unittest.TestCase):
         self.assertIn('▗▆            ▆▖', text)
         self.assertIn('▅▇▁▁▇▅', text)
 
-    def test_versioned_startup_splash_is_safe_and_uses_stage_progress(self):
-        from Shared.bull_llm import startup_splash
-        splash = startup_splash.load_splash('v0.28.0.0')
-        self.assertIsNotNone(splash)
-        plain = startup_splash._SGR_ESCAPE_RE.sub('', splash)
-        self.assertNotIn('\x1b', plain)
-        self.assertEqual(len(plain.splitlines()), 27)
-        self.assertLessEqual(max(map(len, plain.splitlines())), 38)
-        self.assertEqual(startup_splash.progress_bar(2, 3), '[###################---------] 2/3')
+    def test_versioned_startup_window_uses_png_and_truthful_stage_progress(self):
+        from Shared.bull_llm import startup_window
 
+        self.assertEqual(startup_window.splash_image_path('v0.28.0.0').name, 'splash-v0.28.0.0.png')
+        self.assertEqual(startup_window._progress(2, 3), (2, 3, 2 / 3))
+        self.assertEqual(startup_window._progress(9, 3), (3, 3, 1.0))
+        self.assertEqual(startup_window._stage_label('run\n\tregression'), 'run regression')
+
+        events = []
+        class FakeWindow:
+            def update(self, stage, current, total):
+                events.append(('update', stage, current, total)); return True
+            def close(self):
+                events.append(('close',))
+        with patch.object(startup_window, '_create_window', return_value=FakeWindow()) as create:
+            splash = startup_window.open_startup_window('v0.28.0.0', 'Run regression', 2, 3)
+        create.assert_called_once_with('v0.28.0.0', 'Run regression', 2, 3)
+        splash.update('Regression passed', 3, 3)
+        splash.close()
+        self.assertEqual(events, [('update', 'Regression passed', 3, 3), ('close',)])
+
+    def test_console_clear_resets_terminal_background_before_main_menu(self):
         out = io.StringIO()
-        with patch.object(self.core, 'clear_console'), patch.object(self.core, 'white'), \
-                patch.object(self.core, 'gray'), contextlib.redirect_stdout(out):
-            self.assertTrue(startup_splash.render(
-                self.core, 'v0.28.0.0', 'Запуск офлайн-регрессии', 2, 3
-            ))
-        text = out.getvalue()
-        self.assertIn('BULL v0.28.0.0', text)
-        self.assertIn('Запуск офлайн-регрессии', text)
-        self.assertIn('2/3', text)
+        old_color = self.core._COLOR_ENABLED
+        try:
+            self.core._COLOR_ENABLED = True
+            with contextlib.redirect_stdout(out):
+                self.core.clear_console()
+            self.assertIn('\033[0m\033[2J\033[3J\033[H', out.getvalue())
+        finally:
+            self.core._COLOR_ENABLED = old_color
 
     def test_home_is_english_after_language_choice_and_model_text_is_untouched(self):
         from Shared.bull_llm.i18n import set_language, tr
@@ -569,6 +580,7 @@ class UXTests(unittest.TestCase):
             for name in ('console_utf8','initialize_ui_theme','select_ui_language','enable_console_colors','set_console_icon',
                          'set_console_title','clear_console','initialize_backend_from_settings','set_active_model','save_session'):
                 stack.enter_context(patch.object(self.core,name,side_effect=noop))
+            stack.enter_context(patch.object(self.core, 'open_startup_verification_window', return_value=None))
             stack.enter_context(patch.dict(os.environ, {'BULL_START_SURFACE':'home'}))
             stack.enter_context(patch.object(self.core,'newfile',return_value=Path(tmp)/'chat.json'))
             stack.enter_context(patch.object(self.core,'benchmark_dir',return_value=Path(tmp)))
