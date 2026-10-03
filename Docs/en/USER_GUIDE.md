@@ -10,11 +10,11 @@ compatible llama.cpp HTTP server, locally or through a pinned SSH tunnel.
 - Ollama or a compatible llama.cpp server;
 - at least one model installed on the selected backend.
 
-Download `BULL-v0.28.0.0-Bundle.zip` and its checksum from the GitHub release.
+Download `BULL-v0.28.0.1-Bundle.zip` and its checksum from the GitHub release.
 Verify the SHA-256 value, extract into a new directory, and run
-`Install-BULL-v0.28.0.0.cmd`. Choose **Client**, **Server**, or **AllInOne**.
+`Install-BULL-v0.28.0.1.cmd`. Choose **Client**, **Server**, or **AllInOne**.
 
-Use `BULL-v0.28.0.0.cmd` for the application. The Benchmark Lab and Agent Lab
+Use `BULL-v0.28.0.1.cmd` for the application. The Benchmark Lab and Agent Lab
 launchers open their respective sections directly.
 
 On the first launch, choose English or Russian. This question is shown once.

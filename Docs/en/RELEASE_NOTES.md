@@ -1,4 +1,4 @@
-# BULL v0.28.0.0 — Clear Choice
+# BULL v0.28.0.1 — Clear Choice
 
 This release improves the trustworthiness of choosing among installed local
 models. It does not change built-in benchmark prompts, built-in scorers, or the
@@ -16,7 +16,9 @@ inference and recovery runtime pipeline.
   without silent rescoring.
 - Three synthetic, self-contained examples are included for extraction,
   structured calculation, and business translation.
-- A new versioned red BULL splash is shown during the verified startup gate.
+- Startup verification now uses a separate native desktop window. It shows the
+  versioned BULL image and observed stages, then closes before the terminal
+  menu; it cannot colour the terminal background.
 
 The public bundle contains no models, chats, benchmark results, runtime state,
 private connections, keys, tokens, endpoints, or local logs.

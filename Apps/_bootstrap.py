@@ -7,7 +7,7 @@ from pathlib import Path
 
 def load_compat_core():
     root=Path(__file__).resolve().parents[1]
-    source=root/'bull_client_v0.28.0.0.py'
+    source=root/'bull_client_v0.28.0.1.py'
     spec=importlib.util.spec_from_file_location('bull_v028_compat',source)
     if spec is None or spec.loader is None:
         raise RuntimeError(f'Cannot load {source}')
