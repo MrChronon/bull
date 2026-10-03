@@ -8720,9 +8720,10 @@ def benchmark_score(name,item,answer):
     if score_type=='ru_dialogue_contract_v1':
         return _score_ru_dialogue_contract_v1(answer,item)
 
-    if score_type=='user_contract_v1':
-        from Shared.bull_llm.user_tests import score_user_test
-        return score_user_test(answer,item.get('scorer_config') or {})
+    if score_type in ('user_contract_v1','user_contract_v2'):
+        from Shared.bull_llm.user_tests import score_user_test,score_user_test_v1
+        scorer=score_user_test_v1 if score_type=='user_contract_v1' else score_user_test
+        return scorer(answer,item.get('scorer_config') or {})
 
     if score_type=='structured_reference_v1':
         obj,parse_error=_extract_json_after_marker(answer)
@@ -15148,7 +15149,7 @@ def benchmark_user_file_wizard():
         read_user_input('\nEnter = назад › '); return None
     ui_section('ВЫБЕРИТЕ ЗАДАЧУ')
     for index,(name,item) in enumerate(rows,1):
-        mode='автопроверка' if item.get('score_type')=='user_contract_v1' else 'без автооценки'
+        mode='автопроверка' if item.get('score_type') in ('user_contract_v1','user_contract_v2') else 'без автооценки'
         ui_print(f"  {index}. {name}  ·  {mode}  ·  {item.get('source_name')}")
         gray(); ui_print('     '+str(item.get('description') or '')); white()
     raw=read_user_input('Задача [номер, Enter=назад] › ').strip()
@@ -15179,7 +15180,7 @@ def benchmark_user_file_wizard():
     ui_print(f'  Задача:      {name} · {item.get("source_name")}')
     ui_print(f'  Модели:      {", ".join(chosen)}')
     ui_print(f'  Запуски:      {runs} · {mode} · {seed_mode}')
-    if item.get('score_type')=='user_contract_v1':
+    if item.get('score_type') in ('user_contract_v1','user_contract_v2'):
         ui_print('  Оценка:       только явные детерминированные criteria из YAML')
         if (item.get('scorer_config') or {}).get('manual_review'):
             yellow(); ui_print('  Ручная проверка: есть пункты, которые нельзя честно автоматизировать.'); white()

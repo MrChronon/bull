@@ -38,7 +38,9 @@ success criteria are not yet formalized.
 
 ## `.yaml` user test
 
-A structured test uses the safe `bull-user-test` version 1 format. The parser
+A structured test uses the safe `bull-user-test` version 1 format. New files use
+the strict `user_contract_v2` scorer; historical `user_contract_v1` results keep
+their recorded behavior and are never silently rescored. The parser
 accepts no custom tags, anchors, aliases, executable code, or regular expressions.
 The file limit is 256 KiB; the prompt limit is 50,000 characters; one to twenty
 criteria are allowed; criterion weights must total exactly 100.
@@ -63,6 +65,11 @@ it only when the failure makes the answer unusable for the stated task.
 `manual_review` lists important questions that the deterministic rules cannot
 evaluate honestly. It receives no hidden numerical weight and explicitly marks
 the result for human review.
+
+For `terminal_json_*`, `BENCHMARK_RESULT` must be followed by the final JSON
+value and no trailing prose. Equality is type-strict: JSON `true` is not numeric
+`1`. A declared JSON path validates that value only; it does not validate an
+entire object schema.
 
 Example:
 
@@ -103,6 +110,8 @@ recorded in the checkpoint.
 6. Use synthetic or distributable data and no secrets or personal information.
 7. Give each criterion one unambiguous question.
 8. Let weight reflect real task impact, not ease of automation.
+9. One-word literal criteria use Unicode word boundaries: `you` is not found
+   inside another word. They remain literal checks, not linguistic evaluation.
 9. Do not treat keyword presence as proof of correct reasoning.
 10. Put non-deterministic qualities under `manual_review`.
 
@@ -121,4 +130,3 @@ Built-in benchmark packs are versioned and hash-checked. A data-only pack cannot
 execute Python. Promotion from candidate to stable requires validation, golden
 snapshots, scorer regression tests, false-positive/negative review, and a versioned
 methodology decision.
-

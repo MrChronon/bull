@@ -7,6 +7,7 @@ from Shared.bull_llm.user_tests import (
     load_user_tests,
     parse_user_test_yaml,
     score_user_test,
+    score_user_test_v1,
     validate_user_test,
 )
 
@@ -64,6 +65,34 @@ class UserTestsRegression(unittest.TestCase):
         score = score_user_test(bad, document)
         self.assertLessEqual(score["value"], .59)
         self.assertEqual(score["critical_failures"][0]["criterion"], "stress_value")
+
+    def test_v2_keeps_boolean_types_and_terminal_json_contract_strict(self):
+        document = validate_user_test(parse_user_test_yaml(STRUCTURED.replace(
+            "path: result.stress_mpa\n    expected: 125\n    tolerance_abs: 0.5",
+            "path: result.ok\n    expected: true",
+        ).replace("type: terminal_json_number", "type: terminal_json_equals")))
+        numeric_boolean = "bending moment\nBENCHMARK_RESULT\n{\"result\":{\"ok\":1}}"
+        self.assertLess(score_user_test(numeric_boolean, document)["value"], 1.0)
+        numeric_document = validate_user_test(parse_user_test_yaml(STRUCTURED))
+        numeric_score = score_user_test(
+            "bending moment\nBENCHMARK_RESULT\n{\"result\":{\"stress_mpa\":true}}", numeric_document
+        )
+        self.assertLess(numeric_score["value"], 1.0)
+        trailing = "bending moment\nBENCHMARK_RESULT\n{\"result\":{\"ok\":true}}\nextra"
+        strict = score_user_test(trailing, document)
+        self.assertEqual(strict["parse_error"], "trailing_text_after_terminal_json")
+        self.assertLess(strict["value"], 1.0)
+        # Existing v1 artifacts retain their historical field-check behavior
+        # rather than being silently rescored as v2.
+        self.assertEqual(score_user_test_v1(trailing, document)["method"], "user_contract_v1")
+
+    def test_v2_one_word_literal_does_not_match_inside_another_word(self):
+        document = validate_user_test(parse_user_test_yaml(STRUCTURED.replace(
+            "type: contains_all", "type: forbidden_any", 1
+        ).replace("- bending moment", "- ты", 1)))
+        score = score_user_test("Документы готовы.\nBENCHMARK_RESULT\n{\"result\":{\"stress_mpa\":125}}", document)
+        check = next(item for item in score["checks"] if item["name"] == "mentions_method")
+        self.assertTrue(check["ok"])
 
     def test_plain_text_is_runtime_only_and_invalid_yaml_is_isolated(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -893,7 +893,10 @@ v0_27_release:
     critical_failure_cap: 0.59
     manual_review_numeric_weight: none
     forbidden_features: [code execution, shell, YAML tags, anchors, aliases, regex]
-    scorer: user_contract_v1
+    scorer: user_contract_v2 for newly discovered YAML; user_contract_v1 preserved for historical artifacts
+    strict_terminal_json: true for user_contract_v2
+    json_boolean_numeric_equivalence: forbidden for user_contract_v2
+    one_word_phrase_matching: Unicode word boundaries for user_contract_v2
     tests: Tests/user_tests_regression.py
   decision_support:
     module: Shared/bull_llm/decision_support.py
@@ -924,7 +927,7 @@ planned_roadmap:
   source: Docs/BULL_TRANSITION_ROADMAP.md
   revision: '1.2'
   approved_on: '2026-10-03'
-  scope: approved priorities and acceptance criteria; not implemented features
+  scope: approved priorities and acceptance criteria; U1 is in progress, later stages are not implemented features
   product_goal: help users choose installed models for their own tasks using trustworthy quality and timing evidence
   interface: terminal first; reuse the existing four-action Home
   delivery_order: [U1, U2, reliable_runs, P1]
@@ -954,13 +957,12 @@ planned_roadmap:
         - new users can create a task compare models and export without expert menus
         - startup regression duration is measured before deciding on startup-gate changes
       open_findings_from_v0_27_0_1:
-        - user_contract_v1 equality can accept numeric one for expected boolean true
-        - terminal JSON trailing text can leave full field-check credit despite a structural failure
-        - substring ban for Russian informal address can reject valid words
         - bundled numeric example lacks source data for its expected answer
       resolved_in_development:
         - equal decision utilities now return equal candidates rather than model-name tie breakers
         - observed Native mean and conservative lower CI are now separate decision-support fields
+        - user_contract_v2 keeps JSON booleans distinct from numbers and requires a terminal JSON boundary
+        - user_contract_v2 matches one-word literal criteria at Unicode word boundaries; it is not a semantic-language scorer
       change_policy: separate scorer template report installer permissions and orchestration PRs; never silently rescore old artifacts
     U2:
       name: BULL Quick Compare

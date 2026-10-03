@@ -299,7 +299,7 @@ def load_user_tests(root: str | Path) -> tuple[dict[str, dict[str, Any]], list[d
                     "prompt": validated["prompt"],
                     "result_instruction": validated["result_instruction"],
                     "category": "user_tasks",
-                    "score_type": "user_contract_v1",
+                    "score_type": "user_contract_v2",
                     "scorer_config": {
                         "criteria": validated["criteria"],
                         "manual_review": validated["manual_review"],
@@ -341,7 +341,33 @@ def _path_value(root: Any, path: str) -> tuple[bool, Any]:
     return True, current
 
 
-def score_user_test(answer: str, scorer_config: Mapping[str, Any]) -> dict[str, Any]:
+def _phrase_present(value: str, text: str, *, word_boundaries: bool) -> bool:
+    """Match a declared literal safely, without treating a word stem as a token."""
+    needle = str(value).casefold()
+    if not word_boundaries or not re.fullmatch(r"\w+", needle, flags=re.UNICODE):
+        return needle in text
+    return re.search(r"(?<!\w)" + re.escape(needle) + r"(?!\w)", text, flags=re.UNICODE) is not None
+
+
+def _json_equals(observed: Any, expected: Any) -> bool:
+    """JSON equality that never equates ``true`` with numeric ``1``."""
+    if isinstance(observed, bool) or isinstance(expected, bool):
+        return isinstance(observed, bool) and isinstance(expected, bool) and observed is expected
+    if isinstance(observed, Mapping) and isinstance(expected, Mapping):
+        return set(observed) == set(expected) and all(_json_equals(observed[key], expected[key]) for key in observed)
+    if isinstance(observed, list) and isinstance(expected, list):
+        return len(observed) == len(expected) and all(_json_equals(a, b) for a, b in zip(observed, expected))
+    return observed == expected
+
+
+def _score_user_test(
+    answer: str,
+    scorer_config: Mapping[str, Any],
+    *,
+    revision: str,
+    strict_terminal_json: bool,
+    word_boundaries: bool,
+) -> dict[str, Any]:
     text = str(answer or "")
     prose = text.rsplit("BENCHMARK_RESULT", 1)[0] if "BENCHMARK_RESULT" in text else text
     folded = prose.casefold()
@@ -354,13 +380,13 @@ def score_user_test(answer: str, scorer_config: Mapping[str, Any]) -> dict[str, 
         kind = criterion["type"]
         evidence = ""
         if kind == "contains_all":
-            missing = [value for value in criterion["values"] if value.casefold() not in folded]
+            missing = [value for value in criterion["values"] if not _phrase_present(value, folded, word_boundaries=word_boundaries)]
             ok = not missing; evidence = "missing: " + ", ".join(missing[:5]) if missing else "all declared phrases present"
         elif kind == "contains_any":
-            present = [value for value in criterion["values"] if value.casefold() in folded]
+            present = [value for value in criterion["values"] if _phrase_present(value, folded, word_boundaries=word_boundaries)]
             ok = bool(present); evidence = "present: " + ", ".join(present[:5]) if present else "none of the declared phrases present"
         elif kind == "forbidden_any":
-            present = [value for value in criterion["values"] if value.casefold() in folded]
+            present = [value for value in criterion["values"] if _phrase_present(value, folded, word_boundaries=word_boundaries)]
             ok = not present; evidence = "forbidden present: " + ", ".join(present[:5]) if present else "no forbidden phrase present"
         elif kind == "word_count":
             count = len(re.findall(r"\b\w+(?:[-'][\w]+)*\b", prose, flags=re.UNICODE))
@@ -368,12 +394,14 @@ def score_user_test(answer: str, scorer_config: Mapping[str, Any]) -> dict[str, 
         elif kind in ("terminal_json_equals", "terminal_json_number"):
             exists, observed = _path_value(structured, criterion["path"])
             if kind == "terminal_json_equals":
-                ok = bool(exists and observed == criterion["expected"])
+                ok = bool(exists and (parse_error is None or not strict_terminal_json) and _json_equals(observed, criterion["expected"]))
             else:
                 try:
+                    if strict_terminal_json and isinstance(observed, bool):
+                        raise TypeError("JSON boolean is not a numeric result")
                     observed_number = float(observed)
                     tolerance = float(criterion.get("tolerance_abs")) if criterion.get("tolerance_abs") is not None else abs(float(criterion["expected"])) * float(criterion["tolerance_pct"]) / 100.0
-                    ok = bool(exists and abs(observed_number - float(criterion["expected"])) <= tolerance)
+                    ok = bool(exists and (parse_error is None or not strict_terminal_json) and abs(observed_number - float(criterion["expected"])) <= tolerance)
                 except (TypeError, ValueError):
                     ok = False
             evidence = f"path={criterion['path']}; observed={observed!r}; expected={criterion['expected']!r}"
@@ -394,7 +422,7 @@ def score_user_test(answer: str, scorer_config: Mapping[str, Any]) -> dict[str, 
         caps.append({"name": "declared_critical_failure", "value": 0.59})
     review = [str(item) for item in (scorer_config.get("manual_review") or [])]
     return {
-        "method": "user_contract_v1",
+        "method": revision,
         "value": value,
         "automatic_score": value,
         "semantic_score": None,
@@ -410,7 +438,17 @@ def score_user_test(answer: str, scorer_config: Mapping[str, Any]) -> dict[str, 
     }
 
 
+def score_user_test_v1(answer: str, scorer_config: Mapping[str, Any]) -> dict[str, Any]:
+    """Historical scorer retained for explicit v1 artifacts and rescoring."""
+    return _score_user_test(answer, scorer_config, revision="user_contract_v1", strict_terminal_json=False, word_boundaries=False)
+
+
+def score_user_test(answer: str, scorer_config: Mapping[str, Any]) -> dict[str, Any]:
+    """Current v2 scorer for newly discovered YAML tasks."""
+    return _score_user_test(answer, scorer_config, revision="user_contract_v2", strict_terminal_json=True, word_boundaries=True)
+
+
 __all__ = [
     "MAX_FILE_BYTES", "MAX_PROMPT_CHARS", "MAX_TESTS", "SUPPORTED_CRITERIA",
-    "UserTestError", "load_user_tests", "parse_user_test_yaml", "score_user_test", "validate_user_test",
+    "UserTestError", "load_user_tests", "parse_user_test_yaml", "score_user_test", "score_user_test_v1", "validate_user_test",
 ]
