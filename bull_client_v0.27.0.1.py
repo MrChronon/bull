@@ -10856,7 +10856,8 @@ def benchmark_visual_report_document(records,evidence_summary=None):
 
     decision_cards=[]
     for profile in decision['profiles']:
-        winner=html_lib.escape(str(profile.get('winner') or 'нет данных'))
+        tied_models=profile.get('tied_models') or []
+        winner=html_lib.escape(str(profile.get('winner') or ('равные кандидаты: '+', '.join(map(str,tied_models)) if tied_models else 'нет данных')))
         weights=', '.join(
             f'{name} {float(value)*100:.0f}%'
             for name,value in profile.get('weights',{}).items() if float(value)>0
@@ -10881,7 +10882,7 @@ def benchmark_visual_report_document(records,evidence_summary=None):
         label=html_lib.escape(str(point.get('model') or '?'))
         scatter_points.append(
             f'<span class="scatter-point" style="left:{x:.2f}%;bottom:{y:.2f}%" '
-            f'title="{label}: Native {_report_percent(point.get("quality"))}, {_report_number(point.get("speed"),1," tok/s")}">'
+            f'title="{label}: Native mean {_report_percent(point.get("quality"))}, {_report_number(point.get("speed"),1," tok/s")}">'
             f'{index}<b>{label}</b></span>'
         )
     decision_section=(
@@ -11762,11 +11763,16 @@ def print_benchmark_decision_support(models,custom_weights=None):
         label=labels.get(profile.get('id'),profile.get('label') or profile.get('id'))
         winner=profile.get('winner')
         if winner:
-            parts=[f'Native {float(profile["quality"])*100:.1f}%']
+            parts=[f'Native mean {float(profile["quality"])*100:.1f}%']
+            if profile.get('decision_quality_basis')=='ci95_low':
+                parts.append(f'conservative 95% CI low {float(profile["decision_quality"])*100:.1f}%')
             if profile.get('speed') is not None: parts.append(f'{float(profile["speed"]):.1f} tok/s')
             if profile.get('vram_mib') is not None: parts.append(f'VRAM {float(profile["vram_mib"])/1024:.1f} GiB')
             green(); ui_print(f'  ★ {label:<18} {winner}'); white()
             gray(); ui_print('      '+' · '.join(parts)); white()
+        elif profile.get('tied_models'):
+            yellow(); ui_print(f'  = {label:<18} равные кандидаты: {", ".join(profile["tied_models"])}'); white()
+            gray(); ui_print('      одинаковая utility; BULL не выбирает по имени модели'); white()
         else:
             yellow(); ui_print(f'  — {label:<18} недостаточно сопоставимых метрик'); white()
     map_rows=_terminal_quality_speed_map(decision)

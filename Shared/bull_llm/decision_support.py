@@ -52,13 +52,18 @@ def _scale(values: Mapping[str, float], *, invert: bool = False, logarithmic: bo
     return {key: 1.0 - value for key, value in scaled.items()} if invert else scaled
 
 
-def _native_quality(row: Mapping[str, Any]) -> tuple[float | None, bool]:
+def _native_quality(row: Mapping[str, Any]) -> tuple[float | None, float | None, bool]:
+    """Return observed mean, conservative choice value, and partial coverage.
+
+    A confidence-interval lower bound is useful for a conservative *choice*,
+    but it is never the observed Native score and must not be shown as one.
+    """
     complete = _number(row.get("chat_native_score"))
     if complete is not None:
         conservative = _number(row.get("chat_native_ci95_low"))
-        return conservative if conservative is not None else complete, False
+        return complete, conservative if conservative is not None else complete, False
     overall = _number(row.get("overall_native_score"))
-    return overall, overall is not None
+    return overall, overall, overall is not None
 
 
 def build_decision_support(
@@ -76,7 +81,7 @@ def build_decision_support(
     model_counts = Counter(str(row.get("model") or "?") for row in source_rows)
     prepared = []
     for row in source_rows:
-        quality, partial = _native_quality(row)
+        quality, decision_quality, partial = _native_quality(row)
         model_id = str(row.get("model") or "?")
         backend = str(row.get("backend") or "")
         label = f"{model_id} [{backend}]" if model_counts[model_id] > 1 and backend else model_id
@@ -86,6 +91,8 @@ def build_decision_support(
                 "model_id": model_id,
                 "backend": backend or None,
                 "quality": quality,
+                "decision_quality": decision_quality,
+                "decision_quality_basis": "ci95_low" if decision_quality != quality else "native_mean",
                 "quality_partial": partial,
                 "speed": _number(row.get("primary_eval_warm_avg") or row.get("primary_eval_avg")),
                 "reliability": _number(
@@ -99,22 +106,28 @@ def build_decision_support(
         )
 
     quality_values = {row["model"]: row["quality"] for row in prepared if row["quality"] is not None}
+    decision_quality_values = {
+        row["model"]: row["decision_quality"]
+        for row in prepared if row["decision_quality"] is not None
+    }
     speed_values = {row["model"]: row["speed"] for row in prepared if row["speed"] is not None}
     memory_values = {row["model"]: row["vram_mib"] for row in prepared if row["vram_mib"] is not None}
     quality_norm = _scale(quality_values)
+    decision_quality_norm = _scale(decision_quality_values)
     speed_norm = _scale(speed_values, logarithmic=True)
     memory_norm = _scale(memory_values, invert=True)
 
-    best_quality = max(quality_values.values(), default=None)
+    best_decision_quality = max(decision_quality_values.values(), default=None)
     for row in prepared:
         model = row["model"]
         row["quality_norm"] = quality_norm.get(model)
+        row["decision_quality_norm"] = decision_quality_norm.get(model)
         row["speed_norm"] = speed_norm.get(model)
         row["memory_norm"] = memory_norm.get(model)
         row["quality_gate"] = bool(
-            best_quality is not None
-            and row["quality"] is not None
-            and row["quality"] >= max(0.60, best_quality - 0.10)
+            best_decision_quality is not None
+            and row["decision_quality"] is not None
+            and row["decision_quality"] >= max(0.60, best_decision_quality - 0.10)
             and (row["reliability"] is None or row["reliability"] >= 0.80)
         )
 
@@ -136,7 +149,7 @@ def build_decision_support(
             if profile_id in ("speed", "balance", "low_memory", "custom") and not row["quality_gate"]:
                 continue
             values = {
-                "quality": row["quality_norm"],
+                "quality": row["decision_quality_norm"],
                 "speed": row["speed_norm"],
                 "reliability": row["reliability"],
                 "memory": row["memory_norm"],
@@ -158,15 +171,32 @@ def build_decision_support(
                 }
             )
             continue
-        utility, winner = max(candidates, key=lambda item: (item[0], item[1]["model"]))
+        best_utility = max(item[0] for item in candidates)
+        tied = [row for utility, row in candidates if abs(utility - best_utility) <= 1e-12]
+        if len(tied) > 1:
+            results.append(
+                {
+                    "id": profile_id,
+                    "label": profile["label"],
+                    "weights": dict(weights),
+                    "winner": None,
+                    "tied_models": sorted(row["model"] for row in tied),
+                    "utility": best_utility,
+                    "reason": "equal decision utility; no arbitrary winner is selected",
+                }
+            )
+            continue
+        winner = tied[0]
         results.append(
             {
                 "id": profile_id,
                 "label": profile["label"],
                 "weights": dict(weights),
                 "winner": winner["model"],
-                "utility": utility,
+                "utility": best_utility,
                 "quality": winner["quality"],
+                "decision_quality": winner["decision_quality"],
+                "decision_quality_basis": winner["decision_quality_basis"],
                 "speed": winner["speed"],
                 "reliability": winner["reliability"],
                 "vram_mib": winner["vram_mib"],
@@ -180,6 +210,8 @@ def build_decision_support(
     ]
     if any(row["quality_partial"] for row in prepared):
         warnings.append("Some recommendations use non-CHAT selected-test quality; compare only like-for-like runs.")
+    if any(row["decision_quality_basis"] == "ci95_low" for row in prepared):
+        warnings.append("Native score is the observed mean; the lower 95% CI is used separately as a conservative decision value.")
     return {"schema": "bull-model-decision-support", "version": 1, "points": prepared, "profiles": results, "warnings": warnings}
 
 

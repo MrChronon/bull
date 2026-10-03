@@ -901,6 +901,8 @@ v0_27_release:
     mutates_quality_score: false
     profiles: [quality, speed, balance, low_memory, custom]
     speed_quality_gate: native quality >= max(0.60, best minus 0.10); task completion >= 0.80 when known
+    quality_labels: observed Native mean and conservative lower CI are separate fields
+    tie_policy: equal decision utility returns equal candidates; model name is display order only
     scope: relative within one comparable run; never a universal leaderboard
     outputs: [terminal markers, terminal quality-speed map, offline HTML cards and scatter]
     tests: Tests/decision_support_regression.py
@@ -930,7 +932,7 @@ planned_roadmap:
     U1:
       name: BULL Clear Choice
       target_version: v0.28.0.0
-      status: planned
+      status: in_progress
       priorities:
         - correct tied recommendations and distinguish native mean from conservative decision values
         - show decision cards first in terminal and HTML with shared data and explicit gate policy
@@ -952,12 +954,13 @@ planned_roadmap:
         - new users can create a task compare models and export without expert menus
         - startup regression duration is measured before deciding on startup-gate changes
       open_findings_from_v0_27_0_1:
-        - equal decision utilities currently use model names as a tie breaker
-        - conservative CI bounds can be displayed as Native score without a separate label
         - user_contract_v1 equality can accept numeric one for expected boolean true
         - terminal JSON trailing text can leave full field-check credit despite a structural failure
         - substring ban for Russian informal address can reject valid words
         - bundled numeric example lacks source data for its expected answer
+      resolved_in_development:
+        - equal decision utilities now return equal candidates rather than model-name tie breakers
+        - observed Native mean and conservative lower CI are now separate decision-support fields
       change_policy: separate scorer template report installer permissions and orchestration PRs; never silently rescore old artifacts
     U2:
       name: BULL Quick Compare

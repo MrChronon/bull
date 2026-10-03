@@ -44,6 +44,27 @@ class DecisionSupportTests(unittest.TestCase):
         self.assertEqual({point["model"] for point in result["points"]},
                          {"same [ollama]", "same [llama_cpp]"})
 
+    def test_ties_remain_equal_candidates_not_name_selected_winner(self):
+        rows = [
+            dict(model="model_a", chat_native_score=.8, primary_eval_warm_avg=20,
+                 native_task_completion_rate=1.0, vram_peak_mib=8000),
+            dict(model="model_z", chat_native_score=.8, primary_eval_warm_avg=20,
+                 native_task_completion_rate=1.0, vram_peak_mib=8000),
+        ]
+        result = build_decision_support(rows)
+        quality = next(item for item in result["profiles"] if item["id"] == "quality")
+        self.assertIsNone(quality["winner"])
+        self.assertEqual(quality["tied_models"], ["model_a", "model_z"])
+        self.assertIn("no arbitrary winner", quality["reason"])
+
+    def test_native_mean_and_conservative_value_are_separate(self):
+        row = dict(model="stable", chat_native_score=.90, chat_native_ci95_low=.82,
+                   primary_eval_warm_avg=20, native_task_completion_rate=1.0)
+        point = build_decision_support([row])["points"][0]
+        self.assertEqual(point["quality"], .90)
+        self.assertEqual(point["decision_quality"], .82)
+        self.assertEqual(point["decision_quality_basis"], "ci95_low")
+
 
 if __name__ == "__main__":
     unittest.main()
