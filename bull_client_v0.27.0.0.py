@@ -85,7 +85,11 @@ def read_user_input(prompt='Вы: '):
             try:
                 pasted = _normalize_paste_text(clipboard_text())
             except Exception as e:
-                print(f'\n[Ошибка вставки: {e}]')
+                append_client_debug('PASTE_ERROR',e,include_traceback=False)
+                if get_language()=='en':
+                    print(f'\n[Paste error: {type(e).__name__}]')
+                else:
+                    print(f'\n[Ошибка вставки: {e}]')
                 print(prompt + ''.join(buf), end='', flush=True)
                 prev_raw_cr = False
                 continue
@@ -119,8 +123,8 @@ def read_user_input(prompt='Вы: '):
                     if removed == '\n':
                         # Redrawing a whole multiline buffer is safer than trying
                         # to move the cursor across terminal rows.
-                        print('\n[Редактирование после многострочной вставки: текущий текст сохранён; '
-                              'для сложного редактирования проще вставить заново.]')
+                        ui_print('\n[Редактирование после многострочной вставки: текущий текст сохранён; '
+                                 'для сложного редактирования проще вставить заново.]')
                         print(prompt + ''.join(buf), end='', flush=True)
                     else:
                         print('\b \b', end='', flush=True)
@@ -1509,7 +1513,7 @@ def backend_setup_wizard():
         set_remote_access_mode(profile)
         ep=_remote_profile(profile)
     except Exception as e:
-        yellow(); print('Не удалось сохранить SSH profile:',e); white(); return False
+        show_actionable_error('Ошибка SSH-профиля',e); return False
 
     print(); print('Проверяю SSH...')
     ok,detail=_test_ssh_endpoint(ep,timeout=6)
@@ -3277,7 +3281,7 @@ def choose_model_interactive(current=None,prompt_title='Выберите мод�
         models=installed_models()
     except Exception as e:
         white()
-        print(f'Не удалось получить список моделей {backend_label()}: {e}')
+        show_actionable_error('Ошибка списка моделей',e)
         if current:
             print(f'Используется текущая модель: {current}')
             return current
@@ -11004,7 +11008,7 @@ def benchmark_report_browser():
                     clear_console(); ui_header('КРАТКАЯ СВОДКА','BULL > Результаты',raw_json.name)
                     benchmark_summary(records)
                 except Exception as exc:
-                    yellow(); print('Не удалось показать сводку:',exc); white()
+                    show_actionable_error('Ошибка сводки',exc)
             read_user_input('\nEnter = назад › ')
         elif choice=='2':
             if not raw_json.is_file():
@@ -11013,7 +11017,7 @@ def benchmark_report_browser():
                 try:
                     benchmark_custom_priorities(_load_benchmark_records_for_view(raw_json))
                 except Exception as exc:
-                    yellow(); print('Не удалось применить приоритеты:',exc); white()
+                    show_actionable_error('Ошибка приоритетов',exc)
             read_user_input('\nEnter = назад › ')
         elif choice=='3':
             open_benchmark_visual_report(report)
@@ -11944,7 +11948,7 @@ def show_benchmark_answers(path):
     p=Path(path)
     if not p.exists():print('Файл benchmark не найден.'); return
     try:data=json.loads(p.read_text(encoding='utf-8'))
-    except Exception as e:print('Не удалось прочитать benchmark:',e); return
+    except Exception as e:show_actionable_error('Ошибка чтения benchmark',e); return
     if isinstance(data,dict) and 'records' in data:data=list(data.get('records',{}).values())
     if not isinstance(data,list):print('Неизвестный формат benchmark.'); return
     for r in data:
@@ -13175,7 +13179,7 @@ def execute_benchmark_checkpoint(path,cp,catalog=None):
                     rec=benchmark_error_record(test,item,model_name,ri,spec['mode'],spec['seed_mode'],seed,effective.get('think',actual_tv),e,catalog,attempt=attempt,effective_config=effective)
                     cp['error_history'].append({'key':key,'at':datetime.now().isoformat(timespec='seconds'),'error':rec['error']})
                     yellow()
-                    print(f"Ошибка {test} / {short_model(model_name)} / run {ri}: {e}. Продолжаю suite.")
+                    render_benchmark_run_error(test,model_name,ri,e)
                     gray(); print('  Подсказка: '+error_hint(e)); white()
                 rec['client_recovery']=_checkpoint_attempt_diagnostics(cp,key)
                 rec['client_recovery']['post_resume_load_state']=(
@@ -13274,7 +13278,7 @@ def run_benchmark_spec(spec):
     path,cp=new_checkpoint(spec)
     try:records=execute_benchmark_checkpoint(path,cp,catalog)
     except KeyboardInterrupt:
-        print('\nBenchmark прерван. Checkpoint:',path); raise
+        ui_print('\nBenchmark прерван. Checkpoint:',path); raise
     records,jp,cp_csv,sj,sc=finalize_checkpoint(path,cp); return records,path,jp,cp_csv,sj,sc
 
 
@@ -14176,31 +14180,130 @@ def show_startup_regression_failure(result):
 def error_hint(exc):
     text=str(exc or '')
     low=text.casefold()
+    english=get_language()=='en'
     if isinstance(exc,(ConnectionResetError,ConnectionRefusedError,TimeoutError)) or \
        'connection reset' in low or 'connection refused' in low or 'timed out' in low or \
        '10054' in low or '10060' in low or '10061' in low:
+        if english:
+            return (
+                'Open Connection and test the selected server. For direct Internet access, '
+                'also verify the public IP, external SSH port, and NAT rule to Server:22.'
+            )
         return (
             'Проверь /backend doctor, затем /remote test и /remote reconnect. '
             'Для direct Internet также сверь public IP, внешний SSH-порт и правило NAT → Server:22.'
         )
     if isinstance(exc,urllib.error.URLError):
+        if english:
+            return 'The backend is unavailable. Open Connection and test the active server.'
         return 'Backend недоступен. Проверь /backend doctor и активный remote profile.'
     if 'does not support thinking' in low or 'thinking capability' in low:
+        if english:
+            return 'This model does not support THINK. Use FAST/non-thinking or a capability-aware benchmark.'
         return 'Эта модель не поддерживает THINK. Используй FAST/non-thinking или capability-aware benchmark.'
     if 'api key' in low and 'llama' in low:
+        if english:
+            return 'Set BULL_LLAMA_API_KEY or configure api_key_env for external llama.cpp.'
         return 'Для external llama.cpp задай BULL_LLAMA_API_KEY или настрой api_key_env.'
     if 'host key verification failed' in low:
+        if english:
+            return 'Connect with ordinary ssh USER@HOST first and verify the new server fingerprint.'
         return 'Сначала выполни обычный ssh USER@HOST вручную и проверь fingerprint новой машины.'
     if 'no such file' in low or 'не найден' in low or 'filenotfound' in low:
+        if english:
+            return 'Check the path. Use Connection → Import or migrate for settings from an older build.'
         return 'Проверь путь. Для backend migration используй /backend setup.'
     if 'context_window' in low:
+        if english:
+            return 'The task reached the context window. Use ULTIMATE for demanding work.'
         return 'Задача упёрлась в context window. Для тяжёлой работы используй ULTIMATE.'
+    if english:
+        return 'Open Status or Connection → Help and diagnostics. Technical details are also written to client_debug.log.'
     return 'Используй /status, /backend doctor или /selftest. Подробности также пишутся в client_debug.log.'
 
 
 def show_actionable_error(title,exc):
-    red(); print(f'\n{title}: {type(exc).__name__}: {exc}'); white()
-    gray(); print('Что сделать: '+error_hint(exc)); white()
+    append_client_debug(str(title),exc,include_traceback=False)
+    red()
+    if get_language()=='en':
+        detail=str(exc or '').strip()
+        if any(('А' <= char <= 'я') or char in 'Ёё' for char in detail):
+            detail=type(exc).__name__
+        headings={
+            'Ошибка llama.cpp settings':'llama.cpp settings error',
+            'Ошибка профиля':'Profile error', 'Ошибка профилей':'Profiles error',
+            'Ошибка benchmark pack':'Benchmark pack error', 'Ошибка отчёта':'Report error',
+            'Ошибка rescore':'Rescore error', 'Ошибка prompt library':'Prompt library error',
+            'Ошибка benchmark profile':'Benchmark profile error',
+            'Ошибка benchmark single':'Single benchmark error',
+            'Ошибка CHAT suite':'CHAT suite error', 'Ошибка benchmark':'Benchmark error',
+            'Ошибка сравнения':'Comparison error', 'Ошибка sweep':'Sweep error',
+            'Ошибка category suite':'Category suite error', 'Ошибка suite':'Suite error',
+            'Ошибка resume':'Resume error', 'Ошибка экспорта':'Export error',
+            'Ошибка запроса':'Request error', 'Ошибка запуска':'Launch error',
+            'Ошибка SSH-профиля':'SSH profile error',
+            'Ошибка списка моделей':'Model list error',
+            'Ошибка сводки':'Summary error', 'Ошибка приоритетов':'Priority settings error',
+            'Ошибка чтения benchmark':'Benchmark read error',
+            'Ошибка сведений о модели':'Model information error',
+            'Ошибка открытия отчёта':'Report open error',
+            'Ошибка открытия ответов benchmark':'Benchmark answers error',
+            'Ошибка переключения backend':'Backend switch error',
+            'Ошибка импорта tested profile':'Tested-profile import error',
+            'Ошибка изменения профиля':'Profile update error',
+            'Ошибка сброса профиля':'Profile reset error',
+            'Ошибка переключения модели':'Model switch error',
+            'Ошибка прикрепления файла':'File attachment error',
+            'Ошибка добавления изображения':'Image attachment error',
+            'Ошибка загрузки schema':'Schema load error',
+            'Ошибка переименования файла':'File rename error',
+            'Ошибка загрузки диалога':'Conversation load error',
+            'Ошибка удаления диалога':'Conversation delete error',
+            'Ошибка вставки':'Paste error',
+            'Ошибка подключения':'Connection error',
+        }
+        heading=headings.get(str(title),tr(str(title),fragments=True))
+        if any(('А' <= char <= 'я') or char in 'Ёё' for char in heading):
+            heading='Error'
+        print(f'\n{heading}: {detail or type(exc).__name__}')
+    else:
+        print(f'\n{title}: {type(exc).__name__}: {exc}')
+    white()
+    gray(); ui_print(('Next step: ' if get_language()=='en' else 'Что сделать: ')+error_hint(exc)); white()
+
+
+def render_runtime_connection_failure(purpose,exc):
+    """Show a localized connection failure without leaking legacy-language text."""
+    append_client_debug(f'RUNTIME_CONNECTION_FAILURE purpose={purpose}',exc,include_traceback=False)
+    yellow()
+    if get_language()=='en':
+        purposes={
+            'работы':'this action', 'чата':'chat', 'benchmark':'the benchmark',
+            'Agent Benchmark':'Agent Benchmark', 'повтора Agent request':'the Agent request retry',
+        }
+        target=purposes.get(str(purpose),str(purpose) if str(purpose).isascii() else 'this action')
+        print(f'\nCould not connect to {backend_label()} for {target}.')
+        white()
+        print('The selected connection was preserved; BULL did not switch the backend automatically.')
+        print('Open Connection on Home, choose this computer or a saved SSH server, then retry.')
+        print('Technical details were written to client_debug.log.')
+        return
+    print(f'\nНе удалось подключить {backend_label()} для {purpose}: {exc}')
+    white()
+    print('Настройки не сброшены и backend автоматически не переключён.')
+    print('Открой «Подключение» на главной, выбери этот компьютер или сохранённый SSH-сервер и повтори действие.')
+
+
+def render_benchmark_run_error(test,model_name,run_index,exc):
+    append_client_debug(
+        f'BENCHMARK_RUN_ERROR test={test} model={model_name} run={run_index}',
+        exc,include_traceback=False,
+    )
+    if get_language()=='en':
+        print(f'Error {test} / {short_model(model_name)} / run {run_index}: '
+              f'{type(exc).__name__}. Continuing the suite.')
+    else:
+        print(f'Ошибка {test} / {short_model(model_name)} / run {run_index}: {exc}. Продолжаю suite.')
 
 
 def _ui_fit(value,width):
@@ -14813,7 +14916,7 @@ def benchmark_sampling_source_setup(models,catalog=None):
         try:
             snapshots[model]=ollama_profile_snapshot(model,catalog)
         except Exception as exc:
-            yellow(); ui_print(f'Не удалось прочитать /api/show для {short_model(model)}: {exc}'); white()
+            show_actionable_error('Ошибка сведений о модели',exc)
             return None
     fields=('temperature','top_p','top_k','min_p','repeat_penalty')
     ui_print(); ui_print(f"  {'MODEL':<27} "+'  '.join(f'{field:>10}' for field in fields))
@@ -15434,7 +15537,7 @@ def benchmark_result_menu(last_command=None,last_benchmark_path=None):
                     clear_console(); ui_header('КРАТКАЯ СВОДКА','BULL > Результат','Результаты без выхода из программы')
                     benchmark_summary(records)
                 except Exception as e:
-                    yellow(); ui_print('Не удалось показать сводку:',e); white()
+                    show_actionable_error('Ошибка сводки',e)
             else:
                 yellow(); ui_print('Нет сохранённого результата benchmark для просмотра.'); white()
             read_user_input('\nEnter = назад › ')
@@ -15447,7 +15550,7 @@ def benchmark_result_menu(last_command=None,last_benchmark_path=None):
                     records=_load_benchmark_records_for_view(last_benchmark_path)
                     benchmark_custom_priorities(records)
                 except Exception as e:
-                    yellow(); ui_print('Не удалось применить приоритеты:',e); white()
+                    show_actionable_error('Ошибка приоритетов',e)
             else:
                 yellow(); ui_print('Нет сохранённого результата benchmark для просмотра.'); white()
             read_user_input('\nEnter = назад › ')
@@ -15461,7 +15564,7 @@ def benchmark_result_menu(last_command=None,last_benchmark_path=None):
                     open_benchmark_visual_report(report)
                     green(); ui_print('Открыт наглядный отчёт: '+report.name); white()
                 except Exception as e:
-                    yellow(); ui_print('Не удалось открыть наглядный отчёт:',e); white()
+                    show_actionable_error('Ошибка открытия отчёта',e)
             else:
                 yellow(); ui_print('Нет сохранённого результата benchmark для просмотра.'); white()
             continue
@@ -15480,7 +15583,7 @@ def benchmark_result_menu(last_command=None,last_benchmark_path=None):
                 try:
                     show_benchmark_answers(last_benchmark_path)
                 except Exception as e:
-                    yellow(); ui_print('Не удалось открыть ответы benchmark:',e); white()
+                    show_actionable_error('Ошибка открытия ответов benchmark',e)
             else:
                 yellow(); ui_print('Нет сохранённого результата benchmark для просмотра.'); white()
             # Crucial UX rule: answers do not kick the user away from results.
@@ -15886,7 +15989,7 @@ def main():
             resolved=previous_model
             if stored and stored.casefold()!=previous_model.casefold():
                 yellow()
-                print(f'Сохранённая модель недоступна: {stored}')
+                ui_print('Сохранённая модель недоступна: ',stored)
                 print(f'Диалог будет открыт на текущей модели: {previous_model}')
                 white()
         set_active_model(resolved)
@@ -16040,9 +16143,7 @@ def main():
                 return True
             except Exception as error:
                 backend_ready=False; startup_backend_error=str(error)
-                yellow(); print(f'\nНе удалось подключить {backend_label()} для {purpose}: {error}'); white()
-                print('Настройки не сброшены и backend автоматически не переключён.')
-                print('Открой «Подключения» на главной, выбери SSH-сервер и повтори действие.')
+                render_runtime_connection_failure(purpose,error)
                 read_user_input('\nEnter = вернуться в главное меню › ')
                 return False
 
@@ -16262,7 +16363,7 @@ def main():
                     activate_backend_runtime(target)
                     print('Используй /model для выбора модели нового backend или продолжай с автоматически выбранной.')
                 except Exception as e:
-                    yellow(); print('Не удалось переключить backend:',e); white()
+                    show_actionable_error('Ошибка переключения backend',e)
                 continue
             if u=='/connection':
                 if connection_menu():
@@ -16310,7 +16411,7 @@ def main():
                     val=set_llama_setting(parts[2],parts[3])
                     print(f'llama.cpp {parts[2]} = {val}')
                     print('Managed server применит изменение автоматически перед следующим llama.cpp запросом.')
-                except Exception as e: print('Ошибка llama.cpp settings:',e)
+                except Exception as e: show_actionable_error('Ошибка llama.cpp settings',e)
                 continue
             if u in ('/llama start','/llama restart'):
                 try:
@@ -16443,12 +16544,12 @@ def main():
             # ----- Профили / model info / telemetry -----
             if u in ('/model info','/info'):
                 try: print_model_info(cfg['model'])
-                except Exception as e: print('Не удалось получить информацию о модели:',e)
+                except Exception as e: show_actionable_error('Ошибка сведений о модели',e)
                 continue
 
             if u=='/profile':
                 try: print_profile(cfg['model'],mode)
-                except Exception as e: print('Ошибка профиля:',e)
+                except Exception as e: show_actionable_error('Ошибка профиля',e)
                 continue
             if u=='/profile list':
                 try:
@@ -16456,7 +16557,7 @@ def main():
                     print('Сохранённые профили:')
                     if not models: print('  (нет, используются defaults)')
                     for name in sorted(models): print('  '+name)
-                except Exception as e: print('Ошибка профилей:',e)
+                except Exception as e: show_actionable_error('Ошибка профилей',e)
                 continue
             if u.startswith('/profile import-tested '):
                 try:
@@ -16468,7 +16569,7 @@ def main():
                         apply_model_profile(cfg['model']); cfg=make_cfg(mode,session.get('think_value'))
                     print(f"Проверенный профиль импортирован: {imported['profile_id']} -> {imported['model']}")
                 except Exception as e:
-                    print('Не удалось импортировать tested profile:',e)
+                    show_actionable_error('Ошибка импорта tested profile',e)
                     print('Пример: /profile import-tested "Benchmarks\\run_tested_profiles.json" model-id')
                 continue
             if u.startswith('/profile set '):
@@ -16480,18 +16581,18 @@ def main():
                     val,prof=save_profile_value(cfg['model'],parts[2],parts[3])
                     cfg=make_cfg(mode,session.get('think_value'))
                     print(f"{parts[2]} = {val} | сохранено для {cfg['model']}")
-                except Exception as e: print('Не удалось изменить профиль:',e)
+                except Exception as e: show_actionable_error('Ошибка изменения профиля',e)
                 continue
             if u=='/profile reset':
                 try:
                     removed,prof=reset_model_profile(cfg['model'])
                     cfg=make_cfg(mode,session.get('think_value'))
                     print('Профиль сброшен к defaults.' if removed else 'Для модели не было отдельного профиля.')
-                except Exception as e: print('Не удалось сбросить профиль:',e)
+                except Exception as e: show_actionable_error('Ошибка сброса профиля',e)
                 continue
 
             if u=='/telemetry':
-                snap=telemetry_snapshot(cfg['model']); print(telemetry_inline(snap) or 'Telemetry недоступна.')
+                snap=telemetry_snapshot(cfg['model']); ui_print(telemetry_inline(snap) or 'Telemetry недоступна.')
                 continue
             if u.startswith('/telemetry '):
                 x=u.split(maxsplit=1)[1].lower()
@@ -16506,7 +16607,7 @@ def main():
                 try:
                     show_models(installed_models(),cfg['model'])
                 except Exception as e:
-                    print('Не удалось получить список моделей:',e)
+                    show_actionable_error('Ошибка списка моделей',e)
                 continue
 
             if u=='/model' or u.startswith('/model '):
@@ -16553,7 +16654,7 @@ def main():
                     if mode in ('think','ultimate') and caps is not None and 'thinking' not in caps:
                         print('Внимание: capability thinking для этой модели не заявлена. При ошибке используй /think off.')
                 except Exception as e:
-                    print('Не удалось переключить модель:',e)
+                    show_actionable_error('Ошибка переключения модели',e)
                 continue
 
             # ----- ULTIMATE persistent reasoning -----
@@ -16649,7 +16750,7 @@ def main():
                     aa.append(a); save_if_needed()
                     print(f"Прикреплено: {a['name']} | {a['chars']} chars" + (' | truncated' if a.get('truncated') else ''))
                     print('Контекст файлов:',attachments_cost(session['attachments']),'~tokens')
-                except Exception as e: print('Не удалось прикрепить файл:',e)
+                except Exception as e: show_actionable_error('Ошибка прикрепления файла',e)
                 continue
             if u.startswith('/detach '):
                 q=u.split(maxsplit=1)[1].strip(); aa=session.get('attachments',[]); removed=None
@@ -16675,7 +16776,7 @@ def main():
                     if 'vision' not in caps:
                         yellow(); print('Текущая модель не заявляет capability vision. Изображение сохранено, но модель может его не обработать.'); white()
                     im=add_image_path(raw); session.setdefault('images',[]).append(im); save_if_needed(); print('Изображение:',im['name'])
-                except Exception as e: print('Не удалось добавить изображение:',e)
+                except Exception as e: show_actionable_error('Ошибка добавления изображения',e)
                 continue
 
             if u=='/tools':
@@ -16689,7 +16790,7 @@ def main():
                 if x!='off':
                     caps=model_capabilities(cfg['model']) or []
                     if 'tools' not in caps and 'tool' not in caps:
-                        yellow(); print('Модель не заявляет capability tools в /api/show. Возможна ошибка или игнорирование tools.'); white()
+                        yellow(); ui_print('Модель не заявляет capability tools в /api/show. Возможна ошибка или игнорирование tools.'); white()
                 if x in ('exec','write','full'): yellow(); print('Опасные вызовы всё равно требуют ручного подтверждения RUN/WRITE.'); white()
                 continue
 
@@ -16708,7 +16809,7 @@ def main():
                     schema=json.loads(Path(raw).expanduser().read_text(encoding='utf-8'))
                     if not isinstance(schema,dict): raise ValueError('Schema должна быть JSON object.')
                     session['response_format']=schema; save_if_needed(); print('Structured output: schema loaded',raw)
-                except Exception as e: print('Не удалось загрузить schema:',e)
+                except Exception as e: show_actionable_error('Ошибка загрузки schema',e)
                 continue
 
             # ----- Benchmark -----
@@ -16769,7 +16870,7 @@ def main():
                     else:
                         print('Использование: /bench pack list | validate [id[@version]] | inspect <id[@version]>')
                 except Exception as e:
-                    print('Ошибка benchmark pack:',e)
+                    show_actionable_error('Ошибка benchmark pack',e)
                 continue
             if u=='/bench list':
                 b=load_benchmarks(); print('Benchmarks:')
@@ -16798,7 +16899,7 @@ def main():
                         open_benchmark_visual_report(report)
                         print('Наглядный отчёт:',report)
                 except Exception as e:
-                    print('Ошибка отчёта:',e)
+                    show_actionable_error('Ошибка отчёта',e)
                 continue
             if u=='/bench rescore' or u.startswith('/bench rescore '):
                 arg=u[len('/bench rescore'):].strip().strip('"')
@@ -16822,7 +16923,7 @@ def main():
                     after_benchmark(u)
                 except Exception as e:
                     benchmark_return_home=False
-                    print('Ошибка rescore:',e)
+                    show_actionable_error('Ошибка rescore',e)
                 continue
 
             if u.startswith('/bench add '):
@@ -16860,7 +16961,7 @@ def main():
                     else:
                         print('Использование: /bench prompt list | show <name> [version] | history <name>')
                 except Exception as e:
-                    print('Ошибка prompt library:',e)
+                    show_actionable_error('Ошибка prompt library',e)
                 continue
             if u=='/bench profile' or u.startswith('/bench profile '):
                 parts=u.split()
@@ -16888,7 +16989,7 @@ def main():
                     else:
                         print('Использование: /bench profile list|show <name>|save <name> key=value...|duplicate <src> <dst>|rename <src> <dst>|delete <name>')
                 except Exception as e:
-                    print('Ошибка benchmark profile:',e)
+                    show_actionable_error('Ошибка benchmark profile',e)
                 continue
             if u=='/bench single':
                 original_model=cfg['model']; original_mode=mode; original_tv=session.get('think_value')
@@ -16908,9 +17009,9 @@ def main():
                     stats['last_benchmark']=str(jp); stats['last_benchmark_summary']=str(sj); stats['last_benchmark_checkpoint']=str(chk)
                     after_benchmark('/bench single')
                 except KeyboardInterrupt:
-                    benchmark_return_home=False; print('\nBenchmark прерван; используй /bench resume.')
+                    benchmark_return_home=False; ui_print('\nBenchmark прерван; используй /bench resume.')
                 except Exception as e:
-                    benchmark_return_home=False; print('Ошибка benchmark single:',e)
+                    benchmark_return_home=False; show_actionable_error('Ошибка benchmark single',e)
                 finally:
                     try:set_active_model(original_model); cfg=make_cfg(original_mode,original_tv)
                     except Exception:pass
@@ -16945,9 +17046,9 @@ def main():
                     stats['last_benchmark']=str(jp); stats['last_benchmark_summary']=str(sj); stats['last_benchmark_checkpoint']=str(chk)
                     after_benchmark(u)
                 except KeyboardInterrupt:
-                    benchmark_return_home=False; print('\nCHAT suite прерван; используй /bench resume.')
+                    benchmark_return_home=False; ui_print('\nCHAT suite прерван; используй /bench resume.')
                 except Exception as e:
-                    benchmark_return_home=False; print('Ошибка CHAT suite:',e)
+                    benchmark_return_home=False; show_actionable_error('Ошибка CHAT suite',e)
                 finally:
                     try:set_active_model(original_model); cfg=make_cfg(original_mode,original_tv)
                     except Exception:pass
@@ -16966,9 +17067,9 @@ def main():
                     stats['last_benchmark']=str(jp); stats['last_benchmark_summary']=str(sj); stats['last_benchmark_checkpoint']=str(chk)
                     after_benchmark(u)
                 except KeyboardInterrupt:
-                    benchmark_return_home=False; print('\nBenchmark прерван; используй /bench resume.')
+                    benchmark_return_home=False; ui_print('\nBenchmark прерван; используй /bench resume.')
                 except Exception as e:
-                    benchmark_return_home=False; print('Ошибка benchmark:',e)
+                    benchmark_return_home=False; show_actionable_error('Ошибка benchmark',e)
                 finally:
                     try:set_active_model(original_model); cfg=make_cfg(original_mode,original_tv)
                     except Exception:pass
@@ -16994,9 +17095,9 @@ def main():
                     stats['last_benchmark']=str(jp); stats['last_benchmark_summary']=str(sj); stats['last_benchmark_checkpoint']=str(chk)
                     after_benchmark(u)
                 except KeyboardInterrupt:
-                    benchmark_return_home=False; print('\nСравнение прервано; используй /bench resume.')
+                    benchmark_return_home=False; ui_print('\nСравнение прервано; используй /bench resume.')
                 except Exception as e:
-                    benchmark_return_home=False; print('Ошибка сравнения:',e)
+                    benchmark_return_home=False; show_actionable_error('Ошибка сравнения',e)
                 finally:
                     try:set_active_model(original_model); cfg=make_cfg(original_mode,original_tv)
                     except Exception:pass
@@ -17031,9 +17132,9 @@ def main():
                     stats['last_benchmark']=str(jp); stats['last_benchmark_summary']=str(sj); stats['last_benchmark_checkpoint']=str(chk)
                     after_benchmark(u)
                 except KeyboardInterrupt:
-                    benchmark_return_home=False; print('\nSweep прерван; используй /bench resume.')
+                    benchmark_return_home=False; ui_print('\nSweep прерван; используй /bench resume.')
                 except Exception as e:
-                    benchmark_return_home=False; print('Ошибка sweep:',e)
+                    benchmark_return_home=False; show_actionable_error('Ошибка sweep',e)
                 finally:
                     try:set_active_model(original_model); cfg=make_cfg(original_mode,original_tv)
                     except Exception:pass
@@ -17061,9 +17162,9 @@ def main():
                     stats['last_benchmark']=str(jp); stats['last_benchmark_summary']=str(sj); stats['last_benchmark_checkpoint']=str(chk)
                     after_benchmark(u)
                 except KeyboardInterrupt:
-                    benchmark_return_home=False; print('\nCategory suite прерван; используй /bench resume.')
+                    benchmark_return_home=False; ui_print('\nCategory suite прерван; используй /bench resume.')
                 except Exception as e:
-                    benchmark_return_home=False; print('Ошибка category suite:',e)
+                    benchmark_return_home=False; show_actionable_error('Ошибка category suite',e)
                 finally:
                     try:set_active_model(original_model); cfg=make_cfg(original_mode,original_tv)
                     except Exception:pass
@@ -17083,9 +17184,9 @@ def main():
                     stats['last_benchmark']=str(jp); stats['last_benchmark_summary']=str(sj); stats['last_benchmark_checkpoint']=str(chk)
                     after_benchmark(u)
                 except KeyboardInterrupt:
-                    benchmark_return_home=False; print('\nSuite прерван; используй /bench resume.')
+                    benchmark_return_home=False; ui_print('\nSuite прерван; используй /bench resume.')
                 except Exception as e:
-                    benchmark_return_home=False; print('Ошибка suite:',e)
+                    benchmark_return_home=False; show_actionable_error('Ошибка suite',e)
                 finally:
                     try:set_active_model(original_model); cfg=make_cfg(original_mode,original_tv)
                     except Exception:pass
@@ -17120,9 +17221,9 @@ def main():
                     stats['last_benchmark']=str(jp); stats['last_benchmark_summary']=str(sj); stats['last_benchmark_checkpoint']=str(p)
                     after_benchmark(u)
                 except KeyboardInterrupt:
-                    benchmark_return_home=False; print('\nResume прерван; checkpoint сохранён.')
+                    benchmark_return_home=False; ui_print('\nResume прерван; checkpoint сохранён.')
                 except Exception as e:
-                    benchmark_return_home=False; print('Ошибка resume:',e)
+                    benchmark_return_home=False; show_actionable_error('Ошибка resume',e)
                 finally:
                     try:set_active_model(original_model); cfg=make_cfg(original_mode,original_tv)
                     except Exception:pass
@@ -17145,7 +17246,7 @@ def main():
             if u=='/export' or u.startswith('/export '):
                 fmt=u.split(maxsplit=1)[1].strip().lower() if ' ' in u else 'md'
                 try: print('Экспорт:',export_dialog_file(fmt,path,mode,history,summary,archive,session,stats))
-                except Exception as e: print('Ошибка экспорта:',e)
+                except Exception as e: show_actionable_error('Ошибка экспорта',e)
                 continue
 
             if u=='/retry' or u.startswith('/retry '):
@@ -17160,7 +17261,7 @@ def main():
                         if not selected: print('Модель не найдена, retry на текущей модели.')
                         else:
                             set_active_model(selected); session['model']=selected; cfg=make_cfg(mode,session.get('think_value'))
-                    except Exception as e: print('Не удалось сменить модель:',e)
+                    except Exception as e: show_actionable_error('Ошибка переключения модели',e)
                 history=new_history; gray(); print('Исходная версия сохранена:',backup); white(); u=prompt
                 # fall through to normal generation
 
@@ -17194,7 +17295,7 @@ def main():
                     if old != Path(path) and not session.get('autosave',True):
                         print('Автосохранение выключено: существующий файл переименован, текущие изменения в него не записаны.')
                 except Exception as e:
-                    print('Не удалось переименовать файл:',e)
+                    show_actionable_error('Ошибка переименования файла',e)
                 continue
 
             # ----- Автосохранение и ручное сохранение -----
@@ -17239,7 +17340,7 @@ def main():
                     print()
                     show_dialog(history,summary,archive,session,path,mode,'preview',6)
                 except Exception as e:
-                    print('Не удалось загрузить диалог:',e)
+                    show_actionable_error('Ошибка загрузки диалога',e)
                 continue
 
             if u=='/load' or u.startswith('/load '):
@@ -17278,7 +17379,7 @@ def main():
                     print()
                     show_dialog(history,summary,archive,session,path,mode,'preview',6)
                 except Exception as e:
-                    print('Не удалось загрузить диалог:',e)
+                    show_actionable_error('Ошибка загрузки диалога',e)
                 continue
 
 
@@ -17345,7 +17446,7 @@ def main():
                     print('Предыдущий диалог полностью удалён.')
                     print('Создан новый пустой диалог без имени.')
                 except Exception as e:
-                    print('Не удалось удалить диалог:',e)
+                    show_actionable_error('Ошибка удаления диалога',e)
                 continue
 
             # ----- Вставка и trace -----
@@ -17354,7 +17455,7 @@ def main():
                     u=clipboard_text()
                     print(f'[Буфер вставлен одним сообщением: {len(u.splitlines())} строк, {len(u)} символов]')
                 except Exception as e:
-                    print(f'[Ошибка /paste: {e}]')
+                    show_actionable_error('Ошибка вставки',e)
                     continue
 
             if u=='/multi':
@@ -17455,7 +17556,7 @@ def main():
 
             except KeyboardInterrupt:
                 white()
-                print('\n[Генерация прервана.]')
+                ui_print('\n[Генерация прервана.]')
                 if history and history[-1]['role']=='user':
                     history.pop()
             except urllib.error.HTTPError as e:
@@ -17464,7 +17565,14 @@ def main():
                     body=e.read().decode('utf-8','replace')
                 except Exception:
                     body=''
-                print(f'\n[Ошибка Ollama HTTP {e.code}: {body or e.reason}]')
+                append_client_debug(f'OLLAMA_HTTP_ERROR code={e.code}',e,include_traceback=False)
+                if get_language()=='en':
+                    detail=str(body or e.reason or '').strip()
+                    if any(('А' <= char <= 'я') or char in 'Ёё' for char in detail):
+                        detail='See client_debug.log for technical details.'
+                    print(f'\n[Ollama HTTP error {e.code}: {detail}]')
+                else:
+                    print(f'\n[Ошибка Ollama HTTP {e.code}: {body or e.reason}]')
                 if history and history[-1]['role']=='user':
                     history.pop()
             except Exception as e:
@@ -17478,7 +17586,7 @@ def main():
         print('\nЗавершение.')
     except Exception as e:
         white()
-        print('\nОшибка запуска:',e)
+        show_actionable_error('Ошибка запуска',e)
         append_client_debug('STARTUP_ERROR',e,include_traceback=True)
         return 1
     finally:
@@ -17524,5 +17632,11 @@ if __name__=='__main__':
             raise
         append_client_debug('FATAL',e,include_traceback=True)
         white()
-        print(f"\nКритическая ошибка клиента: {type(e).__name__}: {e}")
+        if get_language()=='en':
+            detail=str(e or '')
+            if any(('А' <= char <= 'я') or char in 'Ёё' for char in detail):
+                detail=type(e).__name__
+            print(f"\nCritical client error: {type(e).__name__}: {detail}")
+        else:
+            print(f"\nКритическая ошибка клиента: {type(e).__name__}: {e}")
         raise

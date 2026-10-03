@@ -193,6 +193,28 @@ class UXTests(unittest.TestCase):
         finally:
             set_language('ru')
 
+    def test_english_connection_and_action_errors_hide_legacy_russian_text(self):
+        from Shared.bull_llm.i18n import set_language
+        has_cyrillic=lambda value:any(('А' <= char <= 'я') or char in 'Ёё' for char in value)
+        out=io.StringIO()
+        set_language('en')
+        try:
+            with patch.object(self.core,'append_client_debug'), patch.object(
+                    self.core,'backend_label',return_value='Ollama'), contextlib.redirect_stdout(out):
+                self.core.render_runtime_connection_failure(
+                    'benchmark',RuntimeError('Локальный Ollama не отвечает на 127.0.0.1:11434.')
+                )
+                self.core.show_actionable_error(
+                    'Ошибка benchmark',RuntimeError('Служебная ошибка старого backend-кода')
+                )
+            text=out.getvalue()
+            self.assertIn('Could not connect to Ollama for the benchmark.',text)
+            self.assertIn('Benchmark error:',text)
+            self.assertIn('client_debug.log',text)
+            self.assertFalse(has_cyrillic(text),text)
+        finally:
+            set_language('ru')
+
     def test_english_appearance_and_offline_status_do_not_mix_languages(self):
         from Shared.bull_llm.i18n import set_language
         has_cyrillic=lambda value:any(('А' <= char <= 'я') or char in 'Ёё' for char in value)
@@ -469,14 +491,16 @@ class UXTests(unittest.TestCase):
             self.assertEqual(experimental_menu(self.core), 'agent')
 
     def test_full_bull_mark_and_expansion_are_available_on_every_page(self):
-        from Shared.bull_llm.terminal_ui import render_page_mark
+        from Shared.bull_llm import terminal_ui
         out=io.StringIO()
         with patch.object(self.core,'matrix'), patch.object(self.core,'white'), contextlib.redirect_stdout(out):
-            render_page_mark(self.core)
+            terminal_ui.render_page_mark(self.core)
         text=out.getvalue()
-        self.assertIn('▅▇▁▁▇▅',text)
+        canonical=terminal_ui._SGR_ESCAPE_RE.sub('',terminal_ui._load_chafa_mark()).strip()
+        visible=terminal_ui._SGR_ESCAPE_RE.sub('',text)
+        self.assertIn(canonical,visible)
         self.assertIn('B U L L  //  Benchmarking & Usage of Local LLMs',text)
-        self.assertGreaterEqual(len(text.splitlines()),12)
+        self.assertGreaterEqual(len(text.splitlines()),16)
 
     def test_page_header_clears_previous_screen(self):
         with patch.object(self.core, 'clear_console') as clear:
@@ -484,6 +508,7 @@ class UXTests(unittest.TestCase):
         clear.assert_called_once_with()
 
     def test_red_theme_uses_red_brand_and_action_colors(self):
+        from Shared.bull_llm import terminal_ui
         selected = self.core.set_ui_theme('bull_red', persist=False)
         try:
             self.assertEqual(selected, 'bull_red')
@@ -491,6 +516,13 @@ class UXTests(unittest.TestCase):
             self.assertEqual(palette['accent'], self.core.ANSI_BULL_RED)
             self.assertEqual(palette['action'], self.core.ANSI_BULL_RED)
             self.assertFalse(palette['matrix'])
+            canonical=terminal_ui._load_chafa_mark()
+            themed=terminal_ui._theme_chafa_mark(canonical,'bull_red')
+            self.assertNotEqual(themed,canonical)
+            self.assertEqual(
+                terminal_ui._SGR_ESCAPE_RE.sub('',themed),
+                terminal_ui._SGR_ESCAPE_RE.sub('',canonical),
+            )
         finally:
             self.core.set_ui_theme('bull_brand', persist=False)
 

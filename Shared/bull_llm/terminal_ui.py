@@ -13,6 +13,7 @@ _CHAFA_ASSET = (
 )
 _SGR_ESCAPE_RE = re.compile(r'\x1b\[[0-9;:]*m')
 _CHAFA_CURSOR_RE = re.compile(r'\x1b\[\?25[hl]')
+_TRUECOLOR_RE = re.compile(r'(?P<kind>38|48);2;(?P<r>\d{1,3});(?P<g>\d{1,3});(?P<b>\d{1,3})')
 
 BULL_PIXEL_ART = (
     '       ▗▆            ▆▖',
@@ -63,6 +64,45 @@ def _render_text_mark(core):
     core.white()
 
 
+def _theme_chafa_mark(rendered, theme):
+    """Keep the canonical Chafa geometry while adapting saturated brand pixels."""
+    theme = str(theme or 'bull_brand').strip().casefold()
+    if theme == 'bull_brand':
+        return rendered
+    targets = {
+        'matrix_bright': (54, 255, 115),
+        'matrix_balanced': (45, 220, 105),
+        'matrix_soft': (38, 176, 91),
+        'bull_red': (255, 60, 82),
+        'classic': (36, 214, 255),
+    }
+    target = targets.get(theme)
+    if target is None:
+        return rendered
+
+    def replace(match):
+        red, green, blue = (int(match.group(name)) for name in ('r', 'g', 'b'))
+        # Preserve the neutral graphite face and background. Only the original
+        # saturated turquoise/green brand pixels are recoloured.
+        if max(red, green, blue) - min(red, green, blue) < 24:
+            return match.group(0)
+        intensity = max(red, green, blue) / 255.0
+        mapped = tuple(max(0, min(255, round(channel * intensity))) for channel in target)
+        return f'{match.group("kind")};2;{mapped[0]};{mapped[1]};{mapped[2]}'
+
+    return _TRUECOLOR_RE.sub(replace, rendered)
+
+
+def _render_chafa_mark(core):
+    rendered = _load_chafa_mark()
+    if rendered is None:
+        _render_text_mark(core)
+        return False
+    themed = _theme_chafa_mark(rendered, getattr(core, 'UI_THEME', 'bull_brand'))
+    print(themed, end='' if themed.endswith('\n') else '\n')
+    return True
+
+
 def _render_wordmark(core):
     core.white()
     print(_WORDMARK)
@@ -74,21 +114,15 @@ def render_startup_mark(core):
     if _startup_mark_shown:
         return False
     _startup_mark_shown = True
-    # The bundled Chafa asset uses the default turquoise brand colours. Other
-    # themes use the complete text mark so the bull follows the chosen palette.
-    rendered = _load_chafa_mark() if getattr(core, 'UI_THEME', 'bull_brand') == 'bull_brand' else None
-    if rendered:
-        print(rendered, end='' if rendered.endswith('\n') else '\n')
-    else:
-        _render_text_mark(core)
+    _render_chafa_mark(core)
     _render_wordmark(core)
     print()
     return True
 
 
 def render_page_mark(core):
-    """Draw the complete theme-coloured bull and product expansion on every page."""
-    _render_text_mark(core)
+    """Draw the canonical Chafa bull and product expansion on every page."""
+    _render_chafa_mark(core)
     _render_wordmark(core)
 
 

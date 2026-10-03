@@ -11,7 +11,7 @@ import json
 import os
 import re
 
-from .i18n import localized_print as print
+from .i18n import get_language, localized_print as print
 import shlex
 import subprocess
 import uuid
@@ -490,7 +490,13 @@ def connection_help_menu(core):
                 print('Выбран этот компьютер. SSH сейчас не используется и не проверяется.')
             else:
                 ok, detail = core._test_ssh_endpoint(core.resolve_remote_endpoint(force=True), timeout=6)
-                print(('SSH OK: ' if ok else 'SSH недоступен: ') + terminal_text(detail))
+                if ok:
+                    print('SSH OK: ' + terminal_text(detail))
+                elif get_language() == 'en':
+                    core.append_client_debug('SSH_TEST_FAILED '+terminal_text(detail))
+                    print('SSH unavailable. Technical details were written to client_debug.log.')
+                else:
+                    print('SSH недоступен: ' + terminal_text(detail))
             pause(core)
         elif value == '2':
             show_ssh_key_guide(core); pause(core)
@@ -563,6 +569,6 @@ def connection_menu(core):
         except Cancelled:
             print('Отменено без сохранения.')
         except (OSError, ValueError, TypeError, KeyError, subprocess.SubprocessError) as exc:
-            core.yellow(); print('Не удалось завершить действие:', terminal_text(str(exc))); core.white()
+            core.show_actionable_error('Ошибка подключения',exc)
             print('Проверьте SSH-алиас или адрес, порт и файл ключа. Старые подключения сохранены.')
             pause(core)
