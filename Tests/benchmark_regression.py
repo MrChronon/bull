@@ -3843,6 +3843,8 @@ def test_icon_shortcut_and_release_assets():
     assert 'IconLocation' in shortcut and 'GetFolderPath("Programs")' in shortcut
     assert 'Install-BULL-v0.28.0.4-Shortcut.ps1' in launcher
     assert (ROOT/'Install-BULL-v0.28.0.4.cmd').is_file()
+    asset_builder=(ROOT/'Tools'/'build_brand_assets.py').read_text(encoding='utf-8')
+    assert 'contain(red_mark_source, (256, 256), padding=16).save(' in asset_builder
 
 
 def test_windows_powershell_launcher_is_ascii_parse_safe():

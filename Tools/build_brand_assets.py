@@ -141,7 +141,10 @@ def main() -> None:
     )
 
     contain(mark_source, (512, 512), padding=32).save(ROOT / f"BULL-{VERSION}.png", optimize=True)
-    contain(mark_source, (256, 256), padding=16).save(
+    # The Windows shell icon follows the release palette.  Keeping this separate
+    # from the canonical master makes the Desktop/Start shortcut visibly match
+    # the default BULL Red theme without changing the approved logo source.
+    contain(red_mark_source, (256, 256), padding=16).save(
         ROOT / f"BULL-{VERSION}.ico",
         sizes=[(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)],
     )
