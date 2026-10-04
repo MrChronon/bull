@@ -15,7 +15,7 @@
 <p align="center">
   <a href="https://github.com/MrChronon/bull/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/MrChronon/bull?style=for-the-badge&color=FF3C52&label=release"></a>
   <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/github/license/MrChronon/bull?style=for-the-badge&color=FF6B7A"></a>
-  <a href="https://github.com/MrChronon/bull/releases"><img alt="Release asset downloads" src="https://img.shields.io/github/downloads/MrChronon/bull/total?style=for-the-badge&color=FF3C52&label=release%20downloads"></a>
+  <a href="https://github.com/MrChronon/bull/releases"><img alt="Total downloads across all release assets" src="https://img.shields.io/github/downloads/MrChronon/bull/total?style=for-the-badge&color=FF3C52&label=total%20downloads"></a>
   <img alt="Windows 11" src="https://img.shields.io/badge/Windows_11-supported-FF6B7A?style=for-the-badge&logo=windows11&logoColor=white">
 </p>
 
@@ -41,7 +41,7 @@ server**. Run chat, compare selected models, resume interrupted suites, inspect
 offline reports and move a tested profile into the working client.
 
 <p align="center">
-  <img src="Assets/Brand/readme-signal-panel.svg" alt="BULL evaluation signal panel: 380 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases, private and share-safe evidence, and nine separated metric spaces" width="100%">
+  <img src="Assets/Brand/readme-signal-panel.svg" alt="BULL evaluation signal panel: 390 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases, private and share-safe evidence, and nine separated metric spaces" width="100%">
 </p>
 
 ## Why BULL
@@ -153,7 +153,7 @@ output, client assistance and recovery behavior in distinct metric spaces.
 .\Build-Release.ps1
 ```
 
-The current release passes **380/380 offline regressions**, including clean
+The current release passes **390/390 offline regressions**, including clean
 Python without site packages, forced `cp1251`, startup integration, manifest
 hashes and ZIP verification.
 
@@ -199,3 +199,7 @@ scorers, recovery and runtime inference behavior remain unchanged. See the
 BULL is released under the [MIT License](LICENSE). Third-party models, engines
 and benchmark packs retain their own licenses. Use **BULL — Benchmark Lab** on
 first mention; the technical namespace is `bull_llm`.
+
+The download badge counts the combined downloads of release assets across all
+published BULL releases. It is GitHub's public aggregate, so it can include the
+ZIP, checksum and other attached release files.
