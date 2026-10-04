@@ -41,7 +41,7 @@ server**. Run chat, compare selected models, resume interrupted suites, inspect
 offline reports and move a tested profile into the working client.
 
 <p align="center">
-  <img src="Assets/Brand/readme-signal-panel.svg" alt="BULL evaluation signal panel: 390 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases, private and share-safe evidence, and nine separated metric spaces" width="100%">
+  <img src="Assets/Brand/readme-signal-panel.svg?v=0.28.0.4-signal390" alt="BULL evaluation signal panel: 390 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases, private and share-safe evidence, and nine separated metric spaces" width="100%">
 </p>
 
 ## Why BULL

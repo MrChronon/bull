@@ -3136,6 +3136,35 @@ def _gpu_command(arguments):
     return None
 
 
+def _system_sampler_command(interval_ms=1000):
+    """Build a bounded local-or-pinned-SSH resource sampler command.
+
+    It intentionally reads only aggregate Windows CPU load and physical-memory
+    counters.  No process list, prompt text, model name or endpoint is emitted
+    by the sampler.
+    """
+    target=_telemetry_target()
+    if target not in ('local','remote'):
+        return None
+    delay=max(500,int(interval_ms))
+    script=(
+        "$ErrorActionPreference='Stop'; "
+        "while($true){ "
+        "$os=Get-CimInstance Win32_OperatingSystem; "
+        "$cpu=(Get-CimInstance Win32_Processor | Measure-Object -Property LoadPercentage -Average).Average; "
+        "$total=[double]$os.TotalVisibleMemorySize*1KB; "
+        "$used=$total-([double]$os.FreePhysicalMemory*1KB); "
+        "'{0},{1},{2}' -f $cpu,$used,$total; "
+        f"Start-Sleep -Milliseconds {delay} "
+        "}"
+    )
+    encoded=enc_ps(script)
+    ps=['powershell.exe','-NoLogo','-NoProfile','-ExecutionPolicy','Bypass','-EncodedCommand',encoded]
+    if target=='remote':
+        return _ssh_base_args(resolve_remote_endpoint(),batch=True)+ps
+    return ps
+
+
 def remote_ram_telemetry():
     target=_telemetry_target()
     if target=='unknown': return None
@@ -8934,6 +8963,10 @@ class LiveInferenceProgress:
             parts.append(f"VRAM {g['vram_used_mib']/1024:.1f}/{g['vram_total_mib']/1024:.1f}G")
         if g.get('gpu_temp') is not None:
             parts.append(f"{g['gpu_temp']:.0f}°C")
+        if g.get('cpu_util') is not None:
+            parts.append(f"CPU {g['cpu_util']:.0f}%")
+        if g.get('ram_used_bytes') is not None and g.get('ram_total_bytes'):
+            parts.append(f"RAM {g['ram_used_bytes']/1024**3:.1f}/{g['ram_total_bytes']/1024**3:.1f}G")
         return ' | '.join(parts)
 
     def render(self,force=False):
@@ -9052,6 +9085,88 @@ class GpuSampler:
             'gpu_temp_avg':avg('gpu_temp'),'gpu_temp_peak':peak('gpu_temp'),
             'gpu_power_avg_w':avg('gpu_power_w'),'gpu_power_peak_w':peak('gpu_power_w'),
         }
+
+
+class SystemSampler:
+    """Best-effort aggregate CPU/RAM sampler for the active inference host."""
+    def __init__(self,interval_ms=1000):
+        self.interval_ms=max(500,int(interval_ms)); self.proc=None; self.thread=None; self.samples=[]; self._stop=False
+
+    @staticmethod
+    def parse_line(line):
+        try:
+            cpu,used,total=[float(value.strip()) for value in str(line).strip().split(',')[:3]]
+            if not (0.0<=cpu<=100.0) or used<0 or total<=0 or used>total:
+                return None
+            return {'cpu_util':cpu,'ram_used_bytes':used,'ram_total_bytes':total}
+        except Exception:
+            return None
+
+    def _reader(self):
+        try:
+            for line in self.proc.stdout:
+                if self._stop: break
+                sample=self.parse_line(line)
+                if sample: self.samples.append(sample)
+        except Exception:
+            pass
+
+    def start(self):
+        flags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0
+        try:
+            command=_system_sampler_command(self.interval_ms)
+            if command is None: return self
+            self.proc=subprocess.Popen(
+                command,stdin=subprocess.DEVNULL,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,
+                text=True,encoding='utf-8',errors='replace',bufsize=1,creationflags=flags,
+            )
+            self.thread=threading.Thread(target=self._reader,daemon=True); self.thread.start()
+        except Exception:
+            self.proc=None
+        return self
+
+    def latest(self):
+        return dict(self.samples[-1]) if self.samples else None
+
+    def stop(self):
+        self._stop=True
+        if self.proc is not None:
+            try: self.proc.terminate()
+            except Exception: pass
+            try: self.proc.wait(timeout=2)
+            except Exception:
+                try: self.proc.kill()
+                except Exception: pass
+        if self.thread is not None:
+            try: self.thread.join(timeout=1)
+            except Exception: pass
+        return self.summary()
+
+    def summary(self):
+        samples=list(self.samples)
+        if not samples: return {'samples':0}
+        def mean(key): return sum(float(row[key]) for row in samples)/len(samples)
+        def peak(key): return max(float(row[key]) for row in samples)
+        return {
+            'samples':len(samples),
+            'cpu_util_avg':mean('cpu_util'),'cpu_util_peak':peak('cpu_util'),
+            'ram_used_avg_bytes':mean('ram_used_bytes'),'ram_used_peak_bytes':peak('ram_used_bytes'),
+            'ram_total_bytes':float(samples[-1]['ram_total_bytes']),
+        }
+
+
+class LiveResourceSampler:
+    """Combine GPU and aggregate CPU/RAM readings without coupling their clocks."""
+    def __init__(self,gpu,system):
+        self.gpu=gpu; self.system=system
+
+    def latest(self):
+        row={}
+        try: row.update(self.gpu.latest() or {})
+        except Exception: pass
+        try: row.update(self.system.latest() or {})
+        except Exception: pass
+        return row or None
 
 
 def _stage_metrics(meta,wall_seconds=None):
@@ -9792,11 +9907,14 @@ def benchmark_record(name,item,cfg,think_value,run_index,total_runs,bench_mode='
     if effective:
         effective_cfg['_benchmark_sent_runtime_options']=deepcopy(effective.get('sent_runtime_options') or {})
     primary_predict=int(effective.get('num_predict') or item.get('primary_predict') or effective_cfg.get('num_predict') or 512)
-    sampler=GpuSampler().start(); pipeline_started=time.time()
+    sampler=GpuSampler().start()
+    system_sampler=SystemSampler().start()
+    live_sampler=LiveResourceSampler(sampler,system_sampler)
+    pipeline_started=time.time()
     live=LiveInferenceProgress(
         f"{name} | {short_model(cfg['model'],34)}",
         primary_predict,
-        sampler=sampler,
+        sampler=live_sampler,
     )
     live.reset('THINK' if effective_mode=='think' else 'FAST',primary_predict)
     try:
@@ -9923,6 +10041,7 @@ def benchmark_record(name,item,cfg,think_value,run_index,total_runs,bench_mode='
         raise
     finally:
         gpu_stats=sampler.stop()
+        system_stats=system_sampler.stop()
 
     catrow=(catalog or {}).get(cfg['model']) or {}
     digest_value=catrow.get('digest') or model_digest(cfg['model'],catalog)
@@ -10047,6 +10166,7 @@ def benchmark_record(name,item,cfg,think_value,run_index,total_runs,bench_mode='
             'scope':'pipeline',
             'runtime':runtime,
             'gpu':gpu_stats,
+            'system':system_stats,
         },
     }
     record['completion_status']=(
@@ -12062,6 +12182,20 @@ def select_benchmark_models(selector,models):
     return chosen
 
 
+def benchmark_command_model_selector(models):
+    """Return one shell-free /bench argument for models chosen by a wizard.
+
+    The interactive picker accepts spaces after commas for people, while the
+    command parser deliberately uses whitespace as an argument separator.
+    Keep generated commands canonical so ``2, 4, 7`` cannot turn ``4`` into a
+    benchmark option on the next screen.
+    """
+    names=[str(model).strip() for model in (models or []) if str(model).strip()]
+    if not names:
+        raise ValueError('Не выбраны модели.')
+    return ','.join(names)
+
+
 def parse_bench_options(tokens,default_mode='native'):
     runs=1; mode=default_mode; seed_mode='fixed'
     for token in tokens:
@@ -12757,6 +12891,38 @@ def benchmark_progress_text(state):
     )
 
 
+def render_benchmark_run_summary(record,saved,total):
+    """Print a compact, evidence-backed checkpoint after every completed job."""
+    identity=record.get('identity') or {}
+    if not _record_execution_ok(record):
+        yellow(); print(
+            f"  Промежуточный итог {saved}/{total}: {identity.get('benchmark','test')} · "
+            f"{short_model(identity.get('model','model'),28)} · run не засчитан"
+        ); white()
+        return
+    native=_rec_v4(record,'score.native.value')
+    final=_rec_v4(record,'score.final.value')
+    speed=_rec_v4(record,'primary.eval_rate')
+    task=_record_task_completed(record,'primary')
+    gpu=_rec_v4(record,'telemetry.gpu') or {}
+    system=_rec_v4(record,'telemetry.system') or {}
+    metrics=[]
+    if native is not None: metrics.append(f"native {float(native)*100:.0f}%")
+    if final is not None and final!=native: metrics.append(f"final {float(final)*100:.0f}%")
+    metrics.append('TASK ✓' if task else 'TASK —')
+    if speed is not None: metrics.append(f"{float(speed):.1f} tok/s")
+    if gpu.get('gpu_util_avg') is not None: metrics.append(f"GPU {float(gpu['gpu_util_avg']):.0f}%")
+    if gpu.get('vram_peak_mib') is not None and gpu.get('vram_total_mib'):
+        metrics.append(f"VRAM {float(gpu['vram_peak_mib'])/1024:.1f}/{float(gpu['vram_total_mib'])/1024:.1f}G")
+    if system.get('cpu_util_avg') is not None: metrics.append(f"CPU {float(system['cpu_util_avg']):.0f}%")
+    if system.get('ram_used_peak_bytes') is not None and system.get('ram_total_bytes'):
+        metrics.append(f"RAM {float(system['ram_used_peak_bytes'])/1024**3:.1f}/{float(system['ram_total_bytes'])/1024**3:.1f}G")
+    green(); print(
+        f"  Промежуточный итог {saved}/{total} · {identity.get('benchmark','test')} · "
+        + ' · '.join(metrics)
+    ); white()
+
+
 def _redact_runtime_diagnostic(value):
     """Keep checkpoint diagnostics useful without persisting endpoints or user paths."""
     text=' '.join(str(value or '').replace('\r',' ').replace('\n',' ').split())
@@ -13209,6 +13375,8 @@ def execute_benchmark_checkpoint(path,cp,catalog=None):
                     rec['sweep']={'parameter':job.get('sweep_parameter'),'value':job.get('sweep_value')}
                 cp['records'][key]=rec; cp['updated_at']=datetime.now().isoformat(timespec='seconds')
                 _checkpoint_finish_attempt(path,cp,key,attempt,attempt_status,attempt_error)
+                state=benchmark_progress_state(cp,total,done)
+                render_benchmark_run_summary(rec,state['saved'],total)
         finally:
             _apply_runtime_context(profile_ctx); NUM_THREAD=profile_threads
             unload_model(model_name)
@@ -15079,6 +15247,10 @@ def _startup_bench_options(default_runs=1,default_mode='native',default_seed_mod
 def benchmark_sampling_source_setup(models,catalog=None):
     """Human-friendly sampling source chooser shared by benchmark wizards."""
     models=list(models or []); catalog=model_catalog() if catalog is None else catalog
+    # This is a new wizard step, not an addition below the preset menu.  Clear
+    # the previous choices so only one active prompt is visible at a time.
+    clear_console()
+    ui_header('ПАРАМЕТРЫ ГЕНЕРАЦИИ','Benchmark Lab > Параметры','Выберите, откуда берутся sampling-параметры')
     ui_section('ИСТОЧНИК ПАРАМЕТРОВ ГЕНЕРАЦИИ')
     ui_menu_item('1','Единые настройки бенчмарка','Одинаковый preset для честного сравнения разных моделей','DEFAULT')
     ui_menu_item('2','Настройки Ollama-профиля','Modelfile наследуется; sampling options не отправляются через API','PROFILE')
@@ -15226,6 +15398,7 @@ def benchmark_chat_wizard(final=False):
     chosen=select_benchmark_models(selector,models)
     if not chosen:
         yellow(); ui_print('Не выбраны модели.'); white(); return None
+    command_selector=benchmark_command_model_selector(chosen)
     runs=int(preset['runs']); seeds=list(preset['seeds']); mode=str(preset['mode']); seed_mode=str(preset['seed_mode'])
     ui_print(); ui_section('НАСТРОЙКИ')
     ui_menu_item('1','Стандартный preset',f'{runs} run · seeds {", ".join(map(str,seeds))} · native · FAST','РЕКОМЕНДУЕТСЯ')
@@ -15284,7 +15457,7 @@ def benchmark_chat_wizard(final=False):
         encoded=urllib.parse.quote(json.dumps(sampling_setup['model_sampling'],ensure_ascii=False,separators=(',',':')),safe='')
         sampling_tokens.append('model_sampling_json='+encoded)
     return (
-        f'/bench {suite} {selector} {runs} {mode} {seed_mode} '
+        f'/bench {suite} {command_selector} {runs} {mode} {seed_mode} '
         f'seeds={",".join(map(str,seeds))} profile=fair_default think=false strict_fair_compare=true '
         + ' '.join(sampling_tokens)+' confirmed=true'
     )
@@ -15348,7 +15521,7 @@ def benchmark_user_file_wizard():
         yellow(); ui_print('  Оценка:       .txt не имеет автоскоринга; сравните ответы вручную.'); white()
     if read_user_input('Запустить? [Y/n] › ').strip().casefold() in ('n','no','нет','0'):
         return None
-    return f'/bench compare {name} {selector} {runs} {mode} {seed_mode} profile=fair_default sampling_source=benchmark_override'
+    return f'/bench compare {name} {benchmark_command_model_selector(chosen)} {runs} {mode} {seed_mode} profile=fair_default sampling_source=benchmark_override'
 
 
 def benchmark_user_tasks_menu():
@@ -15478,7 +15651,7 @@ def benchmark_custom_prompt_wizard():
         if sampling_setup.get('model_sampling'):
             encoded=urllib.parse.quote(json.dumps(sampling_setup['model_sampling'],ensure_ascii=False,separators=(',',':')),safe='')
             sampling_tokens.append('model_sampling_json='+encoded)
-        tokens=[f'/bench compare {name} {selector} {runs} {mode} {seed_mode}','profile=fair_default',*extra,*sampling_tokens]
+        tokens=[f'/bench compare {name} {benchmark_command_model_selector(chosen)} {runs} {mode} {seed_mode}','profile=fair_default',*extra,*sampling_tokens]
         return ' '.join(tokens)
 
 

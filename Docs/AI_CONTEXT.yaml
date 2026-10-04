@@ -492,6 +492,13 @@ terminal_analytics:
     - category leaders
   mandatory_caveat: descriptive current-run comparison, not general superiority proof
 
+live_run_telemetry:
+  scope: active_inference_host_only
+  display: approximate token rate plus GPU, VRAM, aggregate CPU and RAM when available
+  persistence: pipeline telemetry keeps GPU and aggregate system summaries separately
+  missing_sensor_policy: unavailable_not_zero
+  after_each_saved_run: compact native/final, TASK, speed and resource checkpoint
+
 visual_report:
   filename: "*_report.html"
   offline: true

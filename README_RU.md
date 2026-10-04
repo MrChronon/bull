@@ -39,7 +39,7 @@ BULL работает с Ollama и совместимым HTTP-сервером 
 проверенный профиль в рабочий клиент.
 
 <p align="center">
-  <img src="Assets/Brand/readme-signal-panel.svg" alt="Сигналы оценки BULL" width="100%">
+  <img src="Assets/Brand/readme-signal-panel.svg?v=0.28.0.4-signal390" alt="Сигналы оценки BULL" width="100%">
 </p>
 
 ## Зачем нужен BULL

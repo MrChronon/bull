@@ -2477,7 +2477,10 @@ def test_qwen3_coder_next_profile_uses_official_nonthink_sampling():
 def test_live_progress_renders_heartbeat_and_gpu():
     class S:
         def latest(self):
-            return {'gpu_util':82,'vram_used_mib':10186,'vram_total_mib':12288,'gpu_temp':52}
+            return {
+                'gpu_util':82,'vram_used_mib':10186,'vram_total_mib':12288,'gpu_temp':52,
+                'cpu_util':37,'ram_used_bytes':12*1024**3,'ram_total_bytes':32*1024**3,
+            }
     out=io.StringIO()
     with contextlib.redirect_stdout(out):
         live=mod.LiveInferenceProgress('analytics | model',5600,S(),interval=.01)
@@ -2489,7 +2492,13 @@ def test_live_progress_renders_heartbeat_and_gpu():
     assert 'THINK' in text
     assert 'GPU 82%' in text
     assert 'VRAM 9.9/12.0G' in text
+    assert 'CPU 37%' in text
+    assert 'RAM 12.0/32.0G' in text
     assert 'score 90%' in text
+    eq(mod.SystemSampler.parse_line('37,12884901888,34359738368'),{
+        'cpu_util':37.0,'ram_used_bytes':12884901888.0,'ram_total_bytes':34359738368.0,
+    })
+    assert mod.SystemSampler.parse_line('not,a,reading') is None
 
 
 def test_ollama_http_error_exposes_server_body():
@@ -4127,7 +4136,8 @@ def test_custom_prompt_wizard_builds_simple_standard_command():
         mod.installed_models=lambda:[{'name':'m1'},{'name':'m2'}]
         mod.show_models=lambda models,current=None:None
         command=mod.benchmark_custom_prompt_wizard()
-        eq(command,'/bench compare my_prompt all 3 native sweep profile=fair_default sampling_source=benchmark_override')
+        eq(command,'/bench compare my_prompt m1,m2 3 native sweep profile=fair_default sampling_source=benchmark_override')
+        eq(mod.benchmark_command_model_selector(['m1','m2']),'m1,m2')
         assert (root/'prompts.json').is_file()
     finally:
         mod.benchmark_dir=old_dir; mod.read_user_input=old_input

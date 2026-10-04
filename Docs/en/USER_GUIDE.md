@@ -102,6 +102,12 @@ After a run, BULL offers:
 Recommendations are relative to that run. They reuse measured metrics and apply
 quality/task gates; they are not a universal leaderboard or a new benchmark score.
 
+During a run, the live line can show approximate token rate plus GPU/VRAM and
+aggregate CPU/RAM for the active inference host. After each saved run, BULL prints
+a compact checkpoint: native/final score when a scorer exists, TASK, speed and the
+available resource measurements. A missing sensor is shown as unavailable, never as
+zero.
+
 See [Benchmarks](BENCHMARKS.md) for metric definitions and user-test authoring.
 
 ## Chat
