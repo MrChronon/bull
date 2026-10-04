@@ -95,7 +95,7 @@
       <circle cx="1163" cy="510" r="13" fill="#ff3c52" filter="url(#glow)"/>
     </g>
 
-    <text x="56" y="583" fill="#c9838d" font-size="13" letter-spacing="1.6">BULL · BENCHMARKING &amp; USAGE OF LOCAL LLMs · v0.28.0.3</text>
+    <text x="56" y="583" fill="#c9838d" font-size="13" letter-spacing="1.6">BULL · BENCHMARKING &amp; USAGE OF LOCAL LLMs · v0.28.0.4</text>
     <text x="1224" y="583" fill="#c9838d" font-size="13" text-anchor="end">Verified project facts · no model results shown</text>
   </g>
 </svg>

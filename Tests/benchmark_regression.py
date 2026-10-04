@@ -33,7 +33,7 @@ from copy import deepcopy
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
-CLIENT=ROOT/'bull_client_v0.28.0.3.py'
+CLIENT=ROOT/'bull_client_v0.28.0.4.py'
 SCORER_V3_FIXTURE=ROOT/'Tests'/'Fixtures'/'benchmark_scorer_v3.json'
 RU_LANGUAGE_STRESS_V176_FIXTURE=ROOT/'Tests'/'Fixtures'/'ru_language_stress_sanitized_v3.json'
 
@@ -45,18 +45,24 @@ spec.loader.exec_module(mod)
 mod.set_language('ru')
 
 passed=[]
+STARTUP_CHECK_TOTAL=390
+print('BULL_STARTUP_TOTAL\t'+str(STARTUP_CHECK_TOTAL),flush=True)
 
 def test(name,fn):
     # The startup splash reads this explicit, line-buffered marker from the
     # offline child process. It is emitted before the check, never inferred
     # from a completed result or an assumed test count.
     print('BULL_STARTUP_TEST\t'+name,flush=True)
-    fn(); passed.append(name); print('OK  '+name)
+    fn(); passed.append(name); print('BULL_STARTUP_COMPLETE\t'+str(len(passed)),flush=True); print('OK  '+name)
 
 
 def startup_suite(name):
     """Expose an imported contract suite before it begins running."""
     print('BULL_STARTUP_TEST\t'+str(name),flush=True)
+
+
+def startup_suite_complete():
+    print('BULL_STARTUP_COMPLETE\t'+str(len(passed)),flush=True)
 
 def eq(a,b,msg=''):
     assert a==b, msg or f'{a!r} != {b!r}'
@@ -1085,7 +1091,10 @@ def test_startup_regression_reports_truthful_stage_progress():
     root=Path(tempfile.mkdtemp())
     test_file=root/'regression.py'
     test_file.write_text(
-        "print('BULL_STARTUP_TEST\\tstreamed active check',flush=True)\nprint('PASS 7/7')\n",
+        "print('BULL_STARTUP_TOTAL\\t7',flush=True)\n"
+        "print('BULL_STARTUP_TEST\\tstreamed active check',flush=True)\n"
+        "print('BULL_STARTUP_COMPLETE\\t1',flush=True)\n"
+        "print('PASS 7/7')\n",
         encoding='utf-8',
     )
     old_path=mod._startup_regression_path
@@ -1099,8 +1108,10 @@ def test_startup_regression_reports_truthful_stage_progress():
         eq(updates,[
             ('Подготовка проверки запуска\nПроверяются обязательные файлы и манифест регрессии',1,3),
             ('Запуск офлайн-регрессии\nОжидание первой проверки',2,3),
-            ('Запуск офлайн-регрессии\nТекущая проверка: streamed active check',2,3),
-            ('Проверка запуска пройдена\nВсе проверки завершены успешно',3,3),
+            ('Запуск офлайн-регрессии\nОжидание первой проверки',0,7),
+            ('Запуск офлайн-регрессии\nТекущая проверка: streamed active check',0,7),
+            ('Запуск офлайн-регрессии\nТекущая проверка завершена',1,7),
+            ('Проверка запуска пройдена\nВсе проверки завершены успешно',7,7),
         ])
     finally:
         mod._startup_regression_path=old_path
@@ -1118,6 +1129,8 @@ def test_startup_regression_active_check_marker_is_explicit_and_bounded():
         mod._startup_active_check_from_output('x BULL_STARTUP_TEST\t'+'a'*200),
         'a'*140,
     )
+    eq(mod._startup_count_from_output('BULL_STARTUP_TOTAL\t390\n',mod._STARTUP_TOTAL_MARKER),390)
+    eq(mod._startup_count_from_output('BULL_STARTUP_COMPLETE\t-1\n',mod._STARTUP_COMPLETE_MARKER),None)
 
 
 
@@ -3244,14 +3257,14 @@ def test_release_gate_reverifies_manifest_and_new_docs():
         'Docs\\BACKEND_SETUP.md',
         'Docs\\CODE_AUDIT.md',
         'Docs\\SECURITY.md',
-        'Docs\\RELEASE_NOTES_0.28.0.3.md',
+        'Docs\\RELEASE_NOTES_0.28.0.4.md',
     ):
         assert doc in build
     assert 'Manifest hash mismatch before packaging' in build
     assert 'Staged manifest hash mismatch' in build
     assert '$allowedVersioned' in build
-    assert 'v0.28.0.3' in build
-    assert 'Apps\\benchmark_lab_v0_28_0_3.py' in build
+    assert 'v0.28.0.4' in build
+    assert 'Apps\\benchmark_lab_v0_28_0_4.py' in build
     assert 'Shared\\bull_llm\\runtime\\__init__.py' in build
     assert 'Shared\\bull_llm\\schemas.py' in build
     assert '$rootExcludedDirs' in build and '$anywhereExcludedDirs' in build
@@ -3800,10 +3813,10 @@ def test_tested_profile_artifact_and_client_import():
 
 def test_v174_application_boundaries_and_shared_contracts():
     required=[
-        ROOT/'Apps'/'benchmark_lab_v0_28_0_3.py',ROOT/'Apps'/'bull_client_app_v0_28_0_3.py',
+        ROOT/'Apps'/'benchmark_lab_v0_28_0_4.py',ROOT/'Apps'/'bull_client_app_v0_28_0_4.py',
         ROOT/'Apps'/'_bootstrap.py',ROOT/'Shared'/'bull_llm'/'schemas.py',
         ROOT/'Shared'/'bull_llm'/'profiles.py',ROOT/'Shared'/'bull_llm'/'telemetry.py',
-        ROOT/'Shared'/'bull_llm'/'backends.py',ROOT/'BULL-Benchmark-Lab-v0.28.0.3.cmd',
+        ROOT/'Shared'/'bull_llm'/'backends.py',ROOT/'BULL-Benchmark-Lab-v0.28.0.4.cmd',
     ]
     assert all(path.is_file() for path in required),[str(x) for x in required if not x.is_file()]
     sys.path.insert(0,str(ROOT))
@@ -3814,35 +3827,35 @@ def test_v174_application_boundaries_and_shared_contracts():
         eq(schemas.TESTED_PROFILE_SCHEMA_VERSION,1)
     finally:
         if sys.path and sys.path[0]==str(ROOT): sys.path.pop(0)
-    lab=(ROOT/'Apps'/'benchmark_lab_v0_28_0_3.py').read_text(encoding='utf-8')
-    client=(ROOT/'Apps'/'bull_client_app_v0_28_0_3.py').read_text(encoding='utf-8')
+    lab=(ROOT/'Apps'/'benchmark_lab_v0_28_0_4.py').read_text(encoding='utf-8')
+    client=(ROOT/'Apps'/'bull_client_app_v0_28_0_4.py').read_text(encoding='utf-8')
     assert "BULL_START_SURFACE']='benchmark'" in lab
     assert "BULL_START_SURFACE']='home'" in client
 
 
 def test_icon_shortcut_and_release_assets():
-    ico=ROOT/'BULL-v0.28.0.3.ico'
+    ico=ROOT/'BULL-v0.28.0.4.ico'
     data=ico.read_bytes()
     assert data[:4]==b'\x00\x00\x01\x00'
     eq(int.from_bytes(data[4:6],'little'),7)
-    shortcut=(ROOT/'Install-BULL-v0.28.0.3-Shortcut.ps1').read_text(encoding='utf-8-sig')
-    launcher=(ROOT/'BULL-v0.28.0.3.cmd').read_text(encoding='utf-8-sig')
+    shortcut=(ROOT/'Install-BULL-v0.28.0.4-Shortcut.ps1').read_text(encoding='utf-8-sig')
+    launcher=(ROOT/'BULL-v0.28.0.4.cmd').read_text(encoding='utf-8-sig')
     assert 'IconLocation' in shortcut and 'GetFolderPath("Programs")' in shortcut
-    assert 'Install-BULL-v0.28.0.3-Shortcut.ps1' in launcher
-    assert (ROOT/'Install-BULL-v0.28.0.3.cmd').is_file()
+    assert 'Install-BULL-v0.28.0.4-Shortcut.ps1' in launcher
+    assert (ROOT/'Install-BULL-v0.28.0.4.cmd').is_file()
 
 
 def test_windows_powershell_launcher_is_ascii_parse_safe():
     # Windows PowerShell 5.1 decodes a BOM-less .ps1 as the active ANSI code
     # page. Keep the tiny entry launcher ASCII-only so parsing cannot fail
     # before it enables UTF-8 for Python and child processes.
-    launcher=ROOT/'BULL-v0.28.0.3.ps1'
+    launcher=ROOT/'BULL-v0.28.0.4.ps1'
     raw=launcher.read_bytes()
     assert raw and all(byte < 128 for byte in raw), 'launcher must remain ASCII-safe for powershell.exe 5.1'
 
     for rel in (
-        'Install-BULL-v0.28.0.3.ps1',
-        'Install-BULL-v0.28.0.3-Shortcut.ps1',
+        'Install-BULL-v0.28.0.4.ps1',
+        'Install-BULL-v0.28.0.4-Shortcut.ps1',
         'Server/Install-BULL-Node.ps1',
         'Server/Test-BULL-RemoteReadiness.ps1',
         'Client/New-BULL-ClientKey.ps1',
@@ -4483,7 +4496,7 @@ def test_v18_connection_bundle_fails_closed_on_secret_or_missing_key():
 
 
 def test_v18_platform_installer_roles_and_release_secret_gate():
-    installer=ROOT/'Install-BULL-v0.28.0.3.ps1'
+    installer=ROOT/'Install-BULL-v0.28.0.4.ps1'
     node=ROOT/'Server'/'Install-BULL-Node.ps1'
     template=ROOT/'Server'/'connection.template.json'
     assert installer.is_file() and node.is_file() and template.is_file()
@@ -4506,7 +4519,7 @@ def test_v18_platform_installer_roles_and_release_secret_gate():
 
 
 def test_wan_installer_propagates_route_port_and_keeps_inference_private():
-    installer=(ROOT/'Install-BULL-v0.28.0.3.ps1').read_text(encoding='utf-8')
+    installer=(ROOT/'Install-BULL-v0.28.0.4.ps1').read_text(encoding='utf-8')
     node=(ROOT/'Server'/'Install-BULL-Node.ps1').read_text(encoding='utf-8')
     readiness_path=ROOT/'Server'/'Test-BULL-RemoteReadiness.ps1'
     assert readiness_path.is_file()
@@ -5157,7 +5170,7 @@ def test_visual_report_is_offline_graphical_and_excludes_raw_answers():
 
 
 def test_public_release_readiness_assets_and_gate_exist():
-    for rel in ('README.md','.gitignore','Docs/PUBLIC_RELEASE_CHECKLIST.md','Docs/RELEASE_NOTES_0.28.0.3.md','Test-Public-Release.ps1'):
+    for rel in ('README.md','.gitignore','Docs/PUBLIC_RELEASE_CHECKLIST.md','Docs/RELEASE_NOTES_0.28.0.4.md','Test-Public-Release.ps1'):
         assert (ROOT/rel).is_file(),rel
     build=(ROOT/'Build-Release.ps1').read_text(encoding='utf-8-sig')
     audit=(ROOT/'Test-Public-Release.ps1').read_text(encoding='utf-8-sig')
@@ -5398,6 +5411,7 @@ startup_suite('Benchmark Registry contract checks')
 from Tests.registry_regression import run_suite as run_registry_suite
 registry_test_count=run_registry_suite(mod)
 passed.extend(f'Benchmark Registry {i+1}' for i in range(registry_test_count))
+startup_suite_complete()
 startup_suite('Agent Benchmark contract checks')
 from Tests.agent_benchmark_regression import run_suite as run_agent_suite
 proxy=mod._agent_core_proxy()
@@ -5409,34 +5423,42 @@ finally:
     mod.API=previous_api
 agent_test_count=run_agent_suite()
 passed.extend(f'Agent Benchmark {i+1}' for i in range(agent_test_count))
+startup_suite_complete()
 startup_suite('Security hardening checks')
 from Tests.hardening_regression import run_suite as run_hardening_suite
 hardening_test_count=run_hardening_suite(mod)
 passed.extend(f'Hardening {i+1}' for i in range(hardening_test_count))
+startup_suite_complete()
 startup_suite('User experience checks')
 from Tests.ux_regression import run_suite as run_ux_suite
 ux_test_count=run_ux_suite(mod)
 passed.extend(f'UX {i+1}' for i in range(ux_test_count))
+startup_suite_complete()
 startup_suite('GPU Lab contract checks')
 from Tests.gpu_lab_regression import run_suite as run_gpu_suite
 gpu_test_count=run_gpu_suite()
 passed.extend(f'GPU Lab {i+1}' for i in range(gpu_test_count))
+startup_suite_complete()
 startup_suite('BULL Core bridge checks')
 from Tests.bridge_regression import run_suite as run_bridge_suite
 bridge_test_count=run_bridge_suite()
 passed.extend(f'BULL Core {i+1}' for i in range(bridge_test_count))
+startup_suite_complete()
 startup_suite('BULL Core contract checks')
 from Tests.core_regression import run_suite as run_core_suite
 core_test_count=run_core_suite()
 passed.extend(f'BULL Core {i+1}' for i in range(core_test_count))
+startup_suite_complete()
 startup_suite('BULL Evidence contract checks')
 from Tests.evidence_regression import run_suite as run_evidence_suite
 evidence_test_count=run_evidence_suite()
 passed.extend(f'BULL Evidence {i+1}' for i in range(evidence_test_count))
+startup_suite_complete()
 startup_suite('Russian dialogue contract checks')
 from Tests.ru_dialogue_regression import run_suite as run_ru_dialogue_suite
 ru_dialogue_test_count=run_ru_dialogue_suite(mod)
 passed.extend(f'RU Dialogue {i+1}' for i in range(ru_dialogue_test_count))
+startup_suite_complete()
 startup_suite('Decision support checks')
 from Tests.decision_support_regression import DecisionSupportTests
 decision_result=unittest.TextTestRunner(verbosity=2).run(
@@ -5445,8 +5467,12 @@ decision_result=unittest.TextTestRunner(verbosity=2).run(
 if not decision_result.wasSuccessful():
     raise AssertionError('BULL decision support regression failed')
 passed.extend(f'Decision Support {i+1}' for i in range(decision_result.testsRun))
+startup_suite_complete()
 startup_suite('User benchmark format checks')
 from Tests.user_tests_regression import run_suite as run_user_tests_suite
 user_tests_count=run_user_tests_suite()
 passed.extend(f'User Tests {i+1}' for i in range(user_tests_count))
+startup_suite_complete()
+if len(passed)!=STARTUP_CHECK_TOTAL:
+    raise AssertionError(f'startup check total mismatch: {len(passed)} != {STARTUP_CHECK_TOTAL}')
 print(f'PASS {len(passed)}/{len(passed)}')

@@ -1,4 +1,4 @@
-# Переход со старых сборок на BULL v0.28.0.3
+# Переход со старых сборок на BULL v0.28.0.4
 
 ## Что изменилось
 
@@ -7,10 +7,10 @@
 
 | Было | Стало |
 |---|---|
-| основной launcher | `BULL-v0.28.0.3.cmd` |
-| Benchmark Lab launcher | `BULL-Benchmark-Lab-v0.28.0.3.cmd` |
-| Agent Lab launcher | `BULL-Agent-Lab-v0.28.0.3.cmd` |
-| installer | `Install-BULL-v0.28.0.3.cmd` |
+| основной launcher | `BULL-v0.28.0.4.cmd` |
+| Benchmark Lab launcher | `BULL-Benchmark-Lab-v0.28.0.4.cmd` |
+| Agent Lab launcher | `BULL-Agent-Lab-v0.28.0.4.cmd` |
+| installer | `Install-BULL-v0.28.0.4.cmd` |
 | старый Python namespace | `Shared.bull_llm` |
 
 ## Что не изменилось
@@ -25,7 +25,7 @@
 
 1. Распакуйте BULL в новую папку; не распаковывайте поверх старой версии.
 2. Запустите `Run-Tests.ps1`.
-3. Запустите `BULL-v0.28.0.3.cmd`.
+3. Запустите `BULL-v0.28.0.4.cmd`.
 4. При необходимости откройте **Подключения → Дополнительно → Перенести из
    старой версии**. Перенос всегда требует явного выбора.
 5. Проверяйте SSH fingerprint независимо на сервере.

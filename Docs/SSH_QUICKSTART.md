@@ -1,4 +1,4 @@
-# BULL v0.28.0.3 — быстрый вход по SSH-алиасу
+# BULL v0.28.0.4 — быстрый вход по SSH-алиасу
 
 Этот сценарий подходит, если обычная команда `ssh bull-home` уже подключается к
 компьютеру с Ollama по ключу. После настройки в BULL достаточно открыть
@@ -30,7 +30,7 @@ ssh-add "$env:USERPROFILE\.ssh\bull_access"
 Для нового Windows-узла используйте установщик BULL от администратора:
 
 ```powershell
-.\Install-BULL-v0.28.0.3.ps1 `
+.\Install-BULL-v0.28.0.4.ps1 `
   -Role Server `
   -AuthorizedKeyPath C:\Transfer\bull_access.pub `
   -PublicHost <SERVER-IP-OR-DNS>

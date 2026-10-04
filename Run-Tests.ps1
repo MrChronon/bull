@@ -14,7 +14,7 @@ $env:CUA_DD_PYTHON_TOOL_WARM_SPREADSHEET_RUNTIME = "0"
 $env:CUA_DD_INIT_ARTIFACT_TOOL_V2_RECORD_OPERATIONS = "0"
 $env:CUA_DD_INIT_ARTIFACT_TOOL_V2 = "0"
 
-$client = Join-Path $PSScriptRoot "bull_client_v0.28.0.3.py"
+$client = Join-Path $PSScriptRoot "bull_client_v0.28.0.4.py"
 $test = Join-Path $PSScriptRoot "Tests\benchmark_regression.py"
 
 if (-not (Test-Path -LiteralPath $client)) { throw "Client file not found: $client" }

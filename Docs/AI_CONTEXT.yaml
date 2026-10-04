@@ -1,8 +1,8 @@
 schema: bull-llm-ai-context
 schema_version: 1
-document_version: 0.28.0.3
-client_version: v0.28.0.3
-documentation_version: v0.28.0.3
+document_version: 0.28.0.4
+client_version: v0.28.0.4
+documentation_version: v0.28.0.4
 updated: 2026-10-03
 language: ru
 
@@ -10,7 +10,7 @@ project:
   name: BULL
   qualified_name: BULL — Benchmark Lab
   legacy_name: Local LLM
-  release: v0.28.0.3
+  release: v0.28.0.4
   frozen_stable_baseline: v17.3.2
   platform:
     primary: Windows 11
@@ -42,16 +42,16 @@ agent_rules:
     - prefer small verifiable commits in a clean repository
 
 release_layout:
-  bundle: BULL-v0.28.0.3-Bundle
-  core: bull_client_v0.28.0.3.py
+  bundle: BULL-v0.28.0.4-Bundle
+  core: bull_client_v0.28.0.4.py
   launchers:
-    client: BULL-v0.28.0.3.cmd
-    benchmark_lab: BULL-Benchmark-Lab-v0.28.0.3.cmd
-    agent_lab: BULL-Agent-Lab-v0.28.0.3.cmd
+    client: BULL-v0.28.0.4.cmd
+    benchmark_lab: BULL-Benchmark-Lab-v0.28.0.4.cmd
+    agent_lab: BULL-Agent-Lab-v0.28.0.4.cmd
   apps:
-    client: Apps/bull_client_app_v0_28_0_3.py
-    benchmark_lab: Apps/benchmark_lab_v0_28_0_3.py
-    agent_lab: Apps/agent_benchmark_v0_28_0_3.py
+    client: Apps/bull_client_app_v0_28_0_4.py
+    benchmark_lab: Apps/benchmark_lab_v0_28_0_4.py
+    agent_lab: Apps/agent_benchmark_v0_28_0_4.py
   public_namespace: Shared/bull_llm
   shared_package: Shared/bull_llm
   schemas_directory: Schemas
@@ -223,7 +223,7 @@ terminal_brand:
     module: Shared/bull_llm/startup_window.py
     asset_pattern: Assets/Brand/splash-{APP_VERSION}.png
     behavior: separate native desktop window during the mandatory startup gate; closes before offline-first connection handling
-    progress: observed startup stages plus the exact current check emitted by the offline harness; no inferred per-test counter
+    progress: exact completed/total check count plus current check name, both emitted by the offline harness; no inferred counter
     runtime_dependencies: Python stdlib Tk only; GUI absence fails open without weakening the gate
     safety: exact versioned local PNG only; no shell, renderer, external URL, or user-provided path
   display_count: once per process
@@ -652,8 +652,8 @@ agent_benchmark:
   maturity: MVP
   module: Shared/bull_llm/agent_benchmark
   guide: Docs/en/EXPERIMENTAL.md and Docs/ru/EXPERIMENTAL.md
-  entrypoint: Apps/agent_benchmark_v0_28_0_3.py
-  launcher: BULL-Agent-Lab-v0.28.0.3.cmd
+  entrypoint: Apps/agent_benchmark_v0_28_0_4.py
+  launcher: BULL-Agent-Lab-v0.28.0.4.cmd
   menu_path: More > Experimental features > Agent Benchmark
   config_schema: local-llm-agent-config
   run_schema: local-llm-agent-run
@@ -686,7 +686,7 @@ agent_benchmark:
 
 hardening_audit:
   version: v0.19.0.1 (retained)
-  report: Docs/AUDIT_v0.28.0.3.md
+  report: Docs/AUDIT_v0.28.0.4.md
   new_tests: Tests/hardening_regression.py
   benchmark_prompts_changed: false
   scorer_functions_changed: false
@@ -934,7 +934,7 @@ planned_roadmap:
   stages:
     U1:
       name: BULL Clear Choice
-      target_version: v0.28.0.3
+      target_version: v0.28.0.4
       status: released
       priorities:
         - correct tied recommendations and distinguish native mean from conservative decision values

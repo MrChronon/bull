@@ -1,4 +1,4 @@
-# BULL v0.28.0.3 — Clear Choice
+# BULL v0.28.0.4 — Clear Choice
 
 Этот релиз делает выбор среди установленных локальных моделей более надёжным.
 Встроенные benchmark prompts, встроенные scorers и inference/recovery runtime

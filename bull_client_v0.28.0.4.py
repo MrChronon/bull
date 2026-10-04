@@ -206,8 +206,8 @@ BENCHMARK_PROFILE_PARAMETER_FIELDS=(
     'mirostat','mirostat_eta','mirostat_tau',
 )
 APP_NAME='BULL — Benchmark Lab'
-APP_VERSION='v0.28.0.3'
-APP_ICON='BULL-v0.28.0.3.ico'
+APP_VERSION='v0.28.0.4'
+APP_ICON='BULL-v0.28.0.4.ico'
 ATTACH_MAX_FILE_CHARS=80000
 ATTACH_CONTEXT_TOKENS=2800
 TOOL_MAX_LOOPS=5
@@ -14072,6 +14072,8 @@ def _save_startup_regression_cache(identity,passed,total):
 
 
 _STARTUP_TEST_MARKER='BULL_STARTUP_TEST\t'
+_STARTUP_TOTAL_MARKER='BULL_STARTUP_TOTAL\t'
+_STARTUP_COMPLETE_MARKER='BULL_STARTUP_COMPLETE\t'
 
 
 def _startup_active_check_from_output(line):
@@ -14087,6 +14089,18 @@ def _startup_active_check_from_output(line):
     name=value.split(_STARTUP_TEST_MARKER,1)[1].strip()
     name=' '.join(name.split())
     return name[:140]
+
+
+def _startup_count_from_output(line,marker):
+    """Read an explicit bounded check count from the offline harness."""
+    value=str(line or '')
+    if marker not in value:
+        return None
+    raw=value.split(marker,1)[1].strip()
+    if not re.fullmatch(r'\d{1,5}',raw):
+        return None
+    count=int(raw)
+    return count if 1 <= count <= 10000 else None
 
 
 def _startup_stage_for_ui(stage):
@@ -14222,7 +14236,7 @@ def run_startup_regression(force=False,progress_callback=None):
         cached=_load_startup_regression_cache(identity)
         if cached:
             passed=cached['passed']; total=cached['total']
-            progress('Используется проверенный кэш регрессии\nТекущий набор: точный кэш предыдущей проверки',3)
+            progress('Используется проверенный кэш регрессии\nТесты не запускались: проверенный результат предыдущей проверки',passed,total)
             green(); print(f'  ✓ Regression {passed}/{total} (cached)'); white()
             return {
                 'ok':True,'summary':f'{passed}/{total}','output':'cached exact-byte regression result',
@@ -14235,10 +14249,29 @@ def run_startup_regression(force=False,progress_callback=None):
     white()
 
     try:
+        completed_checks=0
+        declared_total=None
+
         def report_output(item):
+            nonlocal completed_checks,declared_total
+            total=_startup_count_from_output(item,_STARTUP_TOTAL_MARKER)
+            if total is not None:
+                declared_total=total
+                completed_checks=0
+                progress('Запуск офлайн-регрессии\nОжидание первой проверки',completed_checks,declared_total)
+                return
+            completed=_startup_count_from_output(item,_STARTUP_COMPLETE_MARKER)
+            if completed is not None and declared_total is not None:
+                completed_checks=min(completed,declared_total)
+                progress('Запуск офлайн-регрессии\nТекущая проверка завершена',completed_checks,declared_total)
+                return
             active=_startup_active_check_from_output(item)
             if active:
-                progress(f'Запуск офлайн-регрессии\nТекущая проверка: {active}',2)
+                progress(
+                    f'Запуск офлайн-регрессии\nТекущая проверка: {active}',
+                    completed_checks if declared_total is not None else 2,
+                    declared_total or 3,
+                )
 
         returncode,output,timed_out=_stream_startup_regression(test_path,report_output,timeout=120)
         if timed_out:
@@ -14251,7 +14284,7 @@ def run_startup_regression(force=False,progress_callback=None):
 
         if ok:
             _save_startup_regression_cache(identity,passed,total)
-            progress('Проверка запуска пройдена\nВсе проверки завершены успешно',3)
+            progress('Проверка запуска пройдена\nВсе проверки завершены успешно',passed,total)
             green()
             print(f'\r  ✓ Regression {passed}/{total}                              ')
             white()

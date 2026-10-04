@@ -29,9 +29,9 @@ try {
     $raw.WindowSize = $win
 } catch {}
 
-$client = Join-Path $PSScriptRoot "bull_client_v0.28.0.3.py"
+$client = Join-Path $PSScriptRoot "bull_client_v0.28.0.4.py"
 if (-not (Test-Path $client)) {
-    Write-Host "ERROR: bull_client_v0.28.0.3.py not found." -ForegroundColor Red
+    Write-Host "ERROR: bull_client_v0.28.0.4.py not found." -ForegroundColor Red
     Read-Host "Press Enter"
     exit 1
 }
