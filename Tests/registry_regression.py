@@ -148,7 +148,7 @@ def run_suite(mod) -> int:
         assert len(pack.cases) == len(mod.CHAT_CORE_TESTS) == 12
         summary = json.dumps(pack.inspect_summary(), ensure_ascii=False)
         assert '"prompt"' not in summary and '"definition"' not in summary
-        client_source = (ROOT / "bull_client_v0.28.0.4.py").read_text(encoding="utf-8")
+        client_source = (ROOT / "bull_client_v0.28.0.5.py").read_text(encoding="utf-8")
         for command in ("/bench pack list", "/bench pack validate", "/bench pack inspect"):
             assert command in client_source
 
@@ -312,7 +312,7 @@ def run_suite(mod) -> int:
 if __name__ == "__main__":
     import importlib.util
 
-    spec = importlib.util.spec_from_file_location("bull_registry_test_core", ROOT / "bull_client_v0.28.0.4.py")
+    spec = importlib.util.spec_from_file_location("bull_registry_test_core", ROOT / "bull_client_v0.28.0.5.py")
     if spec is None or spec.loader is None:
         raise RuntimeError("cannot load compatibility core")
     core = importlib.util.module_from_spec(spec)

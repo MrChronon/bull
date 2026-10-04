@@ -1,9 +1,9 @@
-# Public release audit — BULL v0.28.0.4
+# Public release audit — BULL v0.28.0.5
 
 ## Scope
 
-This patch changes only startup presentation and the persisted default visual
-theme. Built-in benchmark prompts, scorers, inference, recovery, and backend
+This patch changes benchmark selection navigation and optional system-resource
+telemetry. Built-in benchmark prompts, scorers, inference, recovery, and backend
 connection behaviour are unchanged.
 
 ## Public-data boundary

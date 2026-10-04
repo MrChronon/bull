@@ -20,7 +20,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/MrChronon/bull/releases/latest/download/BULL-v0.28.0.4-Bundle.zip"><strong>Download BULL v0.28 for Windows</strong></a><br><br>
+  <a href="https://github.com/MrChronon/bull/releases/latest/download/BULL-v0.28.0.5-Bundle.zip"><strong>Download BULL v0.28.0.5 for Windows</strong></a><br><br>
   <a href="#quick-start">Quick start</a> ·
   <a href="Docs/en/USER_GUIDE.md">User guide</a> ·
   <a href="Docs/ru/USER_GUIDE.md">Руководство</a> ·
@@ -41,7 +41,7 @@ server**. Run chat, compare selected models, resume interrupted suites, inspect
 offline reports and move a tested profile into the working client.
 
 <p align="center">
-  <img src="Assets/Brand/readme-signal-panel.svg?v=0.28.0.4-signal390" alt="BULL evaluation signal panel: 390 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases, private and share-safe evidence, and nine separated metric spaces" width="100%">
+  <img src="Assets/Brand/readme-signal-panel.svg?v=0.28.0.5-signal390" alt="BULL evaluation signal panel: 390 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases, private and share-safe evidence, and nine separated metric spaces" width="100%">
 </p>
 
 ## Why BULL
@@ -103,13 +103,13 @@ superiority from a single run.
 
 ### Install
 
-1. Download `BULL-v0.28.0.4-Bundle.zip` and its SHA-256 file from the
+1. Download `BULL-v0.28.0.5-Bundle.zip` and its SHA-256 file from the
    [latest release](https://github.com/MrChronon/bull/releases/latest).
 2. Verify the checksum, extract the archive and run
-   `Install-BULL-v0.28.0.4.cmd`.
+   `Install-BULL-v0.28.0.5.cmd`.
 3. Choose `Client`, `Server` or `AllInOne`.
-4. Start `BULL-v0.28.0.4.cmd` for chat or
-   `BULL-Benchmark-Lab-v0.28.0.4.cmd` for evaluation.
+4. Start `BULL-v0.28.0.5.cmd` for chat or
+   `BULL-Benchmark-Lab-v0.28.0.5.cmd` for evaluation.
 
 The interface opens without a running backend, so connection setup, help,
 diagnostics and saved reports remain available offline.
@@ -186,11 +186,11 @@ Public release gates exclude `Chats`, `Runtime`, `Benchmarks`, `Exports`,
 
 ## Project status
 
-`v0.28.0.4` is the **Clear Choice** release. It keeps the primary UI simple and
-compare, chat, connection and more; adds reusable user-owned tasks; and presents
-transparent model-choice profiles in the terminal and offline HTML. Existing
-expert features remain under advanced/experimental menus. Built-in prompts,
-scorers, recovery and runtime inference behavior remain unchanged. See the
+`v0.28.0.5` is the **Clear Benchmark Flow** release. It keeps the primary UI simple and
+compare, chat, connection and more; adds clean sampling-source navigation, live
+CPU/RAM context and per-run checkpoints. Existing expert features remain under
+advanced/experimental menus. Built-in prompts, scorers, recovery and runtime
+inference behavior remain unchanged. See the
 [release notes](Docs/en/RELEASE_NOTES.md) and
 [documentation index](Docs/README.md).
 
