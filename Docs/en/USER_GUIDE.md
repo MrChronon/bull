@@ -12,7 +12,8 @@ compatible llama.cpp HTTP server, locally or through a pinned SSH tunnel.
 
 Download `BULL-v0.28.0.4-Bundle.zip` and its checksum from the GitHub release.
 Verify the SHA-256 value, extract into a new directory, and run
-`Install-BULL-v0.28.0.4.cmd`. Choose **Client**, **Server**, or **AllInOne**.
+`Install-BULL-v0.28.0.4.cmd`. It creates red BULL shortcuts on the Desktop and
+in the Start Menu. Choose **Client**, **Server**, or **AllInOne**.
 
 Use `BULL-v0.28.0.4.cmd` for the application. The Benchmark Lab and Agent Lab
 launchers open their respective sections directly.
@@ -25,8 +26,8 @@ shows the active stage, the exact current check, and the completed/total check
 count emitted by the offline regression harness.
 
 The client performs an offline regression check before enabling inference. A
-small separate desktop window shows the version, release artwork, and the three
-observed verification stages. It closes before the terminal menu opens and
+small separate desktop window shows the version, release artwork, the current
+check, and its real completed/total progress. It closes before the terminal menu opens and
 never changes terminal colours. If Windows GUI facilities are unavailable, the
 check still runs normally in the terminal. If it fails, run `Run-Tests.ps1` and
 inspect `client_debug.log`.

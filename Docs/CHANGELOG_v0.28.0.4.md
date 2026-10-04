@@ -10,6 +10,7 @@
   fail-closed on a timeout or a failing check.
 - The progress bar now uses explicit completed/total markers emitted by the
   harness, rather than the three startup stages.
+- Windows Desktop and Start Menu shortcuts use the BULL Red release icon.
 
 ## Validation
 

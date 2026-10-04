@@ -15,6 +15,8 @@ native/final quality metrics are unchanged.
 - Status text remains localized while test identifiers stay intact.
 - The progress bar shows completed checks out of the harness-declared total;
   a verified cache clearly states that it did not run new checks.
+- Desktop and Start Menu shortcuts now use the BULL Red icon, matching the
+  default application theme while preserving the approved logo geometry.
 
 ## Install
 
