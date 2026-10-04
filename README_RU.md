@@ -19,7 +19,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/MrChronon/bull/releases/latest/download/BULL-v0.28.0.2-Bundle.zip"><strong>Скачать BULL v0.28 для Windows</strong></a><br><br>
+  <a href="https://github.com/MrChronon/bull/releases/latest/download/BULL-v0.28.0.3-Bundle.zip"><strong>Скачать BULL v0.28 для Windows</strong></a><br><br>
   <a href="Docs/ru/USER_GUIDE.md">Руководство</a> ·
   <a href="Docs/ru/BENCHMARKS.md">Бенчмарки</a> ·
   <a href="Docs/ru/CONNECTIONS.md">Подключения</a> ·
@@ -62,9 +62,9 @@ BULL работает с Ollama и совместимым HTTP-сервером 
 
 1. Скачайте ZIP и SHA-256 из [последнего релиза](https://github.com/MrChronon/bull/releases/latest).
 2. Проверьте checksum и распакуйте архив в новую папку.
-3. Запустите `Install-BULL-v0.28.0.2.cmd`.
+3. Запустите `Install-BULL-v0.28.0.3.cmd`.
 4. Выберите Client, Server или AllInOne.
-5. Запустите `BULL-v0.28.0.2.cmd`.
+5. Запустите `BULL-v0.28.0.3.cmd`.
 6. Выберите язык, затем **Подключение** и **Сравнить модели**.
 
 Приложение открывает меню без работающей Ollama: настройки, справка и сохранённые

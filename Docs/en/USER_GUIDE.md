@@ -10,18 +10,19 @@ compatible llama.cpp HTTP server, locally or through a pinned SSH tunnel.
 - Ollama or a compatible llama.cpp server;
 - at least one model installed on the selected backend.
 
-Download `BULL-v0.28.0.2-Bundle.zip` and its checksum from the GitHub release.
+Download `BULL-v0.28.0.3-Bundle.zip` and its checksum from the GitHub release.
 Verify the SHA-256 value, extract into a new directory, and run
-`Install-BULL-v0.28.0.2.cmd`. Choose **Client**, **Server**, or **AllInOne**.
+`Install-BULL-v0.28.0.3.cmd`. Choose **Client**, **Server**, or **AllInOne**.
 
-Use `BULL-v0.28.0.2.cmd` for the application. The Benchmark Lab and Agent Lab
+Use `BULL-v0.28.0.3.cmd` for the application. The Benchmark Lab and Agent Lab
 launchers open their respective sections directly.
 
 On the first launch, choose English or Russian. This question is shown once.
 Change the saved language or color theme later under **More → Language and
 appearance**. BULL Red is the default. Matrix BULL is the green alternative;
 high contrast remains available. During the startup check, the separate splash
-shows the active stage and the exact regression-suite file being run.
+shows the active stage and the exact check currently emitted by the offline
+regression harness.
 
 The client performs an offline regression check before enabling inference. A
 small separate desktop window shows the version, release artwork, and the three

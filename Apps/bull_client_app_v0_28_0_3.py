@@ -1,4 +1,4 @@
-"""Dedicated BULL Benchmark Lab entry point for v0.28.0.2."""
+"""Dedicated BULL working Client entry point for v0.28.0.3."""
 
 from __future__ import annotations
 import os
@@ -7,7 +7,7 @@ from _bootstrap import load_compat_core
 
 
 def main():
-    os.environ['BULL_START_SURFACE']='benchmark'
+    os.environ['BULL_START_SURFACE']='home'
     return load_compat_core().main()
 
 

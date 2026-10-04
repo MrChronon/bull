@@ -88,7 +88,7 @@ class UXTests(unittest.TestCase):
     def test_versioned_startup_window_uses_png_and_truthful_stage_progress(self):
         from Shared.bull_llm import startup_window
 
-        self.assertEqual(startup_window.splash_image_path('v0.28.0.2').name, 'splash-v0.28.0.2.png')
+        self.assertEqual(startup_window.splash_image_path('v0.28.0.3').name, 'splash-v0.28.0.3.png')
         self.assertEqual(startup_window._progress(2, 3), (2, 3, 2 / 3))
         self.assertEqual(startup_window._progress(9, 3), (3, 3, 1.0))
         self.assertEqual(startup_window._stage_label('run\n\tregression'), 'run regression')
@@ -96,6 +96,16 @@ class UXTests(unittest.TestCase):
             startup_window._stage_parts('Run suite\nCurrent suite: Tests/benchmark_regression.py'),
             ('Run suite', 'Current suite: Tests/benchmark_regression.py'),
         )
+        self.assertEqual(
+            startup_window._stage_parts('Running offline regression\nCurrent check: scorer contract'),
+            ('Running offline regression', 'Current check: scorer contract'),
+        )
+        self.core.set_language('en')
+        self.assertEqual(
+            self.core._startup_stage_for_ui('Запуск офлайн-регрессии\nТекущая проверка: scorer contract'),
+            'Running offline regression\nCurrent check: scorer contract',
+        )
+        self.core.set_language('ru')
 
         events = []
         class FakeWindow:
@@ -104,8 +114,8 @@ class UXTests(unittest.TestCase):
             def close(self):
                 events.append(('close',))
         with patch.object(startup_window, '_create_window', return_value=FakeWindow()) as create:
-            splash = startup_window.open_startup_window('v0.28.0.2', 'Run regression', 2, 3)
-        create.assert_called_once_with('v0.28.0.2', 'Run regression', 2, 3)
+            splash = startup_window.open_startup_window('v0.28.0.3', 'Run regression', 2, 3)
+        create.assert_called_once_with('v0.28.0.3', 'Run regression', 2, 3)
         splash.update('Regression passed', 3, 3)
         splash.close()
         self.assertEqual(events, [('update', 'Regression passed', 3, 3), ('close',)])

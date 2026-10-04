@@ -1,4 +1,4 @@
-BULL v0.28.0.2 — Benchmarking & Usage of Local LLMs
+BULL v0.28.0.3 — Benchmarking & Usage of Local LLMs
 ====================================================
 
 ENGLISH
@@ -13,10 +13,10 @@ Put reusable tasks in UserTests. A .txt prompt receives runtime measurements and
 manual review without a fabricated quality score. A strict .yaml task uses only
 declared deterministic criteria.
 
-Install:       Install-BULL-v0.28.0.2.cmd
-Application:   BULL-v0.28.0.2.cmd
-Benchmark Lab: BULL-Benchmark-Lab-v0.28.0.2.cmd
-Agent Lab:     BULL-Agent-Lab-v0.28.0.2.cmd
+Install:       Install-BULL-v0.28.0.3.cmd
+Application:   BULL-v0.28.0.3.cmd
+Benchmark Lab: BULL-Benchmark-Lab-v0.28.0.3.cmd
+Agent Lab:     BULL-Agent-Lab-v0.28.0.3.cmd
 
 Documentation: Docs\en\README.md
 
@@ -31,10 +31,10 @@ Simple Experience оставляет на основном маршруте ср
 но не создаётся выдуманный quality score. Строгий .yaml использует только явно
 заданные детерминированные критерии.
 
-Установка:     Install-BULL-v0.28.0.2.cmd
-Приложение:    BULL-v0.28.0.2.cmd
-Benchmark Lab: BULL-Benchmark-Lab-v0.28.0.2.cmd
-Agent Lab:     BULL-Agent-Lab-v0.28.0.2.cmd
+Установка:     Install-BULL-v0.28.0.3.cmd
+Приложение:    BULL-v0.28.0.3.cmd
+Benchmark Lab: BULL-Benchmark-Lab-v0.28.0.3.cmd
+Agent Lab:     BULL-Agent-Lab-v0.28.0.3.cmd
 
 Документация: Docs\ru\README.md
 

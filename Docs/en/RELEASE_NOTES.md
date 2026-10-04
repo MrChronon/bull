@@ -1,4 +1,4 @@
-# BULL v0.28.0.2 — Clear Choice
+# BULL v0.28.0.3 — Clear Choice
 
 This release improves the trustworthiness of choosing among installed local
 models. It does not change built-in benchmark prompts, built-in scorers, or the

@@ -206,8 +206,8 @@ BENCHMARK_PROFILE_PARAMETER_FIELDS=(
     'mirostat','mirostat_eta','mirostat_tau',
 )
 APP_NAME='BULL — Benchmark Lab'
-APP_VERSION='v0.28.0.2'
-APP_ICON='BULL-v0.28.0.2.ico'
+APP_VERSION='v0.28.0.3'
+APP_ICON='BULL-v0.28.0.3.ico'
 ATTACH_MAX_FILE_CHARS=80000
 ATTACH_CONTEXT_TOKENS=2800
 TOOL_MAX_LOOPS=5
@@ -14071,6 +14071,116 @@ def _save_startup_regression_cache(identity,passed,total):
         pass
 
 
+_STARTUP_TEST_MARKER='BULL_STARTUP_TEST\t'
+
+
+def _startup_active_check_from_output(line):
+    """Return the explicit active-check marker emitted by the offline suite.
+
+    The marker is deliberately emitted by the regression harness immediately
+    before a check starts.  This makes the splash factual: it never derives a
+    made-up test number from output that has not happened yet.
+    """
+    value=str(line or '')
+    if _STARTUP_TEST_MARKER not in value:
+        return ''
+    name=value.split(_STARTUP_TEST_MARKER,1)[1].strip()
+    name=' '.join(name.split())
+    return name[:140]
+
+
+def _startup_stage_for_ui(stage):
+    """Translate fixed splash labels without translating a check identifier."""
+    value=str(stage or '')
+    heading,separator,detail=value.partition('\n')
+    prefix='Текущая проверка: '
+    if separator and detail.startswith(prefix):
+        return tr(heading,fragments=True)+'\n'+tr(prefix,fragments=True)+detail[len(prefix):]
+    return tr(value,fragments=True)
+
+
+def _stream_startup_regression(test_path,on_line=None,timeout=120):
+    """Run the mandatory suite while exposing its already-emitted progress.
+
+    A reader thread prevents a quiet or stuck child process from bypassing the
+    existing bounded timeout.  stdout and stderr are deliberately merged so
+    presentation receives the same ordered text that is retained in the local
+    diagnostic log on failure.
+    """
+    import queue
+
+    process=subprocess.Popen(
+        [sys.executable,'-u',str(test_path)],
+        cwd=str(appdir()),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        encoding='utf-8',
+        errors='replace',
+        env=_utf8_subprocess_env(),
+        bufsize=1,
+        creationflags=(subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0),
+    )
+    lines=[]
+    received=queue.Queue()
+
+    def read_output():
+        try:
+            for item in iter(process.stdout.readline,''):
+                received.put(item)
+        finally:
+            try:
+                process.stdout.close()
+            except Exception:
+                pass
+
+    reader=threading.Thread(target=read_output,name='bull-startup-regression-output',daemon=True)
+    reader.start()
+    deadline=time.monotonic()+max(1,float(timeout))
+    timed_out=False
+    while reader.is_alive() or process.poll() is None:
+        remaining=deadline-time.monotonic()
+        if remaining<=0:
+            timed_out=True
+            try:
+                process.kill()
+            except Exception:
+                pass
+            break
+        try:
+            item=received.get(timeout=min(0.10,remaining))
+        except queue.Empty:
+            continue
+        lines.append(item)
+        if callable(on_line):
+            try:
+                on_line(item)
+            except Exception:
+                pass
+
+    try:
+        process.wait(timeout=3)
+    except subprocess.TimeoutExpired:
+        try:
+            process.kill()
+        except Exception:
+            pass
+        process.wait()
+    reader.join(timeout=1)
+    while True:
+        try:
+            item=received.get_nowait()
+        except queue.Empty:
+            break
+        lines.append(item)
+        if callable(on_line):
+            try:
+                on_line(item)
+            except Exception:
+                pass
+    return process.returncode,''.join(lines).strip(),timed_out
+
+
 def run_startup_regression(force=False,progress_callback=None):
     """Run or reuse the bundled offline regression before SSH/model selection.
 
@@ -14120,32 +14230,28 @@ def run_startup_regression(force=False,progress_callback=None):
             }
 
     gray()
-    progress('Запуск офлайн-регрессии\nТекущий набор: Tests/benchmark_regression.py',2)
+    progress('Запуск офлайн-регрессии\nОжидание первой проверки',2)
     print('  Offline regression ...',end='',flush=True)
     white()
 
     try:
-        cp=subprocess.run(
-            [sys.executable,'-u',str(test_path)],
-            cwd=str(appdir()),
-            capture_output=True,
-            text=True,
-            encoding='utf-8',
-            errors='replace',
-            env=_utf8_subprocess_env(),
-            timeout=120,
-            creationflags=(subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0),
-        )
-        output=((cp.stdout or '')+'\n'+(cp.stderr or '')).strip()
+        def report_output(item):
+            active=_startup_active_check_from_output(item)
+            if active:
+                progress(f'Запуск офлайн-регрессии\nТекущая проверка: {active}',2)
+
+        returncode,output,timed_out=_stream_startup_regression(test_path,report_output,timeout=120)
+        if timed_out:
+            raise subprocess.TimeoutExpired([sys.executable,'-u',str(test_path)],120,output=output)
         matches=re.findall(r'PASS\s+(\d+)\s*/\s*(\d+)',output,re.I)
         passed=total=0
         if matches:
             passed,total=map(int,matches[-1])
-        ok=(cp.returncode==0 and total>0 and passed==total)
+        ok=(returncode==0 and total>0 and passed==total)
 
         if ok:
             _save_startup_regression_cache(identity,passed,total)
-            progress('Проверка запуска пройдена\nЗавершён: Tests/benchmark_regression.py',3)
+            progress('Проверка запуска пройдена\nВсе проверки завершены успешно',3)
             green()
             print(f'\r  ✓ Regression {passed}/{total}                              ')
             white()
@@ -14163,7 +14269,7 @@ def run_startup_regression(force=False,progress_callback=None):
         white()
         return {
             'ok':False,
-            'summary':f'{passed}/{total}' if total else f'exit {cp.returncode}',
+            'summary':f'{passed}/{total}' if total else f'exit {returncode}',
             'output':output,
             'passed':passed,
             'total':total,
@@ -16064,7 +16170,7 @@ def main():
         startup_window=open_startup_verification_window()
         def startup_window_progress(stage,current,total):
             if startup_window is not None:
-                startup_window.update(tr(stage,fragments=True),current,total)
+                startup_window.update(_startup_stage_for_ui(stage),current,total)
 
         startup_regression=run_startup_regression(progress_callback=startup_window_progress)
         if not startup_regression.get('ok'):
