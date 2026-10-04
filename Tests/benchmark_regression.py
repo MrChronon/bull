@@ -33,7 +33,7 @@ from copy import deepcopy
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
-CLIENT=ROOT/'bull_client_v0.28.0.1.py'
+CLIENT=ROOT/'bull_client_v0.28.0.2.py'
 SCORER_V3_FIXTURE=ROOT/'Tests'/'Fixtures'/'benchmark_scorer_v3.json'
 RU_LANGUAGE_STRESS_V176_FIXTURE=ROOT/'Tests'/'Fixtures'/'ru_language_stress_sanitized_v3.json'
 
@@ -3231,14 +3231,14 @@ def test_release_gate_reverifies_manifest_and_new_docs():
         'Docs\\BACKEND_SETUP.md',
         'Docs\\CODE_AUDIT.md',
         'Docs\\SECURITY.md',
-        'Docs\\RELEASE_NOTES_0.28.0.1.md',
+        'Docs\\RELEASE_NOTES_0.28.0.2.md',
     ):
         assert doc in build
     assert 'Manifest hash mismatch before packaging' in build
     assert 'Staged manifest hash mismatch' in build
     assert '$allowedVersioned' in build
-    assert 'v0.28.0.1' in build
-    assert 'Apps\\benchmark_lab_v0_28_0_1.py' in build
+    assert 'v0.28.0.2' in build
+    assert 'Apps\\benchmark_lab_v0_28_0_2.py' in build
     assert 'Shared\\bull_llm\\runtime\\__init__.py' in build
     assert 'Shared\\bull_llm\\schemas.py' in build
     assert '$rootExcludedDirs' in build and '$anywhereExcludedDirs' in build
@@ -3787,10 +3787,10 @@ def test_tested_profile_artifact_and_client_import():
 
 def test_v174_application_boundaries_and_shared_contracts():
     required=[
-        ROOT/'Apps'/'benchmark_lab_v0_28_0_1.py',ROOT/'Apps'/'bull_client_app_v0_28_0_1.py',
+        ROOT/'Apps'/'benchmark_lab_v0_28_0_2.py',ROOT/'Apps'/'bull_client_app_v0_28_0_2.py',
         ROOT/'Apps'/'_bootstrap.py',ROOT/'Shared'/'bull_llm'/'schemas.py',
         ROOT/'Shared'/'bull_llm'/'profiles.py',ROOT/'Shared'/'bull_llm'/'telemetry.py',
-        ROOT/'Shared'/'bull_llm'/'backends.py',ROOT/'BULL-Benchmark-Lab-v0.28.0.1.cmd',
+        ROOT/'Shared'/'bull_llm'/'backends.py',ROOT/'BULL-Benchmark-Lab-v0.28.0.2.cmd',
     ]
     assert all(path.is_file() for path in required),[str(x) for x in required if not x.is_file()]
     sys.path.insert(0,str(ROOT))
@@ -3801,35 +3801,35 @@ def test_v174_application_boundaries_and_shared_contracts():
         eq(schemas.TESTED_PROFILE_SCHEMA_VERSION,1)
     finally:
         if sys.path and sys.path[0]==str(ROOT): sys.path.pop(0)
-    lab=(ROOT/'Apps'/'benchmark_lab_v0_28_0_1.py').read_text(encoding='utf-8')
-    client=(ROOT/'Apps'/'bull_client_app_v0_28_0_1.py').read_text(encoding='utf-8')
+    lab=(ROOT/'Apps'/'benchmark_lab_v0_28_0_2.py').read_text(encoding='utf-8')
+    client=(ROOT/'Apps'/'bull_client_app_v0_28_0_2.py').read_text(encoding='utf-8')
     assert "BULL_START_SURFACE']='benchmark'" in lab
     assert "BULL_START_SURFACE']='home'" in client
 
 
 def test_icon_shortcut_and_release_assets():
-    ico=ROOT/'BULL-v0.28.0.1.ico'
+    ico=ROOT/'BULL-v0.28.0.2.ico'
     data=ico.read_bytes()
     assert data[:4]==b'\x00\x00\x01\x00'
     eq(int.from_bytes(data[4:6],'little'),7)
-    shortcut=(ROOT/'Install-BULL-v0.28.0.1-Shortcut.ps1').read_text(encoding='utf-8-sig')
-    launcher=(ROOT/'BULL-v0.28.0.1.cmd').read_text(encoding='utf-8-sig')
+    shortcut=(ROOT/'Install-BULL-v0.28.0.2-Shortcut.ps1').read_text(encoding='utf-8-sig')
+    launcher=(ROOT/'BULL-v0.28.0.2.cmd').read_text(encoding='utf-8-sig')
     assert 'IconLocation' in shortcut and 'GetFolderPath("Programs")' in shortcut
-    assert 'Install-BULL-v0.28.0.1-Shortcut.ps1' in launcher
-    assert (ROOT/'Install-BULL-v0.28.0.1.cmd').is_file()
+    assert 'Install-BULL-v0.28.0.2-Shortcut.ps1' in launcher
+    assert (ROOT/'Install-BULL-v0.28.0.2.cmd').is_file()
 
 
 def test_windows_powershell_launcher_is_ascii_parse_safe():
     # Windows PowerShell 5.1 decodes a BOM-less .ps1 as the active ANSI code
     # page. Keep the tiny entry launcher ASCII-only so parsing cannot fail
     # before it enables UTF-8 for Python and child processes.
-    launcher=ROOT/'BULL-v0.28.0.1.ps1'
+    launcher=ROOT/'BULL-v0.28.0.2.ps1'
     raw=launcher.read_bytes()
     assert raw and all(byte < 128 for byte in raw), 'launcher must remain ASCII-safe for powershell.exe 5.1'
 
     for rel in (
-        'Install-BULL-v0.28.0.1.ps1',
-        'Install-BULL-v0.28.0.1-Shortcut.ps1',
+        'Install-BULL-v0.28.0.2.ps1',
+        'Install-BULL-v0.28.0.2-Shortcut.ps1',
         'Server/Install-BULL-Node.ps1',
         'Server/Test-BULL-RemoteReadiness.ps1',
         'Client/New-BULL-ClientKey.ps1',
@@ -4470,7 +4470,7 @@ def test_v18_connection_bundle_fails_closed_on_secret_or_missing_key():
 
 
 def test_v18_platform_installer_roles_and_release_secret_gate():
-    installer=ROOT/'Install-BULL-v0.28.0.1.ps1'
+    installer=ROOT/'Install-BULL-v0.28.0.2.ps1'
     node=ROOT/'Server'/'Install-BULL-Node.ps1'
     template=ROOT/'Server'/'connection.template.json'
     assert installer.is_file() and node.is_file() and template.is_file()
@@ -4493,7 +4493,7 @@ def test_v18_platform_installer_roles_and_release_secret_gate():
 
 
 def test_wan_installer_propagates_route_port_and_keeps_inference_private():
-    installer=(ROOT/'Install-BULL-v0.28.0.1.ps1').read_text(encoding='utf-8')
+    installer=(ROOT/'Install-BULL-v0.28.0.2.ps1').read_text(encoding='utf-8')
     node=(ROOT/'Server'/'Install-BULL-Node.ps1').read_text(encoding='utf-8')
     readiness_path=ROOT/'Server'/'Test-BULL-RemoteReadiness.ps1'
     assert readiness_path.is_file()
@@ -5144,7 +5144,7 @@ def test_visual_report_is_offline_graphical_and_excludes_raw_answers():
 
 
 def test_public_release_readiness_assets_and_gate_exist():
-    for rel in ('README.md','.gitignore','Docs/PUBLIC_RELEASE_CHECKLIST.md','Docs/RELEASE_NOTES_0.28.0.1.md','Test-Public-Release.ps1'):
+    for rel in ('README.md','.gitignore','Docs/PUBLIC_RELEASE_CHECKLIST.md','Docs/RELEASE_NOTES_0.28.0.2.md','Test-Public-Release.ps1'):
         assert (ROOT/rel).is_file(),rel
     build=(ROOT/'Build-Release.ps1').read_text(encoding='utf-8-sig')
     audit=(ROOT/'Test-Public-Release.ps1').read_text(encoding='utf-8-sig')

@@ -1,4 +1,4 @@
-# BULL v0.28.0.1 — Clear Choice
+# BULL v0.28.0.2 — Clear Choice
 
 This release improves the trustworthiness of choosing among installed local
 models. It does not change built-in benchmark prompts, built-in scorers, or the
@@ -17,8 +17,10 @@ inference and recovery runtime pipeline.
 - Three synthetic, self-contained examples are included for extraction,
   structured calculation, and business translation.
 - Startup verification now uses a separate native desktop window. It shows the
-  versioned BULL image and observed stages, then closes before the terminal
-  menu; it cannot colour the terminal background.
+  versioned BULL image, the observed stage, and the exact offline
+  regression-suite file, then closes before the terminal menu; it cannot colour
+  the terminal background. BULL Red is the default theme and Matrix BULL is the
+  green alternative.
 
 The public bundle contains no models, chats, benchmark results, runtime state,
 private connections, keys, tokens, endpoints, or local logs.

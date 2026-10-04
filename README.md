@@ -20,7 +20,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/MrChronon/bull/releases/latest/download/BULL-v0.28.0.1-Bundle.zip"><strong>Download BULL v0.28 for Windows</strong></a><br><br>
+  <a href="https://github.com/MrChronon/bull/releases/latest/download/BULL-v0.28.0.2-Bundle.zip"><strong>Download BULL v0.28 for Windows</strong></a><br><br>
   <a href="#quick-start">Quick start</a> ·
   <a href="Docs/en/USER_GUIDE.md">User guide</a> ·
   <a href="Docs/ru/USER_GUIDE.md">Руководство</a> ·
@@ -103,13 +103,13 @@ superiority from a single run.
 
 ### Install
 
-1. Download `BULL-v0.28.0.1-Bundle.zip` and its SHA-256 file from the
+1. Download `BULL-v0.28.0.2-Bundle.zip` and its SHA-256 file from the
    [latest release](https://github.com/MrChronon/bull/releases/latest).
 2. Verify the checksum, extract the archive and run
-   `Install-BULL-v0.28.0.1.cmd`.
+   `Install-BULL-v0.28.0.2.cmd`.
 3. Choose `Client`, `Server` or `AllInOne`.
-4. Start `BULL-v0.28.0.1.cmd` for chat or
-   `BULL-Benchmark-Lab-v0.28.0.1.cmd` for evaluation.
+4. Start `BULL-v0.28.0.2.cmd` for chat or
+   `BULL-Benchmark-Lab-v0.28.0.2.cmd` for evaluation.
 
 The interface opens without a running backend, so connection setup, help,
 diagnostics and saved reports remain available offline.
@@ -186,7 +186,7 @@ Public release gates exclude `Chats`, `Runtime`, `Benchmarks`, `Exports`,
 
 ## Project status
 
-`v0.28.0.1` is the **Clear Choice** release. It keeps the primary UI simple and
+`v0.28.0.2` is the **Clear Choice** release. It keeps the primary UI simple and
 compare, chat, connection and more; adds reusable user-owned tasks; and presents
 transparent model-choice profiles in the terminal and offline HTML. Existing
 expert features remain under advanced/experimental menus. Built-in prompts,

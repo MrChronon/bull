@@ -1,4 +1,4 @@
-# BULL v0.28.0.1 — установка платформы
+# BULL v0.28.0.2 — установка платформы
 
 ## Роли
 
@@ -13,16 +13,16 @@
 Запуск:
 
 ```text
-Install-BULL-v0.28.0.1.cmd
+Install-BULL-v0.28.0.2.cmd
 ```
 
 CMD включает установку недостающего Python через `winget`. PowerShell entry point позволяет автоматизацию:
 
 ```powershell
-.\Install-BULL-v0.28.0.1.ps1 -Role Client -InstallDependencies
-.\Install-BULL-v0.28.0.1.ps1 -Role Server -AuthorizedKeyPath C:\Transfer\access.pub -PublicHost <VPN-IP-or-DNS>
-.\Install-BULL-v0.28.0.1.ps1 -Role Server -Route direct -EndpointPort 48222 -AuthorizedKeyPath C:\Transfer\access.pub -PublicHost <PUBLIC-IP-or-DNS>
-.\Install-BULL-v0.28.0.1.ps1 -Role AllInOne -InstallDependencies
+.\Install-BULL-v0.28.0.2.ps1 -Role Client -InstallDependencies
+.\Install-BULL-v0.28.0.2.ps1 -Role Server -AuthorizedKeyPath C:\Transfer\access.pub -PublicHost <VPN-IP-or-DNS>
+.\Install-BULL-v0.28.0.2.ps1 -Role Server -Route direct -EndpointPort 48222 -AuthorizedKeyPath C:\Transfer\access.pub -PublicHost <PUBLIC-IP-or-DNS>
+.\Install-BULL-v0.28.0.2.ps1 -Role AllInOne -InstallDependencies
 ```
 
 Server и AllInOne требуют администратора; installer сам запрашивает UAC в интерактивном режиме. Server требует `.pub`-ключ и завершается без него. AllInOne без ключа не включает OpenSSH и входящее firewall-правило.
@@ -101,7 +101,7 @@ AllInOne устанавливает Client и локальный Ollama, зат�
 
 ## llama.cpp
 
-v0.28.0.1 сохраняет существующий llama.cpp backend. Публичные defaults безопасны:
+v0.28.0.2 сохраняет существующий llama.cpp backend. Публичные defaults безопасны:
 
 ```json
 {
@@ -144,7 +144,7 @@ Invoke-RestMethod http://127.0.0.1:11434/api/version
 
 На новом Client переносите:
 
-- чистый BULL v0.28.0.1 bundle;
+- чистый BULL v0.28.0.2 bundle;
 - нужный connection JSON;
 - private key отдельным защищённым каналом, если это ваш key;
 - при необходимости пользовательские `model_profiles.json` и tested profiles.

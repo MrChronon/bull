@@ -83,10 +83,10 @@ class BridgeTests(unittest.TestCase):
 
     def test_release_has_only_branded_launchers(self):
         for target in (
-            "BULL-v0.28.0.1.cmd",
-            "BULL-Benchmark-Lab-v0.28.0.1.cmd",
-            "BULL-Agent-Lab-v0.28.0.1.cmd",
-            "Install-BULL-v0.28.0.1.cmd",
+            "BULL-v0.28.0.2.cmd",
+            "BULL-Benchmark-Lab-v0.28.0.2.cmd",
+            "BULL-Agent-Lab-v0.28.0.2.cmd",
+            "Install-BULL-v0.28.0.2.cmd",
         ):
             self.assertTrue((ROOT / target).is_file(), target)
         legacy_names = [path for path in ROOT.rglob("*") if "local-llm" in path.name.casefold()]
@@ -101,7 +101,7 @@ class BridgeTests(unittest.TestCase):
             result = subprocess.run(
                 [
                     "powershell.exe", "-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass",
-                    "-File", str(ROOT / "Install-BULL-v0.28.0.1.ps1"),
+                    "-File", str(ROOT / "Install-BULL-v0.28.0.2.ps1"),
                     "-Role", "Client", "-NonInteractive",
                     "-ShortcutDesktop", str(desktop),
                     "-ShortcutPrograms", str(programs),
@@ -127,7 +127,7 @@ class BridgeTests(unittest.TestCase):
                     "favicon.png": (32, 32), "github-social-preview.png": (1280, 640)}
         for name, size in expected.items():
             self.assertEqual(_png_size(brand / name), size)
-        _assert_ico(ROOT / "BULL-v0.28.0.1.ico")
+        _assert_ico(ROOT / "BULL-v0.28.0.2.ico")
         lock = json.loads((brand / "brand-lock.json").read_text(encoding="utf-8"))
         master = brand / lock["source_file"]
         self.assertEqual(hashlib.sha256(master.read_bytes()).hexdigest(), lock["source_sha256"])
@@ -135,12 +135,12 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(lock["derivation"], "crop_resize_only_no_redraw")
 
     def test_bridge_release_identity_and_measurement_freeze_are_documented(self):
-        core = (ROOT / "bull_client_v0.28.0.1.py").read_text(encoding="utf-8")
+        core = (ROOT / "bull_client_v0.28.0.2.py").read_text(encoding="utf-8")
         self.assertIn("APP_NAME='BULL — Benchmark Lab'", core)
-        self.assertIn("APP_VERSION='v0.28.0.1'", core)
+        self.assertIn("APP_VERSION='v0.28.0.2'", core)
         self.assertIn("'СОСТОЯНИЕ BULL'", core)
         self.assertNotIn("'LOCAL LLM DASHBOARD'", core)
-        notes = (ROOT / "Docs" / "RELEASE_NOTES_0.28.0.1.md").read_text(encoding="utf-8")
+        notes = (ROOT / "Docs" / "RELEASE_NOTES_0.28.0.2.md").read_text(encoding="utf-8")
         for phrase in ("Built-in benchmark prompts", "scorers", "runtime"):
             self.assertIn(phrase, notes)
 
