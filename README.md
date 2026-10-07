@@ -41,7 +41,7 @@ server**. Run chat, compare selected models, resume interrupted suites, inspect
 offline reports and move a tested profile into the working client.
 
 <p align="center">
-  <img src="Assets/Brand/readme-signal-panel.svg?v=0.28.0.7-signal400" alt="BULL evaluation signal panel: 400 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases, private and share-safe evidence, and separate metric spaces" width="100%">
+  <img src="Assets/Brand/readme-signal-panel.svg?v=0.28.0.7-clean401" alt="BULL evaluation signal panel: 401 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases, bilingual tracks, private and share-safe evidence, and separate metric spaces" width="100%">
 </p>
 
 ## Why BULL
@@ -67,6 +67,8 @@ offline reports and move a tested profile into the working client.
 - **contract completion:** generation, structure, terminal JSON and exact schema
   are tracked as distinct facts;
 - **performance:** load duration, warm tokens/second, VRAM and GPU telemetry;
+- **language tracks:** separate Russian and English suites plus paired bilingual
+  execution of the same semantic tasks;
 - **stability:** multi-seed dispersion, worst cases, uncertainty-aware Pareto
   status and category-level comparisons;
 - **system behavior:** recovery use, retries, fingerprints, resume provenance and
@@ -87,6 +89,8 @@ structured `.yaml` file can declare bounded deterministic checks. See the
 [user-test authoring guide](Docs/en/BENCHMARKS.md).
 
 The bundled `bull_chat_core@1.0.0` pack contains the stable 12-case CHAT Core.
+`bull_language_comparison` adds Russian, English and paired bilingual tracks so
+language quality and throughput are not collapsed into one average.
 The new `bull_ru_dialogue@1.0.0` candidate adds 10 public parameterized cases for
 confirmed-state updates, evidence limits, causal caution, instruction retention,
 business Russian and embedded-instruction resistance. Its scorer publishes
@@ -155,7 +159,7 @@ output, client assistance and recovery behavior in distinct metric spaces.
 .\Build-Release.ps1
 ```
 
-The current release passes **400/400 offline regressions**, including clean
+The current release passes **401/401 offline regressions**, including clean
 Python without site packages, forced `cp1251`, startup integration, manifest
 hashes and ZIP verification.
 
@@ -188,11 +192,12 @@ Public release gates exclude `Chats`, `Runtime`, `Benchmarks`, `Exports`,
 
 ## Project status
 
-`v0.28.0.7` is the **Ollama Profile Comparison Fix** release. It keeps the primary UI simple and
-compare, chat, connection and more; adds clean sampling-source navigation, live
-CPU/RAM context and per-run checkpoints. Existing expert features remain under
-advanced/experimental menus. Built-in prompts, scorers, recovery and runtime
-inference behavior remain unchanged. See the
+`v0.28.0.7` is the **Clean Release** milestone. It combines the Ollama profile
+comparison fix with richer terminal and HTML analytics, live CPU/RAM/GPU/VRAM
+context, per-run checkpoints, Russian/English/bilingual tracks and a hardened
+public bundle. The release contains only BULL identifiers and paths; duplicate
+old splash assets and machine-local data are excluded. Existing expert features
+remain under advanced/experimental menus. See the
 [release notes](Docs/en/RELEASE_NOTES.md) and
 [documentation index](Docs/README.md).
 

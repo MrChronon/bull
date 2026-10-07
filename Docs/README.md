@@ -1,4 +1,4 @@
-# BULL v0.28 documentation
+# BULL v0.28.0.7 documentation
 
 [English documentation](en/README.md) · [Документация на русском](ru/README.md)
 
@@ -13,7 +13,10 @@ The current documentation is maintained in two equivalent language trees:
 | Privacy and threat model | [Security](en/SECURITY.md) | [Безопасность](ru/SECURITY.md) |
 | Agent Lab and GPU Lab | [Experimental features](en/EXPERIMENTAL.md) | [Экспериментальные функции](ru/EXPERIMENTAL.md) |
 | Architecture, tests and release process | [Development](en/DEVELOPMENT.md) | [Разработка](ru/DEVELOPMENT.md) |
-| v0.28 release | [Release notes](en/RELEASE_NOTES.md) | [Описание релиза](ru/RELEASE_NOTES.md) |
+| v0.28.0.7 Clean Release | [Release notes](en/RELEASE_NOTES.md) | [Описание релиза](ru/RELEASE_NOTES.md) |
+
+Current public release: **BULL v0.28.0.7**. Downloads and checksums are available
+from the repository's Releases page.
 
 `AI_CONTEXT.yaml` is the machine-readable engineering contract used by coding
 agents. It is language-neutral and does not replace the user guides.

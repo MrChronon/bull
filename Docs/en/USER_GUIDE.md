@@ -4,13 +4,21 @@ BULL is a Windows-first terminal application for chatting with local language
 models and comparing them under repeatable conditions. It supports Ollama and a
 compatible llama.cpp HTTP server, locally or through a pinned SSH tunnel.
 
+The current public release is **v0.28.0.7 Clean Release**. It passes 401/401
+offline regression checks and ships as a 256-file manifest-controlled archive.
+It includes separate Russian, English, and bilingual benchmark tracks, richer
+terminal and offline HTML analytics, and live CPU/RAM/GPU/VRAM telemetry when
+the selected host exposes those sensors. Public identifiers and paths are
+BULL-only; private runtime data is excluded.
+
 ## Requirements and installation
 
 - Windows 11, Python 3 and PowerShell;
 - Ollama or a compatible llama.cpp server;
 - at least one model installed on the selected backend.
 
-Download `BULL-v0.28.0.7-Bundle.zip` and its checksum from the GitHub release.
+Download `BULL-v0.28.0.7-Bundle.zip` and its checksum from the repository's
+GitHub Releases page.
 Verify the SHA-256 value, extract into a new directory, and run
 `Install-BULL-v0.28.0.7.cmd`. It creates red BULL shortcuts on the Desktop and
 in the Start Menu. Choose **Client**, **Server**, or **AllInOne**.

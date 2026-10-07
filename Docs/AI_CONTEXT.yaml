@@ -42,6 +42,8 @@ agent_rules:
 
 release_layout:
   bundle: BULL-v0.28.0.7-Bundle
+  public_archive_files: 256
+  public_archive_sha256: 492c7f1208845492a8fa5fcfee617da585612050e51e7a8dc075a4328c595b77
   core: bull_client_v0.28.0.7.py
   launchers:
     client: BULL-v0.28.0.7.cmd
@@ -621,6 +623,8 @@ schemas:
 
 verification:
   current_offline_regression: 401/401
+  public_archive_manifest_files: 256
+  public_identifiers: BULL_only
   clean_python_no_site_packages: pass
   runtime_third_party_python_dependencies: none_on_windows
   scorer_gold_set: 15/15

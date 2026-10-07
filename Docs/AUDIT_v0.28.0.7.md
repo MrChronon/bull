@@ -2,9 +2,10 @@
 
 ## Scope
 
-This patch fixes the interpretation and presentation of sampling values inherited
-from Ollama Modelfiles. Built-in benchmark prompts, scorers, recovery, inference,
-and backend connection behaviour are unchanged.
+This audit covers the complete v0.28.0.7 public bundle: result presentation,
+language-track separation, Ollama profile comparison, packaging, documentation,
+privacy exclusions, and release integrity. Built-in benchmark prompts, scorers,
+recovery, inference, and backend connection behaviour are unchanged.
 
 ## Public-data boundary
 
@@ -20,3 +21,13 @@ versioned PNG.
 - source and staged public-release audits;
 - manifest hash verification before and after packaging;
 - archive entry verification and SHA-256 output.
+
+## Verified release
+
+- offline regression: **401/401**;
+- manifest-controlled archive: **256 files**;
+- mandatory BULL runtime and language-pack modules present;
+- public launchers, paths, schemas, and documentation use BULL-only identifiers;
+- obsolete splash assets and private runtime data absent;
+- published assets: `BULL-v0.28.0.7-Bundle.zip` and
+  `BULL-v0.28.0.7-Bundle.sha256.txt`.

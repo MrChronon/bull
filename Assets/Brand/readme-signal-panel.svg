@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="620" viewBox="0 0 1280 620" role="img" aria-labelledby="title desc">
   <title id="title">BULL evaluation signal panel</title>
-  <desc id="desc">Project facts and a conceptual map of BULL evaluation coverage. The panel shows 400 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases and nine separated metric spaces. It is not a model score chart.</desc>
+  <desc id="desc">Project facts and a conceptual map of BULL evaluation coverage. The panel shows 401 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases and nine separated metric spaces. It is not a model score chart.</desc>
   <defs>
     <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#16090f"/>
@@ -39,7 +39,7 @@
       <rect x="640" y="154" width="274" height="132" rx="18" fill="#211017" stroke="#722a39"/>
       <rect x="932" y="154" width="292" height="132" rx="18" fill="#211017" stroke="#722a39"/>
 
-      <text x="80" y="217" fill="#f4f7f5" font-size="42" font-weight="750">400/400</text>
+      <text x="80" y="217" fill="#f4f7f5" font-size="42" font-weight="750">401/401</text>
       <text x="80" y="252" fill="#d899a3" font-size="14" font-weight="650" letter-spacing="2">OFFLINE REGRESSIONS</text>
       <circle cx="300" cy="188" r="8" fill="#ff3c52" filter="url(#glow)"/>
 
@@ -78,7 +78,7 @@
       <rect x="640" y="365" width="274" height="174" rx="18" fill="#1b0d13" stroke="#642735"/>
       <text x="664" y="405" fill="#ff3c52" font-size="16" font-weight="750" letter-spacing="2">PERFORMANCE</text>
       <text x="664" y="440" fill="#f4f7f5" font-size="18" font-weight="600">Load · warm tok/s</text>
-      <text x="664" y="468" fill="#f4f7f5" font-size="18" font-weight="600">VRAM · GPU telemetry</text>
+      <text x="664" y="468" fill="#f4f7f5" font-size="18" font-weight="600">CPU · RAM · GPU · VRAM</text>
       <rect x="664" y="499" width="214" height="10" rx="5" fill="#4a1f2a"/>
       <rect x="664" y="499" width="62" height="10" rx="5" fill="#ff3c52"/>
       <rect x="731" y="499" width="76" height="10" rx="5" fill="#ff8a94" opacity="0.82"/>
