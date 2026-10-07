@@ -342,6 +342,9 @@ benchmark_sampling:
     - parameter provenance
   strict_fair_compare:
     experimental_parameters_are_allowed_to_differ: true
+    model_profile_sampler_differences_are_profile_owned: true
+    model_profile_sampler_differences_do_not_fail_strict_comparison: true
+    model_profile_missing_sampler_value: backend_default_unresolved
     all_other_runtime_fields_must_match: true
   preflight_errors:
     SAMPLING_EXPERIMENT_HAS_NO_VARIATION: declared sampling experiment has no effective variation

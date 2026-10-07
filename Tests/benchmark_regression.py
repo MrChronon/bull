@@ -45,7 +45,7 @@ spec.loader.exec_module(mod)
 mod.set_language('ru')
 
 passed=[]
-STARTUP_CHECK_TOTAL=398
+STARTUP_CHECK_TOTAL=399
 print('BULL_STARTUP_TOTAL\t'+str(STARTUP_CHECK_TOTAL),flush=True)
 
 def test(name,fn):
@@ -3619,6 +3619,28 @@ def test_strict_fair_compare_allows_only_experimental_parameters():
     eq(report['differences'][0]['field'],'ctx')
 
 
+def test_strict_fair_compare_records_ollama_profile_sampler_differences():
+    """Profile inheritance is visible evidence, never a hidden fair-compare failure."""
+    a={
+        'model':'a','sampling_source':'model_profile','allow_mixed_sampling_override':False,
+        'ctx':16384,'num_thread':12,'num_predict':4096,'temperature':1.0,
+        'top_p':.95,'top_k':40,'min_p':0.0,'repeat_penalty':1.0,
+        'repeat_last_n':None,'presence_penalty':None,'frequency_penalty':None,
+        'mirostat':None,'mirostat_eta':None,'mirostat_tau':None,
+        'seed':42,'think_requested':False,'think':False,'force_final_answer':False,
+        'recovery':{'enabled':False},
+    }
+    b={**deepcopy(a),'model':'b','temperature':.2,'repeat_penalty':None}
+    report=mod.benchmark_fairness_report([a,b],[])
+    assert report['equivalent'] is True
+    assert not report['differences']
+    eq({row['field'] for row in report['profile_owned_differences']},{'temperature','repeat_penalty'})
+    b['num_thread']=8
+    report=mod.benchmark_fairness_report([a,b],[])
+    assert report['equivalent'] is False
+    eq(report['differences'][0]['field'],'num_thread')
+
+
 def test_old_benchmark_profile_defaults_to_benchmark_override():
     old_profile,old_caps=mod.model_profile,mod.cached_model_capabilities
     try:
@@ -5364,6 +5386,7 @@ test('benchmark-override sampling keeps legacy request',test_sampling_source_ben
 test('per-model sampling produces distinct requests',test_sampling_source_per_model_has_distinct_requests_and_fingerprints)
 test('sampling preflight blocks fake/leaking experiments',test_sampling_preflight_blocks_no_variation_and_profile_override)
 test('strict fair compare permits declared experiment only',test_strict_fair_compare_allows_only_experimental_parameters)
+test('strict fair compare records Ollama profile sampler differences',test_strict_fair_compare_records_ollama_profile_sampler_differences)
 test('legacy profile defaults to benchmark override',test_old_benchmark_profile_defaults_to_benchmark_override)
 test('/bench all strict fair uses benchmark predict budgets',test_all_suite_strict_fair_uses_each_benchmark_predict_budget)
 test('manual seeds + runtime options + sweep parser',test_manual_seeds_runtime_options_and_sweep_matrix)

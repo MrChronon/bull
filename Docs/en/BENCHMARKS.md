@@ -31,6 +31,25 @@ These choices apply only to the compared models and conditions in that report.
 Unknown VRAM is not treated as low usage: the **Low memory** choice remains
 unavailable until the report has comparable memory measurements.
 
+## Sampling source and strict comparison
+
+**Benchmark settings** is the default: BULL sends one explicit sampler setup to
+every selected model. Use it when the question is which model performs best
+under the same runtime settings.
+
+**Ollama profile settings** reads every model's current Modelfile through
+`/api/show` and deliberately does not send sampler options in the request.
+Differences in `temperature`, `top_p`, penalties, mirostat and other inherited
+sampler fields are reported as **profile-owned differences**. They are not a
+sampling experiment and do not fail strict fair comparison; context, threads,
+output limit, reasoning mode, recovery and prompt still have to match. Missing
+Modelfile fields remain `backend_default_unresolved` rather than being guessed.
+Use this mode to assess models with their own profiles, not to claim that they
+used identical sampler settings.
+
+**Per-model settings** is an explicit sampler experiment. Each edited field is
+recorded as experimental and must actually vary between selected models.
+
 ## `.txt` user task
 
 Place one UTF-8 prompt in `UserTests/name.txt`. BULL runs the unchanged prompt

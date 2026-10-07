@@ -5312,16 +5312,26 @@ def benchmark_effective_config(model_name,benchmark_name,item,requested_think,se
 
 
 def benchmark_fairness_report(configs,experimental_parameters=None):
-    """Compare effective runtime settings while separating capability overrides."""
+    """Compare effective runtime settings while preserving profile-owned sampling.
+
+    ``model_profile`` deliberately asks Ollama to inherit each model's
+    Modelfile.  Those sampler values are therefore evidence of the selected
+    model profile, not an accidental runtime mismatch.  They must be visible
+    in the report, but must not make a strict comparison fail.  All non-sampler
+    runtime settings remain strictly comparable.
+    """
     configs=list(configs or [])
     fields=(
-        'ctx','num_thread','num_predict','temperature','top_p','top_k','min_p',
-        'repeat_penalty','seed','think_requested','think','force_final_answer','recovery'
+        'ctx','num_thread','num_predict',*BENCHMARK_SAMPLING_FIELDS,
+        'seed','think_requested','think','force_final_answer','recovery'
     )
     experimental=set(_normalize_experimental_parameters(experimental_parameters))
-    differences=[]; capability=[]; experimental_differences=[]
+    differences=[]; capability=[]; experimental_differences=[]; profile_differences=[]
     if not configs:
-        return {'equivalent':True,'differences':[],'experimental_differences':[],'capability_overrides':[]}
+        return {
+            'equivalent':True,'differences':[],'experimental_differences':[],
+            'profile_owned_differences':[],'capability_overrides':[],
+        }
     base=configs[0]
     for cur in configs[1:]:
         for field in fields:
@@ -5330,18 +5340,35 @@ def benchmark_fairness_report(configs,experimental_parameters=None):
             public_field='num_ctx' if field=='ctx' else field
             if public_field in experimental:
                 experimental_differences.append({'field':public_field,'left_model':base.get('model'),'left':base.get(field),'right_model':cur.get('model'),'right':cur.get(field),'reason':'EXPERIMENTAL PARAMETER'})
+            elif (
+                field in BENCHMARK_SAMPLING_FIELDS
+                and base.get('sampling_source')=='model_profile'
+                and cur.get('sampling_source')=='model_profile'
+                and not base.get('allow_mixed_sampling_override')
+                and not cur.get('allow_mixed_sampling_override')
+            ):
+                profile_differences.append({
+                    'field':public_field,'left_model':base.get('model'),'left':base.get(field),
+                    'right_model':cur.get('model'),'right':cur.get(field),
+                    'reason':'OLLAMA PROFILE INHERITANCE',
+                })
             elif field=='think' and (cur.get('capability_overrides') or base.get('capability_overrides')):
                 capability.append({'field':field,'left_model':base.get('model'),'left':base.get(field),'right_model':cur.get('model'),'right':cur.get(field),'reason':'CAPABILITY OVERRIDE'})
             else:
                 differences.append({'field':field,'left_model':base.get('model'),'left':base.get(field),'right_model':cur.get('model'),'right':cur.get(field)})
-    return {'equivalent':not differences,'differences':differences,'experimental_differences':experimental_differences,'capability_overrides':capability}
+    return {
+        'equivalent':not differences,'differences':differences,
+        'experimental_differences':experimental_differences,
+        'profile_owned_differences':profile_differences,
+        'capability_overrides':capability,
+    }
 
 
 def normalize_fair_compare_spec(spec):
     """Normalize runtime fields to the first selected model for each test/run."""
     fields=(
-        'ctx','num_thread','num_predict','temperature','top_p','top_k','min_p',
-        'repeat_penalty','seed','think_requested','think','primary_mode','force_final_answer','recovery',
+        'ctx','num_thread','num_predict',*BENCHMARK_SAMPLING_FIELDS,
+        'seed','think_requested','think','primary_mode','force_final_answer','recovery',
         'sampling_preset','run_profile','prompt_tokens_estimate','available_generation_context','context_window_risk'
     )
     experimental=set(_normalize_experimental_parameters(spec.get('experimental_parameters')))
@@ -5359,7 +5386,14 @@ def normalize_fair_compare_spec(spec):
                 if not cur: continue
                 for field in fields:
                     public_field='num_ctx' if field=='ctx' else field
-                    if public_field not in experimental:
+                    profile_owned_sampling=(
+                        field in BENCHMARK_SAMPLING_FIELDS
+                        and source.get('sampling_source')=='model_profile'
+                        and cur.get('sampling_source')=='model_profile'
+                        and not source.get('allow_mixed_sampling_override')
+                        and not cur.get('allow_mixed_sampling_override')
+                    )
+                    if public_field not in experimental and not profile_owned_sampling:
                         cur[field]=deepcopy(source.get(field))
                 cur['capability_overrides']=[]
                 if is_thinking_value(cur.get('think')) and (cur.get('model_capabilities') or {}).get('supports_thinking') is False:
@@ -12437,7 +12471,11 @@ def print_benchmark_sampling_matrix(spec):
     if not rows:
         return result
     print(); cyan(); print('  ИТОГОВАЯ МАТРИЦА ПАРАМЕТРОВ ГЕНЕРАЦИИ'); white()
-    print(f"  Источник: {result['sampling_source']}  ·  экспериментальные: {', '.join(result['experimental_parameters']) or 'нет'}")
+    if result['sampling_source']=='model_profile':
+        print('  Источник: model_profile  ·  sampling наследуется из Modelfile и не отправляется через API')
+        print('  Сравнение: profile-owned различия sampler будут записаны отдельно; остальные runtime settings должны совпадать')
+    else:
+        print(f"  Источник: {result['sampling_source']}  ·  экспериментальные: {', '.join(result['experimental_parameters']) or 'нет'}")
     print(f"  {'MODEL':<25} {'PARAMETER':<18} {'PROFILE':>10} {'REQUEST':>10} {'EFFECTIVE':>10}  SOURCE")
     for row in rows:
         def compact(value):
@@ -14939,10 +14977,14 @@ def benchmark_sampling_source_setup(models,catalog=None):
         yellow(); ui_print('  Предупреждение: в Ollama-профиле отсутствуют: '+', '.join(f'{short_model(m,18)}.{p}' for m,p in missing)); white()
 
     if raw in ('2','profile','model_profile'):
-        gray(); ui_print('  Sampling preset отключён. Отсутствующие параметры останутся backend_default_unresolved.'); white()
+        gray(); ui_print('  Sampling preset отключён. Различия Modelfile будут отмечены как profile-owned, а не как ошибка strict fair compare.'); white()
+        gray(); ui_print('  Отсутствующие параметры останутся backend_default_unresolved и не будут угаданы BULL.'); white()
         return {
             'sampling_source':'model_profile',
-            'experimental_parameters':['temperature','top_p','top_k','min_p'],
+            # Profile inheritance is not a sampling experiment.  The fairness
+            # layer records its sampler differences separately and still
+            # requires context, threads, output limit and pipeline to match.
+            'experimental_parameters':[],
             'model_sampling':{},'profile_snapshots':snapshots,
         }
 
@@ -14960,7 +15002,10 @@ def benchmark_sampling_source_setup(models,catalog=None):
         model_sampling[model]=row
     return {
         'sampling_source':'per_model',
-        'experimental_parameters':['temperature','top_p','top_k','min_p'],
+        # Every field editable by this wizard is an intentional experiment.
+        # In particular, do not let a different repeat_penalty trip strict
+        # fair comparison after a successful preflight.
+        'experimental_parameters':list(fields),
         'model_sampling':model_sampling,'profile_snapshots':snapshots,
     }
 
