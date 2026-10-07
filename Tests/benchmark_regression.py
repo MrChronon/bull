@@ -45,7 +45,7 @@ spec.loader.exec_module(mod)
 mod.set_language('ru')
 
 passed=[]
-STARTUP_CHECK_TOTAL=399
+STARTUP_CHECK_TOTAL=400
 print('BULL_STARTUP_TOTAL\t'+str(STARTUP_CHECK_TOTAL),flush=True)
 
 def test(name,fn):
@@ -3641,6 +3641,34 @@ def test_strict_fair_compare_records_ollama_profile_sampler_differences():
     eq(report['differences'][0]['field'],'num_thread')
 
 
+def test_model_profile_spec_preflight_accepts_inherited_sampler_variation():
+    old_profile=mod.model_profile; old_caps=mod.cached_model_capabilities
+    old_runtime=mod.backend_runtime_fingerprint; old_digest=mod.model_digest
+    try:
+        mod.model_profile=lambda name:_benchmark_test_profile()
+        mod.cached_model_capabilities=lambda name,refresh=False:['completion']
+        mod.backend_runtime_fingerprint=lambda:'runtime'
+        mod.model_digest=lambda name,catalog=None:'digest-'+name
+        first=_ollama_benchmark_snapshot('first',temperature=1.0)
+        second=_ollama_benchmark_snapshot('second',temperature=.2)
+        second['parameters'].pop('repeat_penalty')
+        spec=mod.make_benchmark_spec(
+            ['simpson'],['first','second'],1,False,'native','fixed',
+            catalog={'first':{},'second':{}},run_profile='fair_default',seeds=[42],
+            fair_compare=True,
+            run_overrides={'sampling_source':'model_profile','strict_fair_compare':True},
+            profile_snapshots={'first':first,'second':second},
+        )
+        report=spec['fairness_by_run']['simpson|1']
+        assert report['equivalent'] is True
+        eq({row['field'] for row in report['profile_owned_differences']},{'temperature','repeat_penalty'})
+        preflight=mod.benchmark_sampling_preflight(spec)
+        eq(preflight['variation_verified'],None)
+    finally:
+        mod.model_profile=old_profile; mod.cached_model_capabilities=old_caps
+        mod.backend_runtime_fingerprint=old_runtime; mod.model_digest=old_digest
+
+
 def test_old_benchmark_profile_defaults_to_benchmark_override():
     old_profile,old_caps=mod.model_profile,mod.cached_model_capabilities
     try:
@@ -5387,6 +5415,7 @@ test('per-model sampling produces distinct requests',test_sampling_source_per_mo
 test('sampling preflight blocks fake/leaking experiments',test_sampling_preflight_blocks_no_variation_and_profile_override)
 test('strict fair compare permits declared experiment only',test_strict_fair_compare_allows_only_experimental_parameters)
 test('strict fair compare records Ollama profile sampler differences',test_strict_fair_compare_records_ollama_profile_sampler_differences)
+test('model-profile preflight accepts inherited sampler variation',test_model_profile_spec_preflight_accepts_inherited_sampler_variation)
 test('legacy profile defaults to benchmark override',test_old_benchmark_profile_defaults_to_benchmark_override)
 test('/bench all strict fair uses benchmark predict budgets',test_all_suite_strict_fair_uses_each_benchmark_predict_budget)
 test('manual seeds + runtime options + sweep parser',test_manual_seeds_runtime_options_and_sweep_matrix)

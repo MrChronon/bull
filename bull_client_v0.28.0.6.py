@@ -17108,6 +17108,13 @@ def main():
                     spec=make_chat_suite_spec(
                         suite,chosen,runs,bmode,seed_mode,seeds,catalog=catalog,run_overrides=overrides,
                     )
+                    # The profile wizard has already made the user choose
+                    # Modelfile inheritance.  Resolve the current /api/show
+                    # snapshot before showing the plan too, rather than
+                    # displaying placeholder ``None`` values and discovering
+                    # a profile-only difference only after confirmation.
+                    if spec.get('sampling_source')=='model_profile':
+                        spec=refresh_benchmark_spec_profiles(spec,catalog)
                     print_benchmark_plan(spec,load_benchmarks(),catalog)
                     if not confirmed and read_user_input('Запустить CHAT suite? [Y/n] › ').strip().casefold() in ('n','no','нет','0'):
                         print('Запуск отменён.'); continue
