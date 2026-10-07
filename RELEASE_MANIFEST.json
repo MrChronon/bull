@@ -1,7 +1,7 @@
 {
   "version": "v0.28.0.7",
   "documentation_version": "v0.28.0.7",
-  "generated_at": "2026-10-07T18:54:38",
+  "generated_at": "2026-10-07T19:00:43",
   "client_sha256": "12fd3de260c981183425d2c167d0d16606ec3e8efc05030d9ea901407a8cd0e1",
   "validation": {
     "documentation_gate": "passed",
@@ -127,7 +127,7 @@
     "Docs/BULL_NAMING_RESEARCH.md": "c9758a6b8a4d1701711c9023d46e65933075ca754bc9d32b6980f317525891f4",
     "Docs/BULL_PRODUCT_CHARTER.md": "fd387860ebbbfc35d694670afc028b5d9d66171897a48f261aa428caa3fe4d88",
     "Docs/BULL_TARGET_ARCHITECTURE.md": "cbd6c413d05e770befe170a47a6920397a383134461635e4f158895d81a9f65b",
-    "Docs/BULL_TRANSITION_ROADMAP.md": "00816f1bf25822bde267fd81a4227a0489061b6de650fbec0f61ec89dca7d3d1",
+    "Docs/BULL_TRANSITION_ROADMAP.md": "98679fb15ddbc8266e58c0813d6a1eee67291cba7025fbf2061ec1d63fee8054",
     "Docs/CHANGELOG_v0.21.0.0.md": "d46789b178347280a68e3ab618143fb4815eec23e07ff8cbb7fd17260e730c07",
     "Docs/CHANGELOG_v0.22.0.0.md": "e2502a4b3e5f4c90c7dec98213d0cb7f9f249ef1ac06ba69eecdddb6ef952c3d",
     "Docs/CHANGELOG_v0.23.0.0.md": "29280c926fe14ef39c40c1309be613e64ecba51a016a70016c50f17049e125a4",
