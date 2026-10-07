@@ -3850,7 +3850,7 @@ def test_tested_profile_artifact_and_client_import():
         }
         records.append(rec)
     artifact=mod.build_tested_profiles_artifact({'spec_fingerprint':'spec-a'},records)
-    eq((artifact['schema'],artifact['schema_version']),('local-llm-tested-profiles',1))
+    eq((artifact['schema'],artifact['schema_version']),('bull-tested-profiles',1))
     eq(len(artifact['profiles']),1)
     exported=artifact['profiles'][0]
     eq(exported['effective_profile_fingerprint'],'profile-a')
@@ -4162,7 +4162,7 @@ def test_user_prompt_store_is_versioned_atomic_and_fail_closed():
         second=mod.save_user_benchmark('my_prompt','Второй prompt','Проверка 2')
         eq((first['version'],second['version']),(1,2))
         index=json.loads((root/'prompts.json').read_text(encoding='utf-8'))
-        eq((index['schema'],index['schema_version']),('local-llm-prompt-index',2))
+        eq((index['schema'],index['schema_version']),('bull-prompt-index',2))
         entry=index['prompts']['my_prompt']; eq(entry['active_version'],2); eq(len(entry['versions']),2)
         v1=root/entry['versions'][0]['path']; v2=root/entry['versions'][1]['path']
         assert v1.is_file() and v2.is_file() and v1!=v2
@@ -4500,7 +4500,7 @@ def test_v18_connection_bundle_keeps_endpoint_and_key_out_of_public_config():
         host_blob=base64.b64encode(b'unit-test-host-key-material-a'*2).decode('ascii')
         host_fingerprint='SHA256:'+base64.b64encode(hashlib.sha256(base64.b64decode(host_blob)).digest()).decode('ascii').rstrip('=')
         bundle.write_text(json.dumps({
-            'schema':'local-llm-connection','version':1,'id':'lab-a','name':'Test Lab',
+            'schema':'bull-connection','version':1,'id':'lab-a','name':'Test Lab',
             'route':'overlay','transport':'ssh',
             'endpoint':{'host':'100.64.0.10','port':22,'user':'lab-user'},
             'backend':{'type':'ollama','remote_port':11434},
@@ -4537,7 +4537,7 @@ def test_v18_connection_bundle_fails_closed_on_secret_or_missing_key():
         host_blob=base64.b64encode(b'unit-test-host-key-material-b'*2).decode('ascii')
         host_fingerprint='SHA256:'+base64.b64encode(hashlib.sha256(base64.b64decode(host_blob)).digest()).decode('ascii').rstrip('=')
         valid={
-            'schema':'local-llm-connection','version':1,'id':'lab-a','name':'Lab',
+            'schema':'bull-connection','version':1,'id':'lab-a','name':'Lab',
             'route':'direct','transport':'ssh',
             'endpoint':{'host':'example.test','port':2222,'user':'runner'},
             'backend':{'type':'ollama','remote_port':11434},
@@ -5131,7 +5131,7 @@ def test_ui_theme_defaults_to_bull_red_and_migrates_legacy_brand_atomically():
         eq(mod.set_ui_theme('bull',persist=True),'bull_red')
         document=json.loads((root/'ui_settings.json').read_text(encoding='utf-8'))
         eq((document['schema'],document['version'],document['theme'],document['language']),
-           ('local-llm-ui-settings',4,'bull_red','en'))
+           ('bull-ui-settings',4,'bull_red','en'))
         assert not (root/'ui_settings.json.tmp').exists()
         mod.set_ui_theme('matrix_soft',persist=False)
         eq(mod.load_ui_theme(),'bull_red')

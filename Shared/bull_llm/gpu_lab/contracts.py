@@ -6,7 +6,7 @@ import math
 import re
 import statistics
 
-SCHEMA = 'local-llm-gpu-experiment'
+SCHEMA = 'bull-gpu-experiment'
 VERSION = 1
 UUID = re.compile(r'GPU-[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}\Z')
 WORKLOADS = {

@@ -5,7 +5,7 @@ param(
     [ValidateRange(1,65535)][int]$EndpointPort = 22,
     [string]$SshUser = $env:USERNAME,
     [string]$AuthorizedKeyPath = '',
-    [string]$ConnectionId = 'local-llm-lab',
+    [string]$ConnectionId = 'bull-lab',
     [string]$ConnectionName = 'BULL Lab',
     [string]$ConnectionOutput = '',
     [switch]$InstallOllama,
@@ -106,13 +106,13 @@ function Set-KeyOnlySshForUser([string]$User) {
     if ($User -notmatch '^[A-Za-z0-9._-]{1,64}$') { throw 'SshUser has an invalid format.' }
     $config = Join-Path $env:ProgramData 'ssh\sshd_config'
     if (-not (Test-Path -LiteralPath $config)) { throw "sshd_config not found: $config" }
-    $begin = "# BEGIN LOCAL LLM KEY-ONLY $User"
-    $end = "# END LOCAL LLM KEY-ONLY $User"
+    $begin = "# BEGIN BULL KEY-ONLY $User"
+    $end = "# END BULL KEY-ONLY $User"
     $raw = Get-Content -LiteralPath $config -Raw -Encoding UTF8
     $escapedBegin = [regex]::Escape($begin); $escapedEnd = [regex]::Escape($end)
     $raw = [regex]::Replace($raw,"(?ms)^$escapedBegin\r?\n.*?^$escapedEnd\r?\n?",'')
-    $globalBegin = '# BEGIN LOCAL LLM GLOBAL KEY-ONLY'
-    $globalEnd = '# END LOCAL LLM GLOBAL KEY-ONLY'
+    $globalBegin = '# BEGIN BULL GLOBAL KEY-ONLY'
+    $globalEnd = '# END BULL GLOBAL KEY-ONLY'
     $escapedGlobalBegin = [regex]::Escape($globalBegin)
     $escapedGlobalEnd = [regex]::Escape($globalEnd)
     $raw = [regex]::Replace($raw,"(?ms)^$escapedGlobalBegin\r?\n.*?^$escapedGlobalEnd\r?\n?",'')
@@ -143,12 +143,12 @@ Match User $User
     PermitTunnel no
 $end
 "@
-    $tmp = $config+'.local-llm.tmp'
+    $tmp = $config+'.bull.tmp'
     ($global.Trim()+"`r`n`r`n"+$raw.Trim()+"`r`n`r`n"+$block.Trim()+"`r`n") | Set-Content -LiteralPath $tmp -Encoding UTF8
     & "$env:WINDIR\System32\OpenSSH\sshd.exe" -t -f $tmp
     if ($LASTEXITCODE -ne 0) { Remove-Item -LiteralPath $tmp -Force; throw 'Generated sshd_config failed validation.' }
-    if (-not (Test-Path -LiteralPath ($config+'.pre-local-llm.bak'))) {
-        Copy-Item -LiteralPath $config -Destination ($config+'.pre-local-llm.bak')
+    if (-not (Test-Path -LiteralPath ($config+'.pre-bull.bak'))) {
+        Copy-Item -LiteralPath $config -Destination ($config+'.pre-bull.bak')
     }
     Move-Item -LiteralPath $tmp -Destination $config -Force
     Restart-Service sshd
@@ -165,7 +165,7 @@ function New-ConnectionBundle {
     if ($safeId -notmatch '^[a-z0-9][a-z0-9._-]{0,63}$') { throw 'ConnectionId has an invalid format.' }
     $output = if ($ConnectionOutput) { $ConnectionOutput } else { Join-Path $PSScriptRoot "$safeId.connection.json" }
     $document = [ordered]@{
-        schema = 'local-llm-connection'
+        schema = 'bull-connection'
         version = 1
         id = $safeId
         name = $ConnectionName

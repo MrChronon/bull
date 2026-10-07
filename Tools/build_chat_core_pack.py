@@ -10,12 +10,12 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-CORE_PATH = ROOT / "bull_client_v0.24.0.0.py"
+CORE_PATH = ROOT / "bull_client_v0.28.0.7.py"
 PACK_ROOT = ROOT / "BenchmarkPacks" / "bull_chat_core"
 
 
 def _load_core():
-    spec = importlib.util.spec_from_file_location("bull_v024_pack_source", CORE_PATH)
+    spec = importlib.util.spec_from_file_location("bull_chat_core_pack_source", CORE_PATH)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Cannot load compatibility core: {CORE_PATH}")
     module = importlib.util.module_from_spec(spec)
@@ -80,7 +80,7 @@ def main() -> int:
         "id": "bull_chat_core",
         "version": "1.0.0",
         "title": "BULL CHAT Core",
-        "description": "Frozen v0.23 CHAT quality suite migrated without prompt or scorer changes.",
+        "description": "Frozen CHAT quality suite migrated without prompt or scorer changes.",
         "status": "stable",
         "visibility": "public",
         "engine": {"minimum_version": "0.24.0.0"},
@@ -90,7 +90,7 @@ def main() -> int:
             "file": "LICENSE.txt",
         },
         "provenance": {
-            "source": "BULL v0.23.0.0 builtin_benchmarks/CHAT_CORE_TESTS",
+            "source": "BULL builtin_benchmarks/CHAT_CORE_TESTS",
             "migration": "data-only extraction",
             "prompts_changed": False,
             "scorers_changed": False,
@@ -119,7 +119,7 @@ def main() -> int:
     )
     (PACK_ROOT / "README.md").write_text(
         "# BULL CHAT Core 1.0.0\n\n"
-        "This stable public pack is the data-only extraction of the v0.23 CHAT Core. "
+        "This stable public pack is the data-only extraction of the CHAT Core. "
         "Prompts, result instructions, scorer IDs and case definitions are byte-for-byte "
         "equivalent after canonical JSON serialization. `gold.json` freezes their hashes.\n\n"
         "The pack contains no executable code. Runner, scorer and verifier references are "

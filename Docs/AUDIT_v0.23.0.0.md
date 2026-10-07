@@ -26,7 +26,7 @@ prompts, scorer logic, recovery or benchmark execution order.
   seam for later incremental extraction, not a completed runtime migration;
 - cancellation capability is explicit but the legacy adapters currently report it
   unsupported because the existing stream API has no per-request cancel primitive;
-- historical schema IDs still contain `local-llm` by compatibility policy;
+- historical schema IDs require explicit compatibility handling;
 - real hardware/WAN validation remains separate from the offline release gate;
 - generated CODE execution remains outside an OS sandbox.
 

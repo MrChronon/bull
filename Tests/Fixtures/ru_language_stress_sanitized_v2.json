@@ -1,5 +1,5 @@
 {
-  "schema": "local-llm-ru-language-regression-fixture",
+  "schema": "bull-ru-language-regression-fixture",
   "schema_version": 1,
   "source": "sanitized-public-regression-fixture",
   "source_sha256": "53cefeb2c6d2f168aa1d129e5ff47d13158b62b4aabd3a763e90236f1316186b",

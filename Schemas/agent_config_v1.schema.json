@@ -5,7 +5,7 @@
   "required": ["schema", "schema_version", "config"],
   "additionalProperties": false,
   "properties": {
-    "schema": {"const": "local-llm-agent-config"},
+    "schema": {"const": "bull-agent-config"},
     "schema_version": {"const": 1},
     "config": {
       "type": "object",

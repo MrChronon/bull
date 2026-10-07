@@ -30,7 +30,7 @@ BULL_PIXEL_ART = (
 )
 
 _startup_mark_shown = False
-_WORDMARK = '  B U L L  //  Benchmarking & Usage of Local LLMs'
+_WORDMARK = '  B U L L  //  Benchmarking & Usage of Local Language Models'
 
 
 def _load_chafa_mark():

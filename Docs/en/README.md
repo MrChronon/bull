@@ -1,6 +1,6 @@
 # BULL documentation in English
 
-BULL — Benchmarking & Usage of Local LLMs — compares local models on the
+BULL — Benchmarking & Usage of Local Language Models — compares local models on the
 hardware and connection that will actually be used.
 
 Start with the [user guide](USER_GUIDE.md). The usual route is:

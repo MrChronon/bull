@@ -6,8 +6,8 @@
 ## 1. Brand core
 
 **Имя:** BULL  
-**Расшифровка:** Benchmarking & Usage of Local LLMs  
-**Пояснение:** Local LLM Benchmark Lab
+**Расшифровка:** Benchmarking & Usage of Local Language Models
+**Пояснение:** BULL Benchmark Lab
 
 Характер бренда:
 
@@ -89,7 +89,7 @@ Accent не заменяет текстовый status. Все важные со
 - нет мелких isolated details, исчезающих при rasterization;
 - light/dark variants проходят contrast review;
 - exact wordmark равен `BULL`;
-- первое текстовое упоминание содержит `Local LLM Benchmark Lab`;
+- первое текстовое упоминание содержит `BULL Benchmark Lab`;
 - assets не содержат metadata с личными путями или author e-mail;
 - SVG не содержит scripts, external URLs или embedded private data.
 
@@ -114,7 +114,7 @@ Accent не заменяет текстовый status. Все важные со
 
 Правильно:
 
-- `BULL — Local LLM Benchmark Lab`;
+- `BULL — Benchmark Lab`;
 - `BULL v0.28.0.7` после первого полного упоминания;
 - `BULL RU Dialogue pack`;
 - `bull_llm.evaluation`.

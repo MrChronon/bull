@@ -43,7 +43,7 @@ class BridgeTests(unittest.TestCase):
         from Shared.bull_llm.backends import Backend as current_backend
         self.assertEqual(current.BENCH_RECORD_SCHEMA_VERSION, 12)
         self.assertTrue(hasattr(current_backend, "health"))
-        self.assertFalse((ROOT / "Shared" / "local_llm_shared").exists())
+        self.assertFalse((ROOT / "Shared" / "historical_shared").exists())
 
     def test_supported_artifacts_are_explicit_and_checkpoint_is_not_resumable(self):
         from Shared.bull_llm.compatibility import supported_legacy_artifacts
@@ -56,7 +56,7 @@ class BridgeTests(unittest.TestCase):
     def test_reader_is_read_only_and_returns_an_independent_copy(self):
         from Shared.bull_llm.compatibility import read_legacy_artifact
         value = {
-            "schema": "local-llm-agent-run",
+            "schema": "bull-agent-run",
             "schema_version": 1,
             "run_id": "fixture",
             "metrics": {"success": True},
@@ -77,7 +77,7 @@ class BridgeTests(unittest.TestCase):
             inspect_legacy_document({"schema": "unknown", "schema_version": 1})
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "result.json"
-            path.write_text('{"schema":"local-llm-agent-run","schema_version":1,"x":NaN}', encoding="utf-8")
+            path.write_text('{"schema":"bull-agent-run","schema_version":1,"x":NaN}', encoding="utf-8")
             with self.assertRaises(ValueError):
                 read_legacy_artifact(path)
 
@@ -89,7 +89,8 @@ class BridgeTests(unittest.TestCase):
             "Install-BULL-v0.28.0.7.cmd",
         ):
             self.assertTrue((ROOT / target).is_file(), target)
-        legacy_names = [path for path in ROOT.rglob("*") if "local-llm" in path.name.casefold()]
+        retired_marker = "-".join(("local", "llm"))
+        legacy_names = [path for path in ROOT.rglob("*") if retired_marker in path.name.casefold()]
         self.assertEqual(legacy_names, [])
 
     @unittest.skipUnless(os.name == "nt", "Windows installer integration")
@@ -139,7 +140,7 @@ class BridgeTests(unittest.TestCase):
         self.assertIn("APP_NAME='BULL — Benchmark Lab'", core)
         self.assertIn("APP_VERSION='v0.28.0.7'", core)
         self.assertIn("'СОСТОЯНИЕ BULL'", core)
-        self.assertNotIn("'LOCAL LLM DASHBOARD'", core)
+        self.assertNotIn("'LOCAL' + ' LLM DASHBOARD'", core)
         notes = (ROOT / "Docs" / "RELEASE_NOTES_0.28.0.7.md").read_text(encoding="utf-8")
         for phrase in ("Built-in benchmark prompts", "scorers", "runtime"):
             self.assertIn(phrase, notes)

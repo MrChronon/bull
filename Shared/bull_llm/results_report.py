@@ -582,7 +582,7 @@ def render_report(model_rows, detail_rows, *, version='', language='en', generat
         ('HTML contains metrics only, no prompts or raw answers. Model and test labels may still be sensitive; review before sharing.', 'HTML содержит метрики, но не промпты и ответы. Имена моделей и тестов могут быть чувствительными — просмотрите их перед отправкой.'),
     ):
         body += ['<li>'+t(en,ru)+'</li>']
-    body += ['</ul></section><footer>BULL — Benchmarking &amp; Usage of Local LLMs · '+h(generated)+'<br>'+t('Offline report · no JavaScript, CDN or external requests', 'Автономный отчёт · без JavaScript, CDN и внешних запросов')+'</footer>']
+    body += ['</ul></section><footer>BULL — Benchmarking &amp; Usage of Local Language Models · '+h(generated)+'<br>'+t('Offline report · no JavaScript, CDN or external requests', 'Автономный отчёт · без JavaScript, CDN и внешних запросов')+'</footer>']
     return '<!doctype html>\n<html lang="'+language+'"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BULL · Results</title><style>'+STYLE+'</style></head><body><main>'+''.join(body)+'</main></body></html>'
 
 

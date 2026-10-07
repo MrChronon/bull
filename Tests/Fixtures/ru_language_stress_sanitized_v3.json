@@ -1,5 +1,5 @@
 {
-  "schema": "local-llm-ru-language-stress-regression",
+  "schema": "bull-ru-language-stress-regression",
   "version": 1,
   "source": "sanitized-public-regression-fixture",
   "client_version": "v17.6.0",

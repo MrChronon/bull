@@ -1,5 +1,5 @@
 {
-  "schema": "local-llm-benchmark-scorer-fixtures",
+  "schema": "bull-benchmark-scorer-fixtures",
   "version": 1,
   "cases": [
     {

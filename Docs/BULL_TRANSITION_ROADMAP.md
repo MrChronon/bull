@@ -1,6 +1,6 @@
 # BULL Transition Roadmap
 
-**Документ:** поэтапный план архитектурного перехода Local LLM → BULL
+**Документ:** поэтапный план архитектурного перехода к BULL
 
 **Версия документа:** 1.2
 
@@ -10,7 +10,7 @@
 
 **Замороженная baseline:** v17.3.2
 
-**Целевое имя:** BULL — Benchmarking & Usage of Local LLMs
+**Целевое имя:** BULL — Benchmarking & Usage of Local Language Models
 
 **Целевой стабильный релиз:** BULL v1.0.0
 
@@ -300,8 +300,8 @@ offline, разрыв сети и ошибочный YAML имеют понят�
 
 ### Работы
 
-- принять полное имя `BULL — Benchmarking & Usage of Local LLMs`;
-- зафиксировать публичное описание `Local LLM Benchmark Lab`;
+- принять полное имя `BULL — Benchmarking & Usage of Local Language Models`;
+- зафиксировать публичное описание `BULL Benchmark Lab`;
 - выполнить предварительную проверку товарного знака, имени GitHub, домена и package names;
 - утвердить brand brief и требования к логотипу;
 - принять ADR по compatibility policy;
@@ -351,7 +351,7 @@ offline, разрыв сети и ошибочный YAML имеют понят�
 - добавить новый display name, version banner и branding assets;
 - подготовить финальный SVG, icon-only, wordmark, monochромный, light и dark variants;
 - добавить Windows `.ico`, favicon и GitHub social preview;
-- ввести compatibility namespace без удаления `local_llm_shared`;
+- ввести compatibility namespace без удаления исторических artefacts;
 - добавить read-only compatibility readers текущих schemas;
 - сохранить старые launchers как aliases с понятным уведомлением;
 - обновить README, USER_GUIDE, AI_CONTEXT, SECURITY и release notes;
@@ -818,7 +818,7 @@ tasks и legacy executable CODE/chat tools; отдельного процесс�
 
 ### Совместимость v1
 
-- legacy Local LLM artifacts открываются read-only;
+- исторические артефакты открываются read-only;
 - compatibility aliases могут быть deprecated, но не удаляются без отдельной major policy;
 - schemas v1 замораживаются;
 - breaking changes после v1 требуют major version;
@@ -892,7 +892,7 @@ tasks и legacy executable CODE/chat tools; отдельного процесс�
 
 ## 7. Определение завершённого перехода
 
-Переход Local LLM → BULL завершён, когда:
+Переход к BULL завершён, когда:
 
 - BULL является основным публичным именем;
 - существующие пользователи не теряют результаты и profiles;

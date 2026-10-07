@@ -2,7 +2,7 @@
 
 **Статус:** Accepted for T0  
 **Дата:** 2026-09-26  
-**Legacy producer:** Local LLM v0.21.0.0 and supported historical readers
+**Historical producer:** pre-BULL releases and supported historical readers
 
 ## 1. Политика
 
@@ -29,14 +29,14 @@
 
 | Artifact | Schema | Read | Migrate copy | Continue | Решение |
 |---|---|---|---|---|---|
-| Agent configuration | `local-llm-agent-config` v1 | Да | Да, private | Нет | Config валидируется повторно; secrets не копируются |
-| Agent run | `local-llm-agent-run` v1 | Да | Да | Нет | Старый run остаётся завершённым evidence; retry создаёт новый run с parent ID |
+| Agent configuration | `bull-agent-config` v1 | Да | Да, private | Нет | Config валидируется повторно; secrets не копируются |
+| Agent run | `bull-agent-run` v1 | Да | Да | Нет | Старый run остаётся завершённым evidence; retry создаёт новый run с parent ID |
 
 ## 4. GPU artifacts
 
 | Artifact | Schema | Read | Migrate copy | Resume | Решение |
 |---|---|---|---|---|---|
-| GPU experiment | `local-llm-gpu-experiment` v1 | Да | Да | Условно | Resume требует совпадения config/workload hashes, inventory, driver, Ollama и model digest |
+| GPU experiment | `bull-gpu-experiment` v1 | Да | Да | Условно | Resume требует совпадения config/workload hashes, inventory, driver, Ollama и model digest |
 | GPU result private | v1 envelope | Да | Да, private | Н/Д | GPU UUID и custom prompt не становятся share-safe |
 | GPU summary CSV | derived | Да | Перегенерировать | Н/Д | Не использовать как canonical source |
 | GPU report HTML | derived | Открыть | Перегенерировать | Н/Д | Не извлекать canonical data из HTML |
@@ -66,7 +66,7 @@
     "source_schema_version": 1,
     "source_basename": "result.json",
     "source_sha256": "...",
-    "migration_id": "local-llm-to-bull",
+    "migration_id": "historical-to-bull",
     "migration_version": 1,
     "migrated_at": "ISO-8601 timestamp"
   }

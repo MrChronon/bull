@@ -9,7 +9,6 @@ language: ru
 project:
   name: BULL
   qualified_name: BULL — Benchmark Lab
-  legacy_name: Local LLM
   release: v0.28.0.7
   frozen_stable_baseline: v17.3.2
   platform:
@@ -693,8 +692,8 @@ agent_benchmark:
   entrypoint: Apps/agent_benchmark_v0_28_0_7.py
   launcher: BULL-Agent-Lab-v0.28.0.7.cmd
   menu_path: More > Experimental features > Agent Benchmark
-  config_schema: local-llm-agent-config
-  run_schema: local-llm-agent-run
+  config_schema: bull-agent-config
+  run_schema: bull-agent-run
   schema_version: 1
   agent_version: 1.0.0
   task_id: PYTHON_CART_FIX_001
@@ -777,7 +776,7 @@ gpu_lab:
   platform: Windows + Ollama only; local or existing pinned SSH
   selection: complete stable NVIDIA GPU UUIDs
   scope: new separate performance workloads; no quality scoring or code execution
-  formats: {schema: local-llm-gpu-experiment, version: 1}
+  formats: {schema: bull-gpu-experiment, version: 1}
   artifacts: [result.private.json, summary.csv, report.html]
   storage: Benchmarks/GPU; private prompt and GPU UUIDs remain local
   settings: Runtime/gpu_lab_settings.private.json; paths apply to selected server

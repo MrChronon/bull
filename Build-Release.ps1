@@ -198,6 +198,13 @@ $required = @(
     "BenchmarkPacks\bull_chat_core\README.md",
     "BenchmarkPacks\bull_chat_core\LICENSE.txt",
     "Tools\build_chat_core_pack.py",
+    "Tools\build_language_comparison_pack.py",
+    "BenchmarkPacks\bull_language_comparison\manifest.json",
+    "BenchmarkPacks\bull_language_comparison\cases.json",
+    "BenchmarkPacks\bull_language_comparison\gold.json",
+    "BenchmarkPacks\bull_language_comparison\pack.lock.json",
+    "BenchmarkPacks\bull_language_comparison\README.md",
+    "BenchmarkPacks\bull_language_comparison\LICENSE.txt",
     "Tools\build_ru_dialogue_pack.py",
     "BenchmarkPacks\bull_ru_dialogue\manifest.json",
     "BenchmarkPacks\bull_ru_dialogue\cases.json",
@@ -377,11 +384,20 @@ try {
 $rootExcludedDirs = @('Chats','Benchmarks','Exports','Workspace','Runtime')
 $anywhereExcludedDirs = @('__pycache__','.git','.codex','.agents','.venv','venv')
 $excludedFilePatterns = @('*.llm-access*','connection*.private.json','*.pem','*.key','id_rsa','id_ed25519')
+$obsoleteReleasePaths = @(
+    'Assets/Brand/splash-v0.27.0.1.ansi.b64',
+    'Assets/Brand/splash-v0.27.0.1.png',
+    'Assets/Brand/splash-v0.28.0.1.png',
+    'Assets/Brand/splash-v0.28.0.2.png',
+    'Assets/Brand/splash-v0.28.0.3.png',
+    'Assets/Brand/splash-v0.28.0.6.png'
+)
 
 function Get-RelativePath([string]$fullPath) {
     return $fullPath.Substring($PWD.Path.Length + 1).Replace('\','/')
 }
 function Is-Excluded([string]$rel) {
+    if ($obsoleteReleasePaths -icontains $rel) { return $true }
     if ([System.IO.Path]::GetFileName($rel) -ieq 'client_debug.log') { return $true }
     if ([System.IO.Path]::GetFileName($rel) -ieq 'ui_settings.json') { return $true }
     $leaf=[System.IO.Path]::GetFileName($rel)

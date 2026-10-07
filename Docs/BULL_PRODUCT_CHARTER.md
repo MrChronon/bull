@@ -4,8 +4,8 @@
 **Версия:** 1.0  
 **Дата:** 2026-09-26  
 **Владелец продукта:** владелец публичного репозитория проекта  
-**Исходный продукт:** Local LLM v0.21.0.0  
-**Целевой продукт:** BULL — Benchmarking & Usage of Local LLMs
+**Исходный продукт:** ранние версии до BULL
+**Целевой продукт:** BULL — Benchmarking & Usage of Local Language Models
 
 ## 1. Миссия
 
@@ -23,12 +23,12 @@ BULL отвечает не на абстрактный вопрос «какая
 ## 2. Публичная идентичность
 
 - **Короткое имя:** BULL.
-- **Расшифровка:** Benchmarking & Usage of Local LLMs.
-- **Обязательное пояснение при первом упоминании:** Local LLM Benchmark Lab.
-- **Рекомендуемая полная форма:** BULL — Local LLM Benchmark Lab.
+- **Расшифровка:** Benchmarking & Usage of Local Language Models.
+- **Обязательное пояснение при первом упоминании:** BULL Benchmark Lab.
+- **Рекомендуемая полная форма:** BULL — Benchmark Lab.
 - **Python namespace:** `bull_llm`.
 - **Запрещённый distribution name:** `bull`.
-- **Рабочий будущий repository/package qualifier:** `bull-local-llm` / `bull-llm`, только после проверки доступности.
+- **Рабочий repository/package qualifier:** `bull-benchmark-lab` / `bull-llm`, только после проверки доступности.
 
 Имя BULL без qualifier допускается в логотипе и внутри уже однозначного интерфейса. В package registries, schemas, поисковых metadata и первом упоминании оно не используется отдельно из-за существующих одноимённых проектов.
 
@@ -130,7 +130,7 @@ GPU Lab не объявляет performance workload тестом качеств
 
 Следующие направления после стабилизации: Agent, Long Context, Security и Robustness Surface.
 
-## 7. Что сохраняется из Local LLM
+## 7. Что сохраняется из ранних версий
 
 - CHAT Core и его текущие prompts/scorers;
 - Ollama и llama.cpp adapters;
@@ -190,7 +190,7 @@ GPU Lab не объявляет performance workload тестом качеств
 
 T0 считается завершённым с архитектурной точки зрения. До публичного запуска BULL Bridge владелец продукта должен подтвердить:
 
-1. использование бренда только с qualifier `Local LLM Benchmark Lab` в первом упоминании;
+1. использование бренда BULL в первом упоминании;
 2. принятие риска существующего Text-to-SQL benchmark BULL;
 3. проведение отдельной trademark-проверки до публичного коммерческого релиза;
 4. сохранение текущего GitHub repository name до подготовленной миграции;

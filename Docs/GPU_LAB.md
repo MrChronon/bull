@@ -84,7 +84,7 @@ HTML автономный, без скриптов/CDN, со сравнител�
 
 `Benchmarks/GPU/<run-id>/`:
 
-- `result.private.json`: schema `local-llm-gpu-experiment`, version 1; конфигурация,
+- `result.private.json`: schema `bull-gpu-experiment`, version 1; конфигурация,
   UUID, точный пользовательский промпт, план, fingerprints, попытки, измерения, события.
   Это **приватный checkpoint**, не файл для GitHub. Сгенерированные ответы не сохраняются.
 - `summary.csv`, `report.html`: показатели без prompts, ответов, адресов, SSH-логинов,

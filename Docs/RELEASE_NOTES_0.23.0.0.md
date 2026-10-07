@@ -9,7 +9,7 @@ proven application without a big-bang runtime rewrite.
   master and all release icons are derived from it;
 - the familiar Client, Benchmark Lab, Agent Lab and GPU Lab keep their existing
   entry points and behavior;
-- existing Local LLM artifacts and temporary compatibility launchers remain
+- existing historical artifacts and temporary compatibility launchers remain
   readable as documented.
 
 Run `Install-BULL-v0.23.0.0.cmd`, then use `BULL-v0.23.0.0.cmd` or a dedicated

@@ -5,7 +5,7 @@
 
 ## Контекст
 
-Существуют benchmark results, checkpoints, tested profiles, custom prompts, Agent artifacts и GPU artifacts с `local-llm-*` identifiers. Переименование schema IDs уничтожит воспроизводимость, если будет выполнено in-place.
+Исторические benchmark results, checkpoints, tested profiles, custom prompts, Agent artifacts и GPU artifacts читаются только через изолированный compatibility bridge. Новые артефакты используют BULL schema IDs.
 
 ## Решение
 

@@ -4,7 +4,7 @@
     "cases_file": "cases.json",
     "sha256": "f8d4c9d628382c6ddd45d4a736c9b8061e60f93ef5c8e2a55f79a29c965be383"
   },
-  "description": "Frozen v0.23 CHAT quality suite migrated without prompt or scorer changes.",
+  "description": "Frozen CHAT quality suite migrated without prompt or scorer changes.",
   "documentation": "README.md",
   "engine": {
     "minimum_version": "0.24.0.0"
@@ -23,7 +23,7 @@
     "migration": "data-only extraction",
     "prompts_changed": false,
     "scorers_changed": false,
-    "source": "BULL v0.23.0.0 builtin_benchmarks/CHAT_CORE_TESTS"
+    "source": "BULL builtin_benchmarks/CHAT_CORE_TESTS"
   },
   "schema": "bull-benchmark-pack-manifest",
   "schema_version": 1,

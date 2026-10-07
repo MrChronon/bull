@@ -174,7 +174,7 @@ Server installer:
 - устанавливает Ollama и задаёт `OLLAMA_HOST=127.0.0.1:11434`;
 - экспортирует connection bundle с реальным SSH host public key и fingerprint.
 
-Перед изменением `sshd_config` создаётся backup `sshd_config.pre-local-llm.bak`, а новый config проверяется `sshd -t`.
+Перед изменением `sshd_config` создаётся backup `sshd_config.pre-bull.bak`, а новый config проверяется `sshd -t`.
 
 ## Импорт на Client
 

@@ -6,7 +6,7 @@
 
 ## 1. Архитектурная цель
 
-Отделить benchmark definition, execution, scoring, telemetry и reporting от UI и transport, сохранив Client, Agent Lab, GPU Lab и compatibility с Local LLM.
+Отделить benchmark definition, execution, scoring, telemetry и reporting от UI и transport, сохранив Client, Agent Lab, GPU Lab и compatibility с ранними артефактами.
 
 ## 2. Целевой layout
 
@@ -73,7 +73,7 @@ BULL/
     inspect_ai/
 
   Compatibility/
-    local_llm_v1/
+    historical_v1/
     schema_migrations/
 
   Schemas/
@@ -233,7 +233,7 @@ Legacy file
 | `Apps/llm_client_*` | `Apps/bull_client` |
 | `Apps/benchmark_lab_*` | `Apps/bull_benchmark_lab` |
 | `Apps/agent_benchmark_*` | `Apps/bull_agent_lab` |
-| `Shared/local_llm_shared/backends.py` | `bull_llm.runtime` interfaces/adapters |
+| historical backend facade | `bull_llm.runtime` interfaces/adapters |
 | `http_transport.py` | `bull_llm.runtime.streaming/http` |
 | `profiles.py` | `bull_llm.core.profiles` |
 | `schemas.py` | `bull_llm.core.contracts` |
@@ -243,18 +243,18 @@ Legacy file
 | `agent_benchmark/*` | `bull_llm.agents` + Agent application |
 | `gpu_lab/*` | GPU application + telemetry/runtime services |
 | monolithic built-in benchmark definitions | `BenchmarkPacks/bull_chat_core` |
-| legacy schema readers | `Compatibility/local_llm_v1` |
+| legacy schema readers | `Compatibility/historical_v1` |
 
 ## 7. Naming map
 
 | Existing | Transition | Target |
 |---|---|---|
-| Local LLM | BULL — Local LLM Benchmark Lab | BULL |
-| `local_llm_shared` | compatibility facade | `bull_llm` |
-| `Local-LLM-*.cmd` | alias with notice | `BULL-*.cmd` |
-| `local-llm-*` schemas | immutable legacy IDs | `bull-llm-*` for new schemas |
-| `Local-LLM-*-Bundle` | retained old bundles | `BULL-vX.Y.Z-Bundle` |
-| `local_llm` repository | retained through T1 preparation | qualified BULL repository after owner gate |
+| Предыдущий продукт | BULL — Benchmark Lab | BULL |
+| historical shared facade | compatibility facade | `bull_llm` |
+| historical launch aliases | alias with notice | `BULL-*.cmd` |
+| historical schemas | read-only legacy IDs | `bull-*` for new schemas |
+| historical bundles | retained old bundles | `BULL-vX.Y.Z-Bundle` |
+| historical repository | retained through T1 preparation | qualified BULL repository after owner gate |
 
 ## 8. Extraction order
 

@@ -510,7 +510,7 @@ def save_backend_settings(settings):
 
 
 def default_connection_store():
-    return {'schema':'local-llm-connection-store','version':1,'active':'','connections':{}}
+    return {'schema':'bull-connection-store','version':1,'active':'','connections':{}}
 
 
 def load_connection_store():
@@ -521,7 +521,7 @@ def load_connection_store():
         raw=json.loads(p.read_text(encoding='utf-8-sig'))
     except Exception as e:
         raise RuntimeError(f'Не удалось прочитать локальное хранилище подключений {p}: {e}') from e
-    if not isinstance(raw,dict) or raw.get('schema')!='local-llm-connection-store' or raw.get('version')!=1:
+    if not isinstance(raw,dict) or raw.get('schema')!='bull-connection-store' or raw.get('version')!=1:
         raise ValueError('Неподдерживаемый формат Runtime/connections.json.')
     connections=raw.get('connections')
     if not isinstance(connections,dict):
@@ -561,8 +561,8 @@ def _validate_connection_bundle(raw):
         },
         'connection bundle'
     )
-    if raw.get('schema')!='local-llm-connection' or raw.get('version')!=1:
-        raise ValueError('Ожидается local-llm-connection v1.')
+    if raw.get('schema')!='bull-connection' or raw.get('version')!=1:
+        raise ValueError('Ожидается bull-connection v1.')
     cid=_connection_id(raw.get('id'))
     name=str(raw.get('name') or cid).strip()
     if not name or len(name)>100 or any(ord(ch)<32 for ch in name):
@@ -1932,7 +1932,7 @@ def llama_remote_stop():
     st=llama_settings(); ok=True
     if st.get('transport')=='remote_ssh':
         ep=resolve_remote_endpoint()
-        script="""$pidFile = Join-Path $env:USERPROFILE 'LLM\\llama.cpp\\local-llm-router.pid'
+        script="""$pidFile = Join-Path $env:USERPROFILE 'LLM\\llama.cpp\\bull-router.pid'
 if (Test-Path $pidFile) {
   $p = Get-Content $pidFile -ErrorAction SilentlyContinue | Select-Object -First 1
   if ($p -match '^\\d+$') { Stop-Process -Id ([int]$p) -Force -ErrorAction SilentlyContinue }
@@ -1974,7 +1974,7 @@ def llama_connect(force_restart=False):
     desired=llama_server_signature(st); server=str(st.get('server_path') or ''); models=str(st.get('models_dir') or '')
     remote_port=int(st.get('remote_port') or 8080); local_port=int(st.get('local_port') or 18080); ep=resolve_remote_endpoint()
     ps_args=', '.join(_ps_quote(x) for x in _llama_server_args(st))
-    remote_ps=f"""$ErrorActionPreference='Stop'\n$server={_ps_quote(server)}\n$models={_ps_quote(models)}\n$port={remote_port}\n$signature={_ps_quote(desired)}\n$root=Join-Path $env:USERPROFILE 'LLM\\llama.cpp'\nNew-Item -ItemType Directory -Force -Path $root | Out-Null\n$pidFile=Join-Path $root 'local-llm-router.pid'\n$sigFile=Join-Path $root 'local-llm-router.signature'\n$logFile=Join-Path $root 'local-llm-router.log'\n$errFile=Join-Path $root 'local-llm-router.err.log'\nfunction Test-Ready {{ try {{ Invoke-RestMethod -Uri (\"http://127.0.0.1:\"+$port+\"/health\") -TimeoutSec 1 | Out-Null; return $true }} catch {{ return $false }} }}\n$currentSig = if (Test-Path $sigFile) {{ (Get-Content $sigFile -Raw).Trim() }} else {{ '' }}\nif ((Test-Ready) -and $currentSig -ne $signature) {{\n  if (Test-Path $pidFile) {{ $old=Get-Content $pidFile | Select-Object -First 1; if ($old -match '^\\d+$') {{ Stop-Process -Id ([int]$old) -Force -ErrorAction SilentlyContinue }} }}\n  Start-Sleep -Milliseconds 700\n}}\nif (-not (Test-Ready)) {{\n  if (-not (Test-Path $server)) {{ throw \"llama-server.exe not found: $server\" }}\n  if (-not (Test-Path $models)) {{ throw \"models dir not found: $models\" }}\n  $args=@({ps_args})\n  $p=Start-Process -FilePath $server -ArgumentList $args -WindowStyle Hidden -PassThru -RedirectStandardOutput $logFile -RedirectStandardError $errFile\n  Set-Content -Path $pidFile -Value $p.Id -Encoding ascii\n  Set-Content -Path $sigFile -Value $signature -Encoding ascii\n  $ok=$false; for($i=0;$i -lt 160;$i++) {{ if(Test-Ready){{$ok=$true;break}}; Start-Sleep -Milliseconds 250 }}\n  if(-not $ok){{ throw \"llama-server did not become ready; see $errFile\" }}\n}}\nwhile($true){{Start-Sleep -Seconds 60}}\n"""
+    remote_ps=f"""$ErrorActionPreference='Stop'\n$server={_ps_quote(server)}\n$models={_ps_quote(models)}\n$port={remote_port}\n$signature={_ps_quote(desired)}\n$root=Join-Path $env:USERPROFILE 'LLM\\llama.cpp'\nNew-Item -ItemType Directory -Force -Path $root | Out-Null\n$pidFile=Join-Path $root 'bull-router.pid'\n$sigFile=Join-Path $root 'bull-router.signature'\n$logFile=Join-Path $root 'bull-router.log'\n$errFile=Join-Path $root 'bull-router.err.log'\nfunction Test-Ready {{ try {{ Invoke-RestMethod -Uri (\"http://127.0.0.1:\"+$port+\"/health\") -TimeoutSec 1 | Out-Null; return $true }} catch {{ return $false }} }}\n$currentSig = if (Test-Path $sigFile) {{ (Get-Content $sigFile -Raw).Trim() }} else {{ '' }}\nif ((Test-Ready) -and $currentSig -ne $signature) {{\n  if (Test-Path $pidFile) {{ $old=Get-Content $pidFile | Select-Object -First 1; if ($old -match '^\\d+$') {{ Stop-Process -Id ([int]$old) -Force -ErrorAction SilentlyContinue }} }}\n  Start-Sleep -Milliseconds 700\n}}\nif (-not (Test-Ready)) {{\n  if (-not (Test-Path $server)) {{ throw \"llama-server.exe not found: $server\" }}\n  if (-not (Test-Path $models)) {{ throw \"models dir not found: $models\" }}\n  $args=@({ps_args})\n  $p=Start-Process -FilePath $server -ArgumentList $args -WindowStyle Hidden -PassThru -RedirectStandardOutput $logFile -RedirectStandardError $errFile\n  Set-Content -Path $pidFile -Value $p.Id -Encoding ascii\n  Set-Content -Path $sigFile -Value $signature -Encoding ascii\n  $ok=$false; for($i=0;$i -lt 160;$i++) {{ if(Test-Ready){{$ok=$true;break}}; Start-Sleep -Milliseconds 250 }}\n  if(-not $ok){{ throw \"llama-server did not become ready; see $errFile\" }}\n}}\nwhile($true){{Start-Sleep -Seconds 60}}\n"""
     flags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0
     cmd=_ssh_base_args(ep,batch=(str(ep.get('kind') or '')=='direct_ssh'))
     target=cmd.pop()
@@ -2501,7 +2501,7 @@ def build_tested_profiles_artifact(spec,records):
             'client_profile':client_profile,'evidence':evidence,'evidence_quality':evidence_quality,
         })
     return {
-        'schema':'local-llm-tested-profiles','schema_version':1,'client_version':APP_VERSION,
+        'schema':'bull-tested-profiles','schema_version':1,'client_version':APP_VERSION,
         'created_at':datetime.now().isoformat(timespec='seconds'),
         'spec_fingerprint':(spec or {}).get('spec_fingerprint'),'profiles':profiles,'excluded_profiles':excluded,
     }
@@ -2624,7 +2624,7 @@ ANSI_RESET = '\033[0m'
 _COLOR_ENABLED = False
 UI_WIDTH=78
 UI_MATRIX_RAIL='01001100 01001100 01001101  //  4C 4C 4D  //  SIGNAL LOCKED'
-UI_THEME_SCHEMA='local-llm-ui-settings'
+UI_THEME_SCHEMA='bull-ui-settings'
 UI_THEME_VERSION=4
 UI_THEME_DEFAULT='bull_red'
 UI_THEME_LABELS={
@@ -11458,7 +11458,7 @@ def rescore_benchmark_raw(path):
         for stage in record_diff.get('stages') or []:
             flat_diffs.append({**identity,**stage})
     diff_document={
-        'schema':'local-llm-offline-score-diff','version':1,
+        'schema':'bull-offline-score-diff','version':1,
         'generated_at':datetime.now().isoformat(timespec='seconds'),
         'source_name':source.name,'source_sha256':source_sha,
         'source_preserved':True,'inference_rerun':False,

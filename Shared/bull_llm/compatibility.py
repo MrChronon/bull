@@ -58,14 +58,14 @@ _NAMED_SCHEMAS = {
     (USER_BENCHMARK_SCHEMA, USER_BENCHMARK_SCHEMA_VERSION): CompatibilityInfo(
         "user_benchmark", USER_BENCHMARK_SCHEMA, USER_BENCHMARK_SCHEMA_VERSION
     ),
-    ("local-llm-agent-config", 1): CompatibilityInfo(
-        "agent_configuration", "local-llm-agent-config", 1, migration="private-copy-only"
+    ("bull-agent-config", 1): CompatibilityInfo(
+        "agent_configuration", "bull-agent-config", 1, migration="private-copy-only"
     ),
-    ("local-llm-agent-run", 1): CompatibilityInfo(
-        "agent_run", "local-llm-agent-run", 1
+    ("bull-agent-run", 1): CompatibilityInfo(
+        "agent_run", "bull-agent-run", 1
     ),
-    ("local-llm-gpu-experiment", 1): CompatibilityInfo(
-        "gpu_experiment", "local-llm-gpu-experiment", 1
+    ("bull-gpu-experiment", 1): CompatibilityInfo(
+        "gpu_experiment", "bull-gpu-experiment", 1
     ),
 }
 

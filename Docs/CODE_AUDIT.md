@@ -41,7 +41,7 @@ Resource peaks сэмплированные, manual edits наблюдаются
 
 **Версия:** v0.21.0.0  
 **Дата:** 30 августа 2026  
-**Объект:** `local_llm_client_v0.21.0.0.py`, RU_LANGUAGE_STRESS, checkpoint/resume, безопасность, производительность и UI
+**Объект:** исторический клиент v0.21.0.0, RU_LANGUAGE_STRESS, checkpoint/resume, безопасность, производительность и UI
 
 ## Аудит startup/SSH navigation v0.21.0.0
 
@@ -187,7 +187,7 @@ Client-recovery diagnostics (`attempt_count`, interruptions, transport failures,
 
 В v0.21.0.0 яркая Matrix стала default: accent и secondary используют bright green без `dim`, muted text — bright white. Добавлены сбалансированная, прежняя приглушённая и классическая контрастная палитры. Все существующие UI-примитивы используют одну динамическую palette function, поэтому тема переключается без перезапуска и без дублирования экранов.
 
-Настройка хранится отдельно от backend/model profiles в schema `local-llm-ui-settings` v1. Запись атомарная (`.tmp` + replace), повреждение fail-soft возвращает яркий default и не блокирует startup. ENV override сохранён для automation. В главное меню добавлен пункт 7, в command surface — `/ui`.
+Настройка хранится отдельно от backend/model profiles в schema `bull-ui-settings` v1. Запись атомарная (`.tmp` + replace), повреждение fail-soft возвращает яркий default и не блокирует startup. ENV override сохранён для automation. В главное меню добавлен пункт 7, в command surface — `/ui`.
 
 Регрессии проверяют яркий default без ANSI dim, атомарное сохранение, повторное чтение, смену темы через меню и маршрут главного меню. UI-theme subchange не меняет inference; изменения scorer/recovery описаны отдельными разделами выше.
 
@@ -207,7 +207,7 @@ Client-recovery diagnostics (`attempt_count`, interruptions, transport failures,
 
 В v17.5.0 одновременно использовались 60- и 78-символьные рамки, несвязанные стили заголовков и плоские длинные списки. В Advanced Benchmark клавиша `0` вела домой, хотя в остальных вложенных меню означала «назад». Термины `prompt/prompts`, `benchmark`, `status` и русские аналоги смешивались даже в одном сценарии.
 
-В v17.5.1 добавлена единая система UI-примитивов: header, breadcrumb, section, menu item, status strip и footer. На неё переведены Control Deck, рабочий Client, Benchmark Lab, custom-prompt wizard, Advanced, Backend, Remote, setup, doctor, Dashboard, Status, help и post-benchmark actions. Matrix-оформление статичное: без мерцания, задержек и фоновых потоков. Значимые состояния продублированы текстом и не зависят от различения цветов. Переменная `LOCAL_LLM_UI_THEME=classic` сохраняет альтернативную палитру.
+В v17.5.1 добавлена единая система UI-примитивов: header, breadcrumb, section, menu item, status strip и footer. На неё переведены Control Deck, рабочий Client, Benchmark Lab, custom-prompt wizard, Advanced, Backend, Remote, setup, doctor, Dashboard, Status, help и post-benchmark actions. Matrix-оформление статичное: без мерцания, задержек и фоновых потоков. Значимые состояния продублированы текстом и не зависят от различения цветов. Переменная `BULL_UI_THEME=classic` сохраняет альтернативную палитру.
 
 Исправлена навигация Advanced: `0` возвращает в Benchmark Lab, `H` — в главное меню; прежний `9` сохранён как совместимый alias. Мастер «Свой промпт» разбит на четыре видимых этапа без добавления новых обязательных вопросов.
 
@@ -302,7 +302,7 @@ Prompts, scorers, model answers и sampling/runtime options не изменен�
 Начата поэтапная декомпозиция без rewrite:
 
 - отдельные entry points Client и Benchmark Lab;
-- общий пакет `Shared/local_llm_shared` для schemas, tested profiles, telemetry fingerprints и backend protocol;
+- общий пакет `Shared/bull_llm` для schemas, tested profiles, telemetry fingerprints и backend protocol;
 - основной runtime временно остаётся compatibility core;
 - Benchmark Lab автоматически создаёт versioned `*_tested_profiles.json`, Client импортирует выбранный profile только явной командой.
 
@@ -505,7 +505,7 @@ Backend code добавлял `thinking` любой llama.cpp модели.
 
 - upstream-supported Bearer API key;
 - секрет берётся только из environment variable;
-- default env name: `LOCAL_LLM_LLAMA_API_KEY`;
+- default env name: `BULL_LLAMA_API_KEY`;
 - ключ не сохраняется в `backend_settings.json`;
 - non-loopback external endpoint без ключа блокируется;
 - отдельный unsafe override требует явного включения.

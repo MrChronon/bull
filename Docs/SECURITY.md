@@ -86,7 +86,7 @@ untrusted prompt / generated code
 
 ## Connection bundle и private key
 
-`local-llm-connection v1` является публичной конфигурацией, а не секретом. Он содержит SSH host public key и fingerprint. Client вычисляет fingerprint самостоятельно; несовпадение закрывает импорт.
+`bull-connection v1` является публичной конфигурацией, а не секретом. Он содержит SSH host public key и fingerprint. Client вычисляет fingerprint самостоятельно; несовпадение закрывает импорт.
 
 Private key:
 

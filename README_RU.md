@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <strong>Benchmarking &amp; Usage of Local LLMs</strong><br>
+  <strong>Benchmarking &amp; Usage of Local Language Models</strong><br>
   Воспроизводимое сравнение локальных моделей на вашем оборудовании.
 </p>
 

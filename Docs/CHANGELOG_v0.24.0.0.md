@@ -43,7 +43,7 @@
   separately instead of claiming that recovery was active.
 - brand-image regression uses standard-library PNG/ICO header validation instead
   of requiring Pillow on a fresh Client installation;
-- the remaining visible `LOCAL LLM DASHBOARD` title is now `BULL CHAT DASHBOARD`.
+- the remaining legacy dashboard title is now `BULL CHAT DASHBOARD`.
 
 ## Intentionally unchanged
 

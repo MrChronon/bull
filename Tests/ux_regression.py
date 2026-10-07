@@ -65,7 +65,7 @@ class UXTests(unittest.TestCase):
         text = out.getvalue()
         plain = terminal_ui._SGR_ESCAPE_RE.sub('', text)
         self.assertIn('\x1b[', text)
-        self.assertEqual(text.count('B U L L  //  Benchmarking & Usage of Local LLMs'), 1)
+        self.assertEqual(text.count('B U L L  //  Benchmarking & Usage of Local Language Models'), 1)
         self.assertNotIn('\x1b', plain)
         art = terminal_ui._load_chafa_mark()
         self.assertIsNotNone(art)
@@ -290,7 +290,7 @@ class UXTests(unittest.TestCase):
     def fixture_connection(self):
         import base64, hashlib
         blob = b'public synthetic host key fixture' * 2
-        return dict(schema='local-llm-connection', version=1, id='fixture', name='Fixture',
+        return dict(schema='bull-connection', version=1, id='fixture', name='Fixture',
                     route='direct', transport='ssh', endpoint=dict(host='example.invalid', user='tester', port=22),
                     backend=dict(type='ollama', remote_port=11434),
                     host_public_key='ssh-ed25519 ' + base64.b64encode(blob).decode(),
@@ -545,7 +545,7 @@ class UXTests(unittest.TestCase):
         canonical=terminal_ui._SGR_ESCAPE_RE.sub('',terminal_ui._load_chafa_mark()).strip()
         visible=terminal_ui._SGR_ESCAPE_RE.sub('',text)
         self.assertIn(canonical,visible)
-        self.assertIn('B U L L  //  Benchmarking & Usage of Local LLMs',text)
+        self.assertIn('B U L L  //  Benchmarking & Usage of Local Language Models',text)
         self.assertGreaterEqual(len(text.splitlines()),16)
 
     def test_page_header_clears_previous_screen(self):

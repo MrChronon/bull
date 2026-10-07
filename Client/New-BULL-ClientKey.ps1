@@ -20,7 +20,7 @@ if ($NonInteractive -and -not $NoPassphrase) {
     throw 'NonInteractive key generation requires explicit -NoPassphrase.'
 }
 
-$arguments = @('-t','ed25519','-a','100','-f',$target,'-C',"local-llm:$Name")
+$arguments = @('-t','ed25519','-a','100','-f',$target,'-C',"bull:$Name")
 if ($NoPassphrase) { $arguments += @('-N','') }
 & $sshKeygen.Source @arguments
 if ($LASTEXITCODE -ne 0) { throw "ssh-keygen failed with exit $LASTEXITCODE" }

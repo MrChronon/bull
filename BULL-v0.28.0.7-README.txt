@@ -1,4 +1,4 @@
-BULL v0.28.0.7 — Benchmarking & Usage of Local LLMs
+BULL v0.28.0.7 — Benchmarking & Usage of Local Language Models
 ====================================================
 
 ENGLISH

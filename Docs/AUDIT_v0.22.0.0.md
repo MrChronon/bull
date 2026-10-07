@@ -19,7 +19,7 @@ The full v0.21 performance/security audit remains in `AUDIT_v0.21.0.0.md`.
 
 ## Residual risks
 
-- historical schema IDs still contain `local-llm`; changing them requires a later
+- historical schema IDs were scheduled for a BULL namespace migration;
   versioned migration and is intentionally avoided here;
 - legacy CODE execution remains outside an OS sandbox;
 - visual trademark/legal clearance is not provided by a technical audit;

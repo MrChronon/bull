@@ -125,7 +125,7 @@ def _create_window(version: str, stage: object, current: object, total: object):
         panel.pack(fill="x")
         tk.Label(
             panel,
-            text=f"BULL {version}  |  Benchmarking & Usage of Local LLMs",
+            text=f"BULL {version}  |  Benchmarking & Usage of Local Language Models",
             fg="#F4F7F5", bg="#111820", font=("Consolas", 10, "bold"), anchor="w",
         ).pack(fill="x", padx=16, pady=(11, 3))
         stage_label = tk.Label(

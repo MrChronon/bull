@@ -22,7 +22,7 @@ master. Do not redraw, stretch, rotate or recolour the canonical artwork.
 
 Use `bull-mark-on-light.png` or `bull-mark-on-dark.png` when a fixed background is
 needed and `bull-mark-mono.png` where only one colour is available. Use the
-qualified name “BULL — Benchmarking & Usage of Local LLMs” on first mention.
+qualified name “BULL — Benchmarking & Usage of Local Language Models” on first mention.
 
 `bull-mark-chafa-full-30.ansi.b64` is the UTF-8/ANSI terminal render generated
 from `bull-mark-512.png` with Chafa 1.18.3 using

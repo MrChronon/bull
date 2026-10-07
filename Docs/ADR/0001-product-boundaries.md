@@ -5,7 +5,7 @@
 
 ## Контекст
 
-Local LLM объединяет рабочий чат, Benchmark Lab, Agent Benchmark, GPU Lab, backend transports и shared schemas. При дальнейшем росте монолитное владение этими функциями создаёт риск скрытого изменения benchmark behavior и смешивания пользовательской работы с экспериментами.
+BULL объединяет рабочий чат, Benchmark Lab, Agent Benchmark, GPU Lab, backend transports и shared schemas. При дальнейшем росте монолитное владение этими функциями создаёт риск скрытого изменения benchmark behavior и смешивания пользовательской работы с экспериментами.
 
 ## Решение
 

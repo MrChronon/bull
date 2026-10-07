@@ -1,5 +1,5 @@
 {
-  "schema": "local-llm-connection",
+  "schema": "bull-connection",
   "version": 1,
   "id": "my-lab",
   "name": "My BULL Lab",

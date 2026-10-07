@@ -43,7 +43,7 @@ def read_document(path):
 
 def clean_entry(core, entry):
     raw = {key: entry.get(key) for key in FIELDS}
-    raw.update(schema='local-llm-connection', version=1)
+    raw.update(schema='bull-connection', version=1)
     result = core._validate_connection_bundle(raw)
     result['identity_file'] = str(entry.get('identity_file') or '')
     return result
@@ -220,7 +220,7 @@ def install_entry(core, entry, remember=False):
         if path.exists() and not same_server(read_document(path), entry):
             raise ValueError('ID уже занят другим сохранённым сервером. Замена запрещена.')
     raw = {field: entry[field] for field in FIELDS}
-    raw.update(schema='local-llm-connection', version=1)
+    raw.update(schema='bull-connection', version=1)
     staged = core.connection_store_path().parent / ('connection-import-' + uuid.uuid4().hex + '.json')
     try:
         atomic_json(staged, raw)
@@ -321,7 +321,7 @@ def new_ssh_alias_connection(core):
         cid = 'ssh-' + hashlib.sha256(
             f"{resolved['host']}:{resolved['port']}:{resolved['user']}".encode()).hexdigest()[:16]
         entry = dict(
-            schema='local-llm-connection', version=1, id=cid,
+            schema='bull-connection', version=1, id=cid,
             name=resolved['alias'], route='direct', transport='ssh',
             endpoint=dict(host=resolved['host'], user=resolved['user'], port=resolved['port']),
             backend=dict(type='ollama', remote_port=11434),
@@ -388,7 +388,7 @@ def new_ssh_connection(core, defaults=None):
         if expected != fingerprint:
             raise ValueError('Fingerprint не совпал. Подключение НЕ сохранено. Проверьте адрес и ключ сервера.')
         cid = 'ssh-' + hashlib.sha256(f'{host}:{port}:{user}'.encode()).hexdigest()[:16]
-        entry = dict(schema='local-llm-connection', version=1, id=cid, name=name, route='direct', transport='ssh',
+        entry = dict(schema='bull-connection', version=1, id=cid, name=name, route='direct', transport='ssh',
                      endpoint=dict(host=host, user=user, port=port), backend=dict(type='ollama', remote_port=remote_port),
                      host_public_key=public, host_key_fingerprint=fingerprint, identity_file=str(key_path))
         return confirm_install(core, clean_entry(core, entry))

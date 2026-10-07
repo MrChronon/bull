@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <strong>Benchmarking &amp; Usage of Local LLMs</strong><br>
+  <strong>Benchmarking &amp; Usage of Local Language Models</strong><br>
   Reproducible local-model evaluation on the hardware you actually use.
 </p>
 
@@ -32,11 +32,11 @@
 ---
 
 > **BULL is not a hosted leaderboard.** It is an open, portable benchmark lab for
-> inspecting local LLM quality, stability, speed, recovery and runtime behavior
+> inspecting local model quality, stability, speed, recovery and runtime behavior
 > without sending prompts or model output to a cloud service.
 
 BULL — Benchmark Lab is a Windows-first client and reproducible evaluation
-platform for local LLMs served by **Ollama** or a compatible **llama.cpp HTTP
+platform for local language models served by **Ollama** or a compatible **llama.cpp HTTP
 server**. Run chat, compare selected models, resume interrupted suites, inspect
 offline reports and move a tested profile into the working client.
 
@@ -161,7 +161,7 @@ hashes and ZIP verification.
 
 ## Help shape the benchmark
 
-The project is looking for rigorous criticism from local-LLM users, benchmark
+The project is looking for rigorous criticism from local-model users, benchmark
 authors, inference engineers and hardware experimenters.
 
 - Use [Discussions](https://github.com/MrChronon/bull/discussions) for benchmark

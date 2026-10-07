@@ -7,11 +7,11 @@
 ## 1. Проверяемое имя
 
 - BULL
-- Benchmarking & Usage of Local LLMs
-- BULL — Local LLM Benchmark Lab
+- Benchmarking & Usage of Local Language Models
+- BULL — Benchmark Lab
 - `bull_llm`
 - `bull-llm`
-- `bull-local-llm`
+- `bull-benchmark-lab`
 
 ## 2. Найденные пересечения
 
@@ -24,7 +24,7 @@
 - [Bull 1.0 Benchmark](https://bull-text-to-sql-benchmark.github.io/)
 - [FinSQL paper](https://arxiv.org/abs/2401.10506)
 
-Вывод: нельзя позиционировать наш проект только как `BULL benchmark` без уточнения `Local LLM Benchmark Lab`.
+Вывод: нельзя позиционировать наш проект только как `BULL benchmark` без уточнения `BULL Benchmark Lab`.
 
 ### PyPI package `bull`
 
@@ -40,11 +40,11 @@ Bull является существующим технологическим б
 
 Источник: [BullSequana AI Platform](https://www.bull.com/en/products/ai/bullsequana-ai-platform)
 
-Вывод: визуальная идентичность не должна имитировать corporate Bull/BullSequana, а полное имя должно явно указывать на local LLM evaluation.
+Вывод: визуальная идентичность не должна имитировать corporate Bull/BullSequana, а полное имя должно явно указывать на оценку локальных моделей.
 
 ## 3. Не найдено при предварительном поиске
 
-Не найдено заметного проекта с точной расшифровкой `Benchmarking & Usage of Local LLMs` или точным полным названием `BULL — Local LLM Benchmark Lab`.
+Не найдено заметного проекта с точной расшифровкой `Benchmarking & Usage of Local Language Models` или точным полным названием `BULL — Benchmark Lab`.
 
 Это не означает юридическую доступность имени. Web search не заменяет поиск по классам товарных знаков и юрисдикциям.
 
@@ -53,11 +53,11 @@ Bull является существующим технологическим б
 | Поверхность | Решение |
 |---|---|
 | Логотип | `BULL` допустимо |
-| Первое упоминание | `BULL — Local LLM Benchmark Lab` |
-| Расшифровка | `Benchmarking & Usage of Local LLMs` |
+| Первое упоминание | `BULL — Benchmark Lab` |
+| Расшифровка | `Benchmarking & Usage of Local Language Models` |
 | Python namespace | `bull_llm` |
 | PyPI candidate | `bull-llm`, только после повторной проверки и reservation |
-| Repository candidate | `bull-local-llm` |
+| Repository candidate | `bull-benchmark-lab` |
 | CLI candidate | `bull-llm` |
 | Schema prefix | `bull-llm-*` |
 | Bundle | `BULL-vX.Y.Z-Bundle` |
@@ -67,7 +67,7 @@ Bull является существующим технологическим б
 
 Обязательные metadata keywords:
 
-- local LLM benchmark;
+- local language model benchmark;
 - offline LLM evaluation;
 - Ollama benchmark;
 - llama.cpp benchmark;
@@ -93,5 +93,5 @@ Bull является существующим технологическим б
 
 Техническое решение: **GO WITH QUALIFIER**.
 
-`BULL` сохраняется как display brand по решению владельца. Во всех неоднозначных технических и поисковых контекстах используется qualifier `Local LLM Benchmark Lab` или `bull_llm`. Юридическая clearance остаётся обязательным внешним gate перед коммерческим публичным релизом и не считается выполненной этим документом.
+`BULL` сохраняется как display brand по решению владельца. Во всех неоднозначных технических и поисковых контекстах используется qualifier `BULL Benchmark Lab` или `bull_llm`. Юридическая clearance остаётся обязательным внешним gate перед коммерческим публичным релизом и не считается выполненной этим документом.
 

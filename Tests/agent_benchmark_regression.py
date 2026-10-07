@@ -97,7 +97,7 @@ class AgentTests(unittest.TestCase):
             config.sampling[key] = value
             with self.assertRaises(ValueError):
                 config.validate()
-        atomic_json(self.root / "bad.json", {"schema": "local-llm-agent-config", "schema_version": 2})
+        atomic_json(self.root / "bad.json", {"schema": "bull-agent-config", "schema_version": 2})
         with self.assertRaises(ValueError):
             load_config(self.root / "bad.json")
 

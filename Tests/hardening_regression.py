@@ -257,7 +257,7 @@ class HardeningTests(unittest.TestCase):
         from Shared.bull_llm.agent_benchmark.contracts import load_config, load_run
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "bad.json"
-            for text in ("[]", "null", '{"schema":"local-llm-agent-run","schema_version":1,"metrics":{},"config":{}}'):
+            for text in ("[]", "null", '{"schema":"bull-agent-run","schema_version":1,"metrics":{},"config":{}}'):
                 path.write_text(text, encoding="utf-8")
                 for reader in (load_config, load_run):
                     with self.subTest(reader=reader.__name__, text=text), self.assertRaises(ValueError):
