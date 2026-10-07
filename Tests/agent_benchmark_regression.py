@@ -397,7 +397,7 @@ class AgentTests(unittest.TestCase):
         for name in ("agent_config_v1.schema.json", "agent_run_v1.schema.json"):
             data = json.loads((root / "Schemas" / name).read_text(encoding="utf-8"))
             self.assertEqual(data["properties"]["schema_version"]["const"], 1)
-        core_source = (root / "bull_client_v0.28.0.6.py").read_text(encoding="utf-8")
+        core_source = (root / "bull_client_v0.28.0.7.py").read_text(encoding="utf-8")
         self.assertIn("if initial_surface=='agent'", core_source)
         self.assertIn("if action=='agent'", core_source)
 

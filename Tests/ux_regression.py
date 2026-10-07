@@ -88,7 +88,7 @@ class UXTests(unittest.TestCase):
     def test_versioned_startup_window_uses_png_and_truthful_stage_progress(self):
         from Shared.bull_llm import startup_window
 
-        self.assertEqual(startup_window.splash_image_path('v0.28.0.6').name, 'splash-v0.28.0.6.png')
+        self.assertEqual(startup_window.splash_image_path('v0.28.0.7').name, 'splash-v0.28.0.7.png')
         self.assertEqual(startup_window._progress(2, 3), (2, 3, 2 / 3))
         self.assertEqual(startup_window._progress(9, 3), (3, 3, 1.0))
         self.assertEqual(startup_window._stage_label('run\n\tregression'), 'run regression')
@@ -114,8 +114,8 @@ class UXTests(unittest.TestCase):
             def close(self):
                 events.append(('close',))
         with patch.object(startup_window, '_create_window', return_value=FakeWindow()) as create:
-            splash = startup_window.open_startup_window('v0.28.0.6', 'Run regression', 2, 3)
-        create.assert_called_once_with('v0.28.0.6', 'Run regression', 2, 3)
+            splash = startup_window.open_startup_window('v0.28.0.7', 'Run regression', 2, 3)
+        create.assert_called_once_with('v0.28.0.7', 'Run regression', 2, 3)
         splash.update('Regression passed', 3, 3)
         splash.close()
         self.assertEqual(events, [('update', 'Regression passed', 3, 3), ('close',)])

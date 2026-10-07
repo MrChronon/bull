@@ -20,7 +20,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/MrChronon/bull/releases/latest/download/BULL-v0.28.0.6-Bundle.zip"><strong>Download BULL v0.28.0.6 for Windows</strong></a><br><br>
+  <a href="https://github.com/MrChronon/bull/releases/latest/download/BULL-v0.28.0.7-Bundle.zip"><strong>Download BULL v0.28.0.7 for Windows</strong></a><br><br>
   <a href="#quick-start">Quick start</a> ·
   <a href="Docs/en/USER_GUIDE.md">User guide</a> ·
   <a href="Docs/ru/USER_GUIDE.md">Руководство</a> ·
@@ -41,7 +41,7 @@ server**. Run chat, compare selected models, resume interrupted suites, inspect
 offline reports and move a tested profile into the working client.
 
 <p align="center">
-  <img src="Assets/Brand/readme-signal-panel.svg?v=0.28.0.6-signal398" alt="BULL evaluation signal panel: 398 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases, private and share-safe evidence, and separate metric spaces" width="100%">
+  <img src="Assets/Brand/readme-signal-panel.svg?v=0.28.0.7-signal400" alt="BULL evaluation signal panel: 400 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases, private and share-safe evidence, and separate metric spaces" width="100%">
 </p>
 
 ## Why BULL
@@ -105,13 +105,13 @@ superiority from a single run.
 
 ### Install
 
-1. Download `BULL-v0.28.0.6-Bundle.zip` and its SHA-256 file from the
+1. Download `BULL-v0.28.0.7-Bundle.zip` and its SHA-256 file from the
    [latest release](https://github.com/MrChronon/bull/releases/latest).
 2. Verify the checksum, extract the archive and run
-   `Install-BULL-v0.28.0.6.cmd`.
+   `Install-BULL-v0.28.0.7.cmd`.
 3. Choose `Client`, `Server` or `AllInOne`.
-4. Start `BULL-v0.28.0.6.cmd` for chat or
-   `BULL-Benchmark-Lab-v0.28.0.6.cmd` for evaluation.
+4. Start `BULL-v0.28.0.7.cmd` for chat or
+   `BULL-Benchmark-Lab-v0.28.0.7.cmd` for evaluation.
 
 The interface opens without a running backend, so connection setup, help,
 diagnostics and saved reports remain available offline.
@@ -155,7 +155,7 @@ output, client assistance and recovery behavior in distinct metric spaces.
 .\Build-Release.ps1
 ```
 
-The current release passes **398/398 offline regressions**, including clean
+The current release passes **400/400 offline regressions**, including clean
 Python without site packages, forced `cp1251`, startup integration, manifest
 hashes and ZIP verification.
 
@@ -188,7 +188,7 @@ Public release gates exclude `Chats`, `Runtime`, `Benchmarks`, `Exports`,
 
 ## Project status
 
-`v0.28.0.6` is the **Clear Benchmark Flow** release. It keeps the primary UI simple and
+`v0.28.0.7` is the **Ollama Profile Comparison Fix** release. It keeps the primary UI simple and
 compare, chat, connection and more; adds clean sampling-source navigation, live
 CPU/RAM context and per-run checkpoints. Existing expert features remain under
 advanced/experimental menus. Built-in prompts, scorers, recovery and runtime

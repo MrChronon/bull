@@ -1,4 +1,4 @@
-"""Dedicated BULL Benchmark Lab entry point for v0.28.0.6."""
+"""Dedicated BULL Benchmark Lab entry point for v0.28.0.7."""
 
 from __future__ import annotations
 import os

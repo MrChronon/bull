@@ -1,8 +1,8 @@
 schema: bull-llm-ai-context
 schema_version: 1
-document_version: 0.28.0.6
-client_version: v0.28.0.6
-documentation_version: v0.28.0.6
+document_version: 0.28.0.7
+client_version: v0.28.0.7
+documentation_version: v0.28.0.7
 updated: 2026-10-07
 language: ru
 
@@ -10,7 +10,7 @@ project:
   name: BULL
   qualified_name: BULL — Benchmark Lab
   legacy_name: Local LLM
-  release: v0.28.0.6
+  release: v0.28.0.7
   frozen_stable_baseline: v17.3.2
   platform:
     primary: Windows 11
@@ -42,16 +42,16 @@ agent_rules:
     - prefer small verifiable commits in a clean repository
 
 release_layout:
-  bundle: BULL-v0.28.0.6-Bundle
-  core: bull_client_v0.28.0.6.py
+  bundle: BULL-v0.28.0.7-Bundle
+  core: bull_client_v0.28.0.7.py
   launchers:
-    client: BULL-v0.28.0.6.cmd
-    benchmark_lab: BULL-Benchmark-Lab-v0.28.0.6.cmd
-    agent_lab: BULL-Agent-Lab-v0.28.0.6.cmd
+    client: BULL-v0.28.0.7.cmd
+    benchmark_lab: BULL-Benchmark-Lab-v0.28.0.7.cmd
+    agent_lab: BULL-Agent-Lab-v0.28.0.7.cmd
   apps:
-    client: Apps/bull_client_app_v0_28_0_6.py
-    benchmark_lab: Apps/benchmark_lab_v0_28_0_6.py
-    agent_lab: Apps/agent_benchmark_v0_28_0_6.py
+    client: Apps/bull_client_app_v0_28_0_7.py
+    benchmark_lab: Apps/benchmark_lab_v0_28_0_7.py
+    agent_lab: Apps/agent_benchmark_v0_28_0_7.py
   public_namespace: Shared/bull_llm
   shared_package: Shared/bull_llm
   schemas_directory: Schemas
@@ -613,7 +613,7 @@ schemas:
   evidence_provenance: bull-evidence-provenance@1
 
 verification:
-  current_offline_regression: 398/398
+  current_offline_regression: 400/400
   clean_python_no_site_packages: pass
   runtime_third_party_python_dependencies: none_on_windows
   scorer_gold_set: 15/15
@@ -682,8 +682,8 @@ agent_benchmark:
   maturity: MVP
   module: Shared/bull_llm/agent_benchmark
   guide: Docs/en/EXPERIMENTAL.md and Docs/ru/EXPERIMENTAL.md
-  entrypoint: Apps/agent_benchmark_v0_28_0_6.py
-  launcher: BULL-Agent-Lab-v0.28.0.6.cmd
+  entrypoint: Apps/agent_benchmark_v0_28_0_7.py
+  launcher: BULL-Agent-Lab-v0.28.0.7.cmd
   menu_path: More > Experimental features > Agent Benchmark
   config_schema: local-llm-agent-config
   run_schema: local-llm-agent-run
@@ -716,7 +716,7 @@ agent_benchmark:
 
 hardening_audit:
   version: v0.19.0.1 (retained)
-  report: Docs/AUDIT_v0.28.0.6.md
+  report: Docs/AUDIT_v0.28.0.7.md
   new_tests: Tests/hardening_regression.py
   benchmark_prompts_changed: false
   scorer_functions_changed: false
@@ -964,7 +964,7 @@ planned_roadmap:
   stages:
     U1:
       name: BULL Clear Choice
-      target_version: v0.28.0.6
+      target_version: v0.28.0.7
       status: released
       priorities:
         - correct tied recommendations and distinguish native mean from conservative decision values

@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 BRAND = ROOT / "Assets" / "Brand"
 MASTER = BRAND / "bull-logo-canonical.png"
 LOCK = BRAND / "brand-lock.json"
-VERSION = "v0.28.0.6"
+VERSION = "v0.28.0.7"
 EXPECTED_SHA256 = "60d91a700b9cd91ad3fd6ad598287a8e2cccd067f2ab0ed7515dd52af44b2269"
 RELEASE_RED = (255, 60, 82)
 
@@ -175,7 +175,7 @@ def main() -> None:
     draw.text((x, 112), "BULL", font=title_font, fill="#FF3C52")
     bull_width = draw.textbbox((0, 0), "BULL", font=title_font)[2]
     draw.text((x + bull_width + 24, 112), "SIMPLE EXPERIENCE", font=title_font, fill="#F4F7F5")
-    draw.text((x, 190), "v0.28.0.6  ·  LOCAL MODEL COMPARISON",
+    draw.text((x, 190), "v0.28.0.7  ·  LOCAL MODEL COMPARISON",
               font=label_font, fill="#D8919A")
     draw.line((x, 232, 1200, 232), fill="#FF6B7A", width=3)
 
@@ -194,7 +194,7 @@ def main() -> None:
         card_y += 88
 
     draw.line((62, 565, 1218, 565), fill=(255, 107, 122, 110), width=2)
-    draw.text((62, 582), "380/380 REGRESSIONS", font=stat_font, fill="#FF3C52")
+    draw.text((62, 582), "400/400 REGRESSIONS", font=stat_font, fill="#FF3C52")
     draw.text((330, 582), "OLLAMA  ·  LLAMA.CPP  ·  WINDOWS  ·  MIT",
               font=stat_font, fill="#D8919A")
     social.save(BRAND / "github-social-preview.png", optimize=True)

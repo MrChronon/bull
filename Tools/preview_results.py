@@ -11,7 +11,7 @@ sys.path.insert(0, str(ROOT))
 
 def main():
     from Shared.bull_llm.results_report import render_report
-    client = ROOT / 'bull_client_v0.28.0.6.py'
+    client = ROOT / 'bull_client_v0.28.0.7.py'
     spec = importlib.util.spec_from_file_location('bull_report_preview', client)
     core = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(core)

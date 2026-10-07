@@ -19,7 +19,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/MrChronon/bull/releases/latest/download/BULL-v0.28.0.6-Bundle.zip"><strong>Скачать BULL v0.28.0.6 для Windows</strong></a><br><br>
+  <a href="https://github.com/MrChronon/bull/releases/latest/download/BULL-v0.28.0.7-Bundle.zip"><strong>Скачать BULL v0.28.0.7 для Windows</strong></a><br><br>
   <a href="Docs/ru/USER_GUIDE.md">Руководство</a> ·
   <a href="Docs/ru/BENCHMARKS.md">Бенчмарки</a> ·
   <a href="Docs/ru/CONNECTIONS.md">Подключения</a> ·
@@ -39,7 +39,7 @@ BULL работает с Ollama и совместимым HTTP-сервером 
 проверенный профиль в рабочий клиент.
 
 <p align="center">
-  <img src="Assets/Brand/readme-signal-panel.svg?v=0.28.0.6-signal398" alt="Сигналы оценки BULL" width="100%">
+  <img src="Assets/Brand/readme-signal-panel.svg?v=0.28.0.7-signal400" alt="Сигналы оценки BULL" width="100%">
 </p>
 
 ## Зачем нужен BULL
@@ -64,9 +64,9 @@ TASK/времени, ресурсы, heatmap тестов, происхожде�
 
 1. Скачайте ZIP и SHA-256 из [последнего релиза](https://github.com/MrChronon/bull/releases/latest).
 2. Проверьте checksum и распакуйте архив в новую папку.
-3. Запустите `Install-BULL-v0.28.0.6.cmd`.
+3. Запустите `Install-BULL-v0.28.0.7.cmd`.
 4. Выберите Client, Server или AllInOne.
-5. Запустите `BULL-v0.28.0.6.cmd`.
+5. Запустите `BULL-v0.28.0.7.cmd`.
 6. Выберите язык, затем **Подключение** и **Сравнить модели**.
 
 Приложение открывает меню без работающей Ollama: настройки, справка и сохранённые

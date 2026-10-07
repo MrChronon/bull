@@ -249,7 +249,7 @@
     "    критично: ": "    critical: ",
     "   Для готового OpenSSH добавьте одну строку .pub в C:\\Users\\<SERVER_USER>\\.ssh\\authorized_keys.": "   For an existing OpenSSH server, add the single .pub line to C:\\Users\\<SERVER_USER>\\.ssh\\authorized_keys.",
     "   Передавайте на сервер только bull_access.pub. Файл bull_access остаётся у вас.": "   Send only bull_access.pub to the server. Keep bull_access on your computer.",
-    "   Проще всего: Install-BULL-v0.28.0.6.cmd → Server и укажите файл .pub.": "   Easiest: Install-BULL-v0.28.0.6.cmd → Server and choose the .pub file.",
+    "   Проще всего: Install-BULL-v0.28.0.7.cmd → Server и укажите файл .pub.": "   Easiest: Install-BULL-v0.28.0.7.cmd → Server and choose the .pub file.",
     "   Сверьте показанный fingerprint с сервером. Для ключа с паролем можно выполнить ssh-add ~/.ssh/bull_access.": "   Compare the shown fingerprint with the server. For a passphrase key, you can run ssh-add ~/.ssh/bull_access.",
     "  (фиксируется benchmark)": "  (fixed by the benchmark)",
     "  /attach <path>     добавить файл": "  /attach <path>     attach a file",
