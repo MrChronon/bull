@@ -345,6 +345,54 @@ def _scatter(decision, ids, colors, language, field='speed'):
     return ''.join(out) + '</svg>'
 
 
+def _comparison_overview(rows, points, badge, colors, language):
+    """Compact visual scorecards using existing, non-combined measurements."""
+    t = lambda en, ru: choose(language, en, ru)
+    speeds = [_number(point.get('speed')) for point in points]
+    speed_max = max([value for value in speeds if value is not None] + [1])
+    out = [
+        '<section id="compare"><div class="eyebrow">02 / ' + t('AT A GLANCE', 'СРАЗУ О ГЛАВНОМ') + '</div>',
+        '<h2>' + t('Quality, contract and speed', 'Качество, контракт и скорость') + '</h2>',
+        '<p class="lead">' + t(
+            'One card per model. Quality and task contract use their direct percentages; speed is only scaled visually within this run and keeps its measured tok/s value.',
+            'Одна карточка на модель. Качество и выполнение контракта показаны в процентах; скорость масштабирована только для наглядности внутри этого прогона и сохраняет измеренное значение ток/с.'
+        ) + '</p><div class="comparison-grid">'
+    ]
+    for row, point in zip(rows, points):
+        quality = point.get('quality')
+        task = point.get('reliability')
+        speed = _number(point.get('speed'))
+        latency = _number(point.get('latency'))
+        low = _number(row.get('chat_native_min'))
+        mean = _number(row.get('chat_native_mean'))
+        high = _number(row.get('chat_native_max'))
+        if low is None:
+            low = quality
+        if mean is None:
+            mean = quality
+        if high is None:
+            high = quality
+        stability = '<div class="stability-track unknown"></div><small>—</small>'
+        if None not in (low, mean, high) and low <= mean <= high:
+            stability = (
+                '<div class="stability-track"><i class="stability-range" style="left:{:.2f}%;width:{:.2f}%;background:{}"></i>'
+                '<i class="stability-dot" style="left:{:.2f}%"></i></div><small>{} – {} · mean {}</small>'
+            ).format(low * 100, (high - low) * 100, colors[point['model']], mean * 100, pct(low), pct(high), pct(mean))
+        out += [
+            '<article class="comparison-card"><h3>' + badge(point['model']) + ' ' + h(point['model']) + '</h3>',
+            '<div class="bar-label"><span>' + t('Native quality', 'Качество Native') + '</span><strong>' + pct(quality) + '</strong></div>' + _bar(quality, color=colors[point['model']]),
+            '<div class="bar-label"><span>' + t('Task contract', 'Контракт задачи') + '</span><strong>' + pct(task) + '</strong></div>' + _bar(task, color='#42D9AD'),
+            '<div class="bar-label"><span>' + t('Generation speed', 'Скорость генерации') + '</span><strong>' + fmt(speed, ' tok/s') + '</strong></div>' + _bar(speed, speed_max, '#51C8FF'),
+            '<p class="micro">' + t('Average task time: ', 'Среднее время задачи: ') + fmt(latency, ' s') + '</p>',
+            '<h4>' + t('Seed stability', 'Стабильность по seed') + '</h4>' + stability,
+            '</article>'
+        ]
+    return ''.join(out) + '</div><p class="micro">' + t(
+        'The stability band is the observed lowest-to-highest Native score across seeds; the white mark is the mean. It is not a pass/fail scale.',
+        'Полоса стабильности — наблюдаемый диапазон Native-балла по seed; белая отметка — среднее. Это не шкала успеха/ошибки.'
+    ) + '</p></section>'
+
+
 def render_report(model_rows, detail_rows, *, version='', language='en', generated='', evidence_summary=None):
     """Render an autonomous HTML document from existing summaries only."""
     language = 'ru' if language == 'ru' else 'en'
@@ -368,7 +416,8 @@ def render_report(model_rows, detail_rows, *, version='', language='en', generat
              '<div class="kpis">' + ''.join(f'<div><strong>{value}</strong><span>{label}</span></div>' for value, label in
                  ((len(rows), t('models', 'моделей')), (len({r.get('benchmark') for r in details}), t('tests', 'тестов')),
                   (counts, t('recorded runs', 'сохранённых запусков')), (failed, t('execution errors', 'ошибок выполнения')))) + '</div></header>']
-    nav = [('rankings', t('Top 3', 'Топ-3')), ('charts', t('Quality & speed', 'Качество и скорость')),
+    nav = [('rankings', t('Top 3', 'Топ-3')), ('compare', t('At a glance', 'Главное')),
+           ('charts', t('Quality & speed', 'Качество и скорость')),
            ('resources', t('Resources', 'Ресурсы')), ('tests', t('Tests', 'Тесты')),
            ('settings', t('Settings', 'Параметры')), ('details', t('Full data', 'Все данные'))]
     body += ['<nav aria-label="Report">' + ''.join(f'<a href="#{key}">{label}</a>' for key, label in nav) + '</nav>']
@@ -417,16 +466,18 @@ def render_report(model_rows, detail_rows, *, version='', language='en', generat
         body += ['</ol><p class="micro">' + ' · '.join(f'{weight_labels[k]} {v*100:.0f}%' for k,v in profile['weights'].items() if v) + '</p></details></article>']
     body += ['</div></section>']
 
-    body += ['<section id="charts"><div class="eyebrow">02 / ' + t('THE TRADE-OFF', 'СОЧЕТАНИЕ МЕТРИК') + '</div><h2>' + t('Quality and speed', 'Качество и скорость') + '</h2>',
+    body += [_comparison_overview(rows, points, badge, colors, language)]
+
+    body += ['<section id="charts"><div class="eyebrow">03 / ' + t('THE TRADE-OFF', 'СОЧЕТАНИЕ МЕТРИК') + '</div><h2>' + t('Quality and speed', 'Качество и скорость') + '</h2>',
              '<p class="lead">' + t('True numeric axes, not relative quadrants. The top-right combines higher measured quality and generation throughput. Point labels identify models below.',
              'Числовые оси, а не относительные квадранты. Вверху справа — выше измеренное качество и скорость генерации. Номера точек расшифрованы ниже.') + '</p>',
              _scatter(decision, ids, colors, language), '<div class="legend">']
     for p in points:
         body += [f'<span>{badge(p["model"])} {h(p["model"])}</span>']
-    body += ['</div><details><summary>' + t('Task latency: the time you actually wait', 'Время задачи: сколько вы действительно ждёте') + '</summary><p>' +
+    body += ['</div><h3>' + t('Quality and task time', 'Качество и время задачи') + '</h3><p class="micro">' +
              t('Pipeline wall time includes generation and allowed recovery. Lower is better; output lengths differ, so tok/s is not task latency.',
                'Полное время включает генерацию и разрешённый recovery. Меньше — лучше. Длина ответов различается, поэтому ток/с не равны времени задачи.') + '</p>',
-             _scatter(decision, ids, colors, language, 'latency'), '</details>',
+             _scatter(decision, ids, colors, language, 'latency'),
              '<h3>' + t('Quality scales', 'Шкалы качества') + '</h3><div class="quality-grid">']
     for row, p in zip(rows, points):
         native = p['quality']
@@ -442,7 +493,7 @@ def render_report(model_rows, detail_rows, *, version='', language='en', generat
 
     body += [_uncertainty_plots(details, language)]
 
-    body += ['<section id="resources"><div class="eyebrow">03 / ' + t('THE COST', 'РЕСУРСЫ') + '</div><h2>' + t('Resources used', 'Затраты ресурсов') + '</h2><p class="lead">' +
+    body += ['<section id="resources"><div class="eyebrow">04 / ' + t('THE COST', 'РЕСУРСЫ') + '</div><h2>' + t('Resources used', 'Затраты ресурсов') + '</h2><p class="lead">' +
              t('Host-level sensors, not per-model allocation. CPU/GPU are means of recorded run averages; RAM/VRAM are observed peaks. Background activity is included. Missing sensors stay unknown.',
                'Датчики всего узла, а не выделение ресурсов одной модели. CPU/GPU — средние по измеренным запускам; RAM/VRAM — наблюдаемые пики. Фоновые процессы включены. Нет датчика — нет значения.') + '</p><div class="resource-grid">']
     for key, label, unit in (('cpu_util_avg', 'CPU', '%'), ('gpu_util_avg', 'GPU', '%'), ('ram_peak_gib', 'RAM', ' GiB'), ('vram_peak_mib', 'VRAM', ' GiB')):
@@ -456,7 +507,7 @@ def render_report(model_rows, detail_rows, *, version='', language='en', generat
     body += ['</div><p class="micro">' + t('Each model’s sensor coverage (measured / successful runs): ', 'Покрытие датчиков (измерено / успешных запусков): ') +
              '; '.join(f'{ids[p["model"]]} CPU {r.get("cpu_sensor_runs",0)}/{r.get("successful_runs",0)}, GPU {r.get("gpu_sensor_runs",0)}/{r.get("successful_runs",0)}, RAM {r.get("ram_sensor_runs",0)}/{r.get("successful_runs",0)}' for r,p in zip(rows,points)) + '</p></section>']
 
-    body += ['<section id="tests"><div class="eyebrow">04 / ' + t('WHERE MODELS DIFFER', 'РАЗЛИЧИЯ ПО ЗАДАЧАМ') + '</div><h2>' + t('Results by test', 'Результаты по тестам') + '</h2><p class="lead">' +
+    body += ['<section id="tests"><div class="eyebrow">05 / ' + t('WHERE MODELS DIFFER', 'РАЗЛИЧИЯ ПО ЗАДАЧАМ') + '</div><h2>' + t('Results by test', 'Результаты по тестам') + '</h2><p class="lead">' +
              t('Cell = existing Native mean for that test. A dash means no automatic score. Color is a visual scale, not a pass/fail boundary. Multiple configurations stay separate in Full data.',
                'Ячейка — готовый средний Native-балл теста. Прочерк — нет автоматического балла. Цвет — шкала, а не порог успеха. Разные конфигурации сохранены отдельно в полных данных.') + '</p><div class="table-wrap"><table class="heatmap"><thead><tr><th>' + t('Test / purpose', 'Тест / назначение') + '</th>' + ''.join('<th>'+badge(p['model'])+'</th>' for p in points) + '</tr></thead><tbody>']
     for test in sorted({str(row.get('benchmark') or '?') for row in details}):
@@ -475,7 +526,7 @@ def render_report(model_rows, detail_rows, *, version='', language='en', generat
                 'Автоматические проверки не заменяют эксперта. Пользовательский текст без scorer не получает место по качеству.') + '</p></section>']
     body += [_category_table(rows, points, badge, language), _language_tracks_table(rows, points, badge, language)]
 
-    body += ['<section id="settings"><div class="eyebrow">05 / ' + t('REPRODUCE', 'ВОСПРОИЗВЕДЕНИЕ') + '</div><h2>' + t('Recorded model settings', 'Записанные параметры моделей') + '</h2><p class="lead">' +
+    body += ['<section id="settings"><div class="eyebrow">06 / ' + t('REPRODUCE', 'ВОСПРОИЗВЕДЕНИЕ') + '</div><h2>' + t('Recorded model settings', 'Записанные параметры моделей') + '</h2><p class="lead">' +
              t('Values are from the run, not guessed from a model name. Multiple values mean settings varied. Unknown inherited defaults remain unknown.',
                'Значения взяты из прогона, а не угаданы по имени модели. Несколько значений означают изменение настроек. Неизвестные унаследованные значения не подставляются.') + '</p><div class="quality-grid">']
     for row, p in zip(rows, points):
@@ -647,7 +698,7 @@ STYLE = '''
 @media(max-width:620px){main{padding:12px}header{padding:22px}.brand-mark{width:76px;height:76px}section{padding:18px}.kpis{grid-template-columns:1fr 1fr}.rank-card ol,.decision-grid,.quality-grid,.resource-grid{grid-template-columns:1fr}nav{position:static;gap:6px}nav a{padding:6px 10px;font-size:13px}h2{font-size:25px}.scatter text{font-size:15px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 @media print{body{background:#fff;color:#111}main{padding:0}nav{display:none}section,header{break-inside:avoid;box-shadow:none}*{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
-.rank-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.ci-row{display:grid;grid-template-columns:minmax(160px,1fr) minmax(180px,2fr) 120px;gap:16px;align-items:center;margin:14px 0;font-size:13px}.ci-row>span{overflow-wrap:anywhere}.ci-track{height:14px;background:#2B3544;position:relative;border-radius:6px}.ci-range{position:absolute;height:8px;top:3px;background:#FF6174;border-radius:5px}.ci-dot{position:absolute;height:14px;top:0;width:3px;transform:translateX(-50%);background:#fff}
-@media(max-width:1000px){.rank-grid{grid-template-columns:1fr 1fr}.rank-card ol{display:block}}
-@media(max-width:620px){.rank-grid{grid-template-columns:1fr}.ci-row{grid-template-columns:1fr}}
+.rank-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.comparison-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.comparison-card{min-width:0;background:#101620;border:1px solid var(--line);border-top:3px solid #51C8FF;border-radius:14px;padding:18px}.comparison-card h4{font-size:13px;margin:18px 0 7px;color:var(--muted)}.stability-track{height:14px;background:#2B3544;position:relative;border-radius:7px;margin:4px 0 5px}.stability-range{position:absolute;height:8px;top:3px;border-radius:5px}.stability-dot{position:absolute;height:14px;top:0;width:3px;transform:translateX(-50%);background:#fff}.ci-row{display:grid;grid-template-columns:minmax(160px,1fr) minmax(180px,2fr) 120px;gap:16px;align-items:center;margin:14px 0;font-size:13px}.ci-row>span{overflow-wrap:anywhere}.ci-track{height:14px;background:#2B3544;position:relative;border-radius:6px}.ci-range{position:absolute;height:8px;top:3px;background:#FF6174;border-radius:5px}.ci-dot{position:absolute;height:14px;top:0;width:3px;transform:translateX(-50%);background:#fff}
+@media(max-width:1000px){.rank-grid,.comparison-grid{grid-template-columns:1fr 1fr}.rank-card ol{display:block}}
+@media(max-width:620px){.rank-grid,.comparison-grid{grid-template-columns:1fr}.ci-row{grid-template-columns:1fr}}
 '''

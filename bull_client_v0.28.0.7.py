@@ -11692,7 +11692,23 @@ def print_benchmark_decision_support(models,custom_weights=None):
     ui_section('MODEL CHOICE / TOP 3' if get_language()=='en' else 'ВЫБОР МОДЕЛИ / ТОП-3')
     width=max(40,min(110,shutil.get_terminal_size((90,30)).columns-2))
     for row in terminal_decisions(decision,language=get_language(),width=width):
+        # The report remains usable without colour, but in an ANSI terminal the
+        # four selection dimensions become scannable without changing values.
+        normalized=str(row).casefold()
+        if normalized.startswith(('native quality:', 'качество native:')):
+            green()
+        elif normalized.startswith(('generation speed:', 'скорость генерации:')):
+            cyan()
+        elif normalized.startswith(('task time', 'время задачи')):
+            yellow()
+        elif normalized.startswith(('recommendation:', 'рекомендация:')):
+            green()
+        elif normalized.startswith(('! recommendation gate:', '! порог рекомендации:')):
+            yellow()
+        else:
+            white()
         ui_print(row)
+    white()
     return decision
 
 
@@ -15741,9 +15757,16 @@ def benchmark_result_menu(last_command=None,last_benchmark_path=None):
         ui_print()
         ui_section('BENCHMARK ЗАВЕРШЁН — ЧТО ДАЛЬШЕ')
         repeatable=bool(last_command and not str(last_command).casefold().startswith('/bench resume'))
+        recommended='RECOMMENDED' if get_language()=='en' else 'РЕКОМЕНДУЕТСЯ'
+        recommendation_hint=(
+            '  RECOMMENDED · [3] Open the full HTML report: charts, comparisons and explanations.'
+            if get_language()=='en' else
+            '  РЕКОМЕНДУЕТСЯ · [3] Открыть полный HTML-отчёт: графики, сравнения и пояснения.'
+        )
+        green(); ui_print(recommendation_hint); white()
         ui_menu_item('1','Краткая сводка в BULL','Качество, скорость, рекомендации и карта','ТЕРМИНАЛ')
         ui_menu_item('2','Выбрать по моим приоритетам','Задать важность качества, скорости, надёжности и памяти')
-        ui_menu_item('3','Открыть полный отчёт','Диаграммы, шкалы и сводные таблицы','HTML')
+        ui_menu_item('3','Открыть полный отчёт','Диаграммы, шкалы и сводные таблицы','HTML · '+recommended)
         ui_menu_item('4','Файлы для экспорта','Безопасный summary JSON и HTML; raw JSON помечен отдельно')
         ui_menu_item('5','Ответы моделей','Открыть raw-ответы и остаться на этом экране')
         ui_menu_item('6','Повторить этот тест' if repeatable else 'Повтор недоступен','Resume уже завершил checkpoint' if not repeatable else 'С теми же моделями и параметрами')

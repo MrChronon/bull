@@ -5276,11 +5276,15 @@ def test_visual_report_is_offline_graphical_and_excludes_raw_answers():
         assert 'Качество' in html_text and 'Баланс' in html_text and 'Мало памяти' in html_text
         assert 'Выбранные тесты' in html_text and '64.0%' in html_text
         assert 'Топ-3 места' in html_text and 'Источник генерации' in html_text
+        assert 'Качество, контракт и скорость' in html_text
+        assert 'Качество и время задачи' in html_text
+        assert 'comparison-card' in html_text and 'stability-track' in html_text
         old_language=mod.get_language()
         try:
             mod.set_language('en')
             english=mod.benchmark_visual_report_document(records)
             assert '<html lang="en">' in english and 'Top 3 places' in english
+            assert 'Quality, contract and speed' in english and 'Seed stability' in english
             assert not re.search('[А-Яа-яЁё]',english)
         finally:
             mod.set_language(old_language)

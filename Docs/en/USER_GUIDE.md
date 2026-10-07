@@ -97,7 +97,9 @@ After a run, BULL offers:
   weighted balance, plus separately gated model choices;
 - custom importance weights;
 - numeric quality/speed and task-time charts with stable model IDs;
-- a self-contained HTML report;
+- a self-contained HTML report — the recommended next step: quality / contract /
+  speed scorecards, two scatter plots (quality ↔ speed and quality ↔ task time),
+  observed seed stability, resources, and a per-test heatmap;
 - share-safe summary files and clearly labelled private raw output.
 
 Recommendations are relative to that run. They reuse measured metrics and apply
