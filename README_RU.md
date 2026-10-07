@@ -19,7 +19,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/MrChronon/bull/releases/latest/download/BULL-v0.28.0.5-Bundle.zip"><strong>Скачать BULL v0.28.0.5 для Windows</strong></a><br><br>
+  <a href="https://github.com/MrChronon/bull/releases/latest/download/BULL-v0.28.0.6-Bundle.zip"><strong>Скачать BULL v0.28.0.6 для Windows</strong></a><br><br>
   <a href="Docs/ru/USER_GUIDE.md">Руководство</a> ·
   <a href="Docs/ru/BENCHMARKS.md">Бенчмарки</a> ·
   <a href="Docs/ru/CONNECTIONS.md">Подключения</a> ·
@@ -39,7 +39,7 @@ BULL работает с Ollama и совместимым HTTP-сервером 
 проверенный профиль в рабочий клиент.
 
 <p align="center">
-  <img src="Assets/Brand/readme-signal-panel.svg?v=0.28.0.5-signal390" alt="Сигналы оценки BULL" width="100%">
+  <img src="Assets/Brand/readme-signal-panel.svg?v=0.28.0.6-signal398" alt="Сигналы оценки BULL" width="100%">
 </p>
 
 ## Зачем нужен BULL
@@ -54,17 +54,19 @@ BULL работает с Ollama и совместимым HTTP-сервером 
 | Общие тесты не отражают работу пользователя | Собственные `.txt` и строгие `.yaml` задачи |
 | Таблица не отвечает «что выбрать» | Качество, Скорость, Баланс, Мало памяти и свои веса |
 
-После прогона краткое сравнение отображается прямо в BULL. Терминал и HTML
-показывают относительную карту Native quality/скорости. Эти рекомендации относятся
-только к моделям и условиям данного отчёта и не являются универсальным рейтингом.
+После прогона BULL показывает измеряемый топ-3 по Native quality, warm speed,
+наблюдаемому пику VRAM и балансу. Эти места отделены от рекомендаций с
+quality/TASK gate. В автономном HTML есть числовые диаграммы качества/скорости и
+TASK/времени, ресурсы, heatmap тестов, происхождение параметров и краткие
+описания тестов. Ни один из этих выводов не является универсальным рейтингом.
 
 ## Быстрый старт
 
 1. Скачайте ZIP и SHA-256 из [последнего релиза](https://github.com/MrChronon/bull/releases/latest).
 2. Проверьте checksum и распакуйте архив в новую папку.
-3. Запустите `Install-BULL-v0.28.0.5.cmd`.
+3. Запустите `Install-BULL-v0.28.0.6.cmd`.
 4. Выберите Client, Server или AllInOne.
-5. Запустите `BULL-v0.28.0.5.cmd`.
+5. Запустите `BULL-v0.28.0.6.cmd`.
 6. Выберите язык, затем **Подключение** и **Сравнить модели**.
 
 Приложение открывает меню без работающей Ollama: настройки, справка и сохранённые

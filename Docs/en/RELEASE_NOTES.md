@@ -1,16 +1,20 @@
-# BULL v0.28.0.5 — Clear Benchmark Flow
+# BULL v0.28.0.6 — Clearer benchmark decisions
 
-This patch makes benchmark setup clearer and adds live host-resource context. It
-does not change built-in benchmark prompts, built-in scorers, or the inference
-and recovery runtime pipeline.
+This release improves how BULL presents benchmark evidence. It does not change
+built-in benchmark prompts, scorers, recovery behaviour or inference runtime.
 
 ## Highlights
 
-- Comma-separated model selection accepts spaces, such as `2, 4, 7`.
-- Sampling-source selection opens on its own clean screen after the preset.
-- Live progress shows optional aggregate CPU and RAM beside GPU and VRAM.
-- Every saved run prints a short checkpoint with result, speed and available
-  resources before the suite completes.
+- Measured top-three places for Native quality, warm speed, observed VRAM and
+  balance.
+- Recommendations clearly separated from rankings: the report states the
+  quality/task gate and why a profile is unavailable.
+- A short, provisional current-test summary after every saved run.
+- Live host telemetry for GPU/VRAM and, when available, aggregate CPU/RAM.
+- A redesigned self-contained red BULL HTML report with charts, resource views,
+  rankings, test descriptions and parameter provenance.
+
+Read [Results](RESULTS.md) before using a report to choose a model.
 
 The public bundle contains no models, chats, benchmark results, runtime state,
 private connections, keys, tokens, endpoints, or local logs.

@@ -1,4 +1,4 @@
-"""Dedicated BULL working Client entry point for v0.28.0.5."""
+"""Dedicated BULL working Client entry point for v0.28.0.6."""
 
 from __future__ import annotations
 import os

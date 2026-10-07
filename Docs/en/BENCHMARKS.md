@@ -1,5 +1,7 @@
 # Benchmarks and user-owned tests
 
+[Reading live output, top-three places and HTML charts](RESULTS.md)
+
 ## What BULL separates
 
 - **Native model quality** scores the model's first answer.

@@ -33,11 +33,27 @@ PROFILE_DEFINITIONS = {
 
 
 def _number(value: Any) -> float | None:
+    if isinstance(value, bool):
+        return None
     try:
         number = float(value)
     except (TypeError, ValueError):
         return None
     return number if number == number and number not in (float("inf"), float("-inf")) else None
+
+
+def rank_values(rows, key, *, reverse=True):
+    """Competition ranks; tied third places remain visible, names only order ties."""
+    ordered = sorted((dict(row) for row in rows if _number(row.get(key)) is not None),
+                     key=lambda row: ((-1 if reverse else 1) * float(row[key]), row['model']))
+    last = None
+    rank = 0
+    for index, row in enumerate(ordered, 1):
+        if last is None or abs(float(row[key]) - last) > 1e-12:
+            rank = index
+        row['rank'] = rank
+        last = float(row[key])
+    return ordered
 
 
 def _scale(values: Mapping[str, float], *, invert: bool = False, logarithmic: bool = False) -> dict[str, float]:
@@ -94,7 +110,9 @@ def build_decision_support(
                 "decision_quality": decision_quality,
                 "decision_quality_basis": "ci95_low" if decision_quality != quality else "native_mean",
                 "quality_partial": partial,
-                "speed": _number(row.get("primary_eval_warm_avg") or row.get("primary_eval_avg")),
+                "speed": _number(row.get("primary_eval_warm_avg") if row.get("primary_eval_warm_avg") is not None else row.get("primary_eval_avg")),
+                "speed_basis": "warm" if _number(row.get("primary_eval_warm_avg")) is not None else "all_load_states",
+                "latency": _number(row.get("pipeline_wall_avg")),
                 "reliability": _number(
                     row.get("native_task_completion_rate")
                     if row.get("native_task_completion_rate") is not None
@@ -102,6 +120,8 @@ def build_decision_support(
                 ),
                 "vram_mib": _number(row.get("vram_peak_mib")),
                 "critical_failures": int(row.get("critical_failure_count") or 0),
+                "comparison_signature": row.get("comparison_signature"),
+                "comparison_complete": row.get("comparison_complete", True),
             }
         )
 
@@ -110,7 +130,8 @@ def build_decision_support(
         row["model"]: row["decision_quality"]
         for row in prepared if row["decision_quality"] is not None
     }
-    speed_values = {row["model"]: row["speed"] for row in prepared if row["speed"] is not None}
+    speed_basis = 'warm' if any(row['speed_basis'] == 'warm' for row in prepared) else 'all_load_states'
+    speed_values = {row["model"]: row["speed"] for row in prepared if row["speed"] is not None and row['speed_basis'] == speed_basis}
     memory_values = {row["model"]: row["vram_mib"] for row in prepared if row["vram_mib"] is not None}
     quality_norm = _scale(quality_values)
     decision_quality_norm = _scale(decision_quality_values)
@@ -118,6 +139,9 @@ def build_decision_support(
     memory_norm = _scale(memory_values, invert=True)
 
     best_decision_quality = max(decision_quality_values.values(), default=None)
+    gate_threshold = max(0.60, best_decision_quality - 0.10) if best_decision_quality is not None else None
+    signatures = {str(row['comparison_signature']) for row in prepared if row['comparison_signature'] is not None}
+    comparable = len(signatures) <= 1 and all(row['comparison_complete'] for row in prepared)
     for row in prepared:
         model = row["model"]
         row["quality_norm"] = quality_norm.get(model)
@@ -127,9 +151,16 @@ def build_decision_support(
         row["quality_gate"] = bool(
             best_decision_quality is not None
             and row["decision_quality"] is not None
-            and row["decision_quality"] >= max(0.60, best_decision_quality - 0.10)
+            and row["decision_quality"] >= gate_threshold
             and (row["reliability"] is None or row["reliability"] >= 0.80)
         )
+        row['gate_reasons'] = []
+        if row['decision_quality'] is None:
+            row['gate_reasons'].append('quality_unknown')
+        elif gate_threshold is not None and row['decision_quality'] < gate_threshold:
+            row['gate_reasons'].append('quality_below_gate')
+        if row['reliability'] is not None and row['reliability'] < .8:
+            row['gate_reasons'].append('task_below_gate')
 
     profiles = dict(PROFILE_DEFINITIONS)
     if custom_weights is not None:
@@ -143,11 +174,8 @@ def build_decision_support(
     for profile_id, profile in profiles.items():
         weights = profile["weights"]
         candidates = []
+        ranking = []
         for row in prepared:
-            if row["quality"] is None:
-                continue
-            if profile_id in ("speed", "balance", "low_memory", "custom") and not row["quality_gate"]:
-                continue
             values = {
                 "quality": row["decision_quality_norm"],
                 "speed": row["speed_norm"],
@@ -155,14 +183,25 @@ def build_decision_support(
                 "memory": row["memory_norm"],
             }
             required = [name for name, weight in weights.items() if weight > 0]
+            exclusions = list(row['gate_reasons']) if profile_id != 'quality' else []
+            if not comparable:
+                exclusions.append('unequal_coverage')
             if any(values[name] is None for name in required):
+                ranking.append({**row, 'utility': None, 'eligible': False,
+                                'exclusions': exclusions + ['metrics_missing'], 'rank': None})
                 continue
             utility = sum(weights[name] * float(values[name]) for name in required)
-            candidates.append((utility, row))
+            ranking.append({**row, 'utility': utility, 'eligible': not exclusions, 'exclusions': exclusions})
+            if not exclusions:
+                candidates.append((utility, row))
+        ranked = rank_values(ranking, 'utility')
+        ranked.extend(row for row in ranking if row['utility'] is None)
+        profile_info = {'ranking': ranked, 'eligible_count': len(candidates), 'total_count': len(prepared)}
         if not candidates:
             results.append(
                 {
                     "id": profile_id,
+                    **profile_info,
                     "label": profile["label"],
                     "weights": dict(weights),
                     "winner": None,
@@ -177,6 +216,7 @@ def build_decision_support(
             results.append(
                 {
                     "id": profile_id,
+                    **profile_info,
                     "label": profile["label"],
                     "weights": dict(weights),
                     "winner": None,
@@ -190,6 +230,7 @@ def build_decision_support(
         results.append(
             {
                 "id": profile_id,
+                **profile_info,
                 "label": profile["label"],
                 "weights": dict(weights),
                 "winner": winner["model"],
@@ -216,7 +257,17 @@ def build_decision_support(
         warnings.append("Memory is unknown for one or more models; the Low memory profile stays unavailable without comparable VRAM measurements.")
     if any(row["speed"] is None for row in prepared):
         warnings.append("Speed is unknown for one or more models; profiles requiring speed stay unavailable for those rows.")
-    return {"schema": "bull-model-decision-support", "version": 1, "points": prepared, "profiles": results, "warnings": warnings}
+    if not comparable:
+        warnings.append('Coverage differs or includes failed/mixed runs; recommendations are withheld. Rankings are descriptive only.')
+    rankings = {
+        'quality': rank_values(prepared, 'quality'),
+        'speed': rank_values([row for row in prepared if row['speed_basis'] == speed_basis], 'speed'),
+        'latency': rank_values(prepared, 'latency', reverse=False),
+        'memory': rank_values(prepared, 'vram_mib', reverse=False),
+    }
+    return {"schema": "bull-model-decision-support", "version": 2, "points": prepared,
+            "profiles": results, "rankings": rankings, "comparable": comparable,
+            "gate_threshold": gate_threshold, "speed_basis": speed_basis, "warnings": warnings}
 
 
-__all__ = ["PROFILE_DEFINITIONS", "build_decision_support"]
+__all__ = ["PROFILE_DEFINITIONS", "build_decision_support", "rank_values"]

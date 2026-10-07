@@ -39,7 +39,7 @@
       <rect x="640" y="154" width="274" height="132" rx="18" fill="#211017" stroke="#722a39"/>
       <rect x="932" y="154" width="292" height="132" rx="18" fill="#211017" stroke="#722a39"/>
 
-      <text x="80" y="217" fill="#f4f7f5" font-size="42" font-weight="750">390/390</text>
+      <text x="80" y="217" fill="#f4f7f5" font-size="42" font-weight="750">398/398</text>
       <text x="80" y="252" fill="#d899a3" font-size="14" font-weight="650" letter-spacing="2">OFFLINE REGRESSIONS</text>
       <circle cx="300" cy="188" r="8" fill="#ff3c52" filter="url(#glow)"/>
 
@@ -95,7 +95,7 @@
       <circle cx="1163" cy="510" r="13" fill="#ff3c52" filter="url(#glow)"/>
     </g>
 
-    <text x="56" y="583" fill="#c9838d" font-size="13" letter-spacing="1.6">BULL · BENCHMARKING &amp; USAGE OF LOCAL LLMs · v0.28.0.5</text>
+    <text x="56" y="583" fill="#c9838d" font-size="13" letter-spacing="1.6">BULL · BENCHMARKING &amp; USAGE OF LOCAL LLMs · v0.28.0.6</text>
     <text x="1224" y="583" fill="#c9838d" font-size="13" text-anchor="end">Verified project facts · no model results shown</text>
   </g>
 </svg>

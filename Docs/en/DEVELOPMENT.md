@@ -14,7 +14,7 @@ readable through compatibility adapters and are never silently rewritten.
 
 ## Development roadmap
 
-The current release is v0.28.0.5. The following stages are planned, not shipped:
+The current release is v0.28.0.6. The following stages are planned, not shipped:
 
 | Stage | Target | Purpose |
 | --- | --- | --- |

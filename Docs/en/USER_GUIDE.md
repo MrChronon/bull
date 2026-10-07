@@ -1,4 +1,4 @@
-# BULL v0.28.0.5 user guide
+# BULL v0.28.0.6 user guide
 
 BULL is a Windows-first terminal application for chatting with local language
 models and comparing them under repeatable conditions. It supports Ollama and a
@@ -10,12 +10,12 @@ compatible llama.cpp HTTP server, locally or through a pinned SSH tunnel.
 - Ollama or a compatible llama.cpp server;
 - at least one model installed on the selected backend.
 
-Download `BULL-v0.28.0.5-Bundle.zip` and its checksum from the GitHub release.
+Download `BULL-v0.28.0.6-Bundle.zip` and its checksum from the GitHub release.
 Verify the SHA-256 value, extract into a new directory, and run
-`Install-BULL-v0.28.0.5.cmd`. It creates red BULL shortcuts on the Desktop and
+`Install-BULL-v0.28.0.6.cmd`. It creates red BULL shortcuts on the Desktop and
 in the Start Menu. Choose **Client**, **Server**, or **AllInOne**.
 
-Use `BULL-v0.28.0.5.cmd` for the application. The Benchmark Lab and Agent Lab
+Use `BULL-v0.28.0.6.cmd` for the application. The Benchmark Lab and Agent Lab
 launchers open their respective sections directly.
 
 On the first launch, choose English or Russian. This question is shown once.
@@ -93,9 +93,10 @@ uses the documented force path.
 After a run, BULL offers:
 
 - a concise terminal summary;
-- model choices for Quality, Speed, Balance, and Low memory;
+- measured top-three places for Native quality, generation speed, VRAM and
+  weighted balance, plus separately gated model choices;
 - custom importance weights;
-- a relative quality/speed map;
+- numeric quality/speed and task-time charts with stable model IDs;
 - a self-contained HTML report;
 - share-safe summary files and clearly labelled private raw output.
 
@@ -108,7 +109,9 @@ a compact checkpoint: native/final score when a scorer exists, TASK, speed and t
 available resource measurements. A missing sensor is shown as unavailable, never as
 zero.
 
-See [Benchmarks](BENCHMARKS.md) for metric definitions and user-test authoring.
+See [Results](RESULTS.md) for how ranks, recommendations, resources and charts
+are read, and [Benchmarks](BENCHMARKS.md) for metric definitions and user-test
+authoring.
 
 ## Chat
 

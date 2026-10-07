@@ -342,7 +342,7 @@ def show_ssh_key_guide(core):
     print(r'   .\Client\New-BULL-ClientKey.ps1')
     print(r'   Передавайте на сервер только bull_access.pub. Файл bull_access остаётся у вас.')
     print('\n2. Добавьте публичный ключ на сервер.')
-    print(r'   Проще всего: Install-BULL-v0.28.0.5.cmd → Server и укажите файл .pub.')
+    print(r'   Проще всего: Install-BULL-v0.28.0.6.cmd → Server и укажите файл .pub.')
     print(r'   Для готового OpenSSH добавьте одну строку .pub в C:\Users\<SERVER_USER>\.ssh\authorized_keys.')
     print('\n3. Создайте или дополните файл:', terminal_text(str(config)))
     print('''

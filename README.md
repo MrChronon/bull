@@ -20,7 +20,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/MrChronon/bull/releases/latest/download/BULL-v0.28.0.5-Bundle.zip"><strong>Download BULL v0.28.0.5 for Windows</strong></a><br><br>
+  <a href="https://github.com/MrChronon/bull/releases/latest/download/BULL-v0.28.0.6-Bundle.zip"><strong>Download BULL v0.28.0.6 for Windows</strong></a><br><br>
   <a href="#quick-start">Quick start</a> ·
   <a href="Docs/en/USER_GUIDE.md">User guide</a> ·
   <a href="Docs/ru/USER_GUIDE.md">Руководство</a> ·
@@ -41,7 +41,7 @@ server**. Run chat, compare selected models, resume interrupted suites, inspect
 offline reports and move a tested profile into the working client.
 
 <p align="center">
-  <img src="Assets/Brand/readme-signal-panel.svg?v=0.28.0.5-signal390" alt="BULL evaluation signal panel: 390 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases, private and share-safe evidence, and nine separated metric spaces" width="100%">
+  <img src="Assets/Brand/readme-signal-panel.svg?v=0.28.0.6-signal398" alt="BULL evaluation signal panel: 398 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases, private and share-safe evidence, and separate metric spaces" width="100%">
 </p>
 
 ## Why BULL
@@ -74,10 +74,12 @@ offline reports and move a tested profile into the working client.
 - **agent behavior:** a restricted Agent Lab MVP with independent verification;
 - **hardware experiments:** an experimental Windows + Ollama GPU Lab.
 
-After a run, BULL can show the comparison directly in the terminal, including a
-relative Native-quality/speed map. The same decision profiles appear in the
-self-contained HTML report. They reuse measured metrics, apply an explicit
-quality/task gate, and never become a new benchmark score or universal ranking.
+After a run, BULL shows measured top-three places directly in the terminal for
+Native quality, warm speed, observed VRAM and balance. These ranks remain
+separate from quality/task-gated recommendations. The self-contained HTML report
+adds numeric quality/speed and task/time charts, resource views, a test heatmap,
+parameter provenance and plain-language test descriptions. Nothing becomes a new
+benchmark score or universal ranking.
 
 For your own work, copy a template into [`UserTests`](UserTests). A `.txt` file
 runs the same prompt across selected models without fabricating quality. A
@@ -103,13 +105,13 @@ superiority from a single run.
 
 ### Install
 
-1. Download `BULL-v0.28.0.5-Bundle.zip` and its SHA-256 file from the
+1. Download `BULL-v0.28.0.6-Bundle.zip` and its SHA-256 file from the
    [latest release](https://github.com/MrChronon/bull/releases/latest).
 2. Verify the checksum, extract the archive and run
-   `Install-BULL-v0.28.0.5.cmd`.
+   `Install-BULL-v0.28.0.6.cmd`.
 3. Choose `Client`, `Server` or `AllInOne`.
-4. Start `BULL-v0.28.0.5.cmd` for chat or
-   `BULL-Benchmark-Lab-v0.28.0.5.cmd` for evaluation.
+4. Start `BULL-v0.28.0.6.cmd` for chat or
+   `BULL-Benchmark-Lab-v0.28.0.6.cmd` for evaluation.
 
 The interface opens without a running backend, so connection setup, help,
 diagnostics and saved reports remain available offline.
@@ -153,7 +155,7 @@ output, client assistance and recovery behavior in distinct metric spaces.
 .\Build-Release.ps1
 ```
 
-The current release passes **390/390 offline regressions**, including clean
+The current release passes **398/398 offline regressions**, including clean
 Python without site packages, forced `cp1251`, startup integration, manifest
 hashes and ZIP verification.
 
@@ -186,7 +188,7 @@ Public release gates exclude `Chats`, `Runtime`, `Benchmarks`, `Exports`,
 
 ## Project status
 
-`v0.28.0.5` is the **Clear Benchmark Flow** release. It keeps the primary UI simple and
+`v0.28.0.6` is the **Clear Benchmark Flow** release. It keeps the primary UI simple and
 compare, chat, connection and more; adds clean sampling-source navigation, live
 CPU/RAM context and per-run checkpoints. Existing expert features remain under
 advanced/experimental menus. Built-in prompts, scorers, recovery and runtime

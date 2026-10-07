@@ -206,8 +206,8 @@ BENCHMARK_PROFILE_PARAMETER_FIELDS=(
     'mirostat','mirostat_eta','mirostat_tau',
 )
 APP_NAME='BULL — Benchmark Lab'
-APP_VERSION='v0.28.0.5'
-APP_ICON='BULL-v0.28.0.5.ico'
+APP_VERSION='v0.28.0.6'
+APP_ICON='BULL-v0.28.0.6.ico'
 ATTACH_MAX_FILE_CHARS=80000
 ATTACH_CONTEXT_TOKENS=2800
 TOOL_MAX_LOOPS=5
@@ -1282,6 +1282,7 @@ def _chat_critical_reasons(record):
 
 
 def benchmark_model_summary_rows(records):
+    from Shared.bull_llm.results_report import report_observations
     benches=load_benchmarks(); groups={}
     for record in records:
         identity=record.get('identity') or {}
@@ -1441,6 +1442,7 @@ def benchmark_model_summary_rows(records):
             math.sqrt(max(0.0,float(native_score))*max(0.0,float(row['primary_eval_warm_avg'])))
             if native_score is not None and row['primary_eval_warm_avg'] is not None else None
         )
+        row.update(report_observations(items))
         output.append(row)
     # Model-level CHAT Pareto is deliberately conservative: three complete
     # seed aggregates and non-overlapping 95% intervals are required.
@@ -8970,23 +8972,21 @@ class LiveInferenceProgress:
         return ' | '.join(parts)
 
     def render(self,force=False):
+        from Shared.bull_llm.results_report import live_progress_line
         now=time.time()
-        if not force and now-self.last_render<self.interval:
+        interactive=bool(getattr(sys.stdout,'isatty',lambda:False)())
+        if not force and now-self.last_render<(self.interval if interactive else max(10,self.interval)):
             return
         self.last_render=now
         elapsed=max(.001,now-self.started)
         est_tokens=max(0,int((self.reasoning_chars+self.answer_chars)/2.5))
-        pct=min(99.0,100.0*est_tokens/max(1,self.predict))
-        rate=est_tokens/elapsed
-        gpu=self._gpu_text()
-        line=(
-            f"  ↻ {self.label} | {self.stage:<10} | {elapsed:6.1f}s | "
-            f"≈{est_tokens:4d}/{self.predict} tok {pct:5.1f}% | ≈{rate:5.1f} tok/s"
-        )
-        if gpu:
-            line+=' | '+gpu
+        # A redirected test/log stream is not a terminal surface: preserve the
+        # complete telemetry record there. Interactive output remains bounded
+        # to the actual terminal width.
+        width=max(30,shutil.get_terminal_size((100,30)).columns-2) if interactive else 1000
+        line=live_progress_line(self.label,self.stage,elapsed,est_tokens,self.predict,self._gpu_text(),width)
         try:
-            print('\r'+line[:175].ljust(175),end='',flush=True)
+            print(('\r'+line.ljust(width)) if interactive else line,end='' if interactive else '\n',flush=True)
         except Exception:
             pass
 
@@ -9024,9 +9024,13 @@ class LiveInferenceProgress:
         if rate is not None:
             exact_text+=f" | {rate:.1f} tok/s"
         try:
-            print('\r'+(
-                f"  ✓ {self.label} | {note} | {elapsed:.1f}s | {exact_text}"
-            )[:175].ljust(175))
+            from Shared.bull_llm.results_report import clean,wrap_lines
+            interactive=bool(getattr(sys.stdout,'isatty',lambda:False)())
+            width=max(30,shutil.get_terminal_size((100,30)).columns-2)
+            if interactive:
+                print('\r'+' '*width+'\r',end='')
+            for text in wrap_lines([f"  ✓ {clean(self.label)} | {clean(note)} | {elapsed:.1f}s | {exact_text}"],width):
+                print(text)
         except Exception:
             print()
 
@@ -10735,333 +10739,15 @@ def _report_bar(value,kind='native'):
 
 
 def benchmark_visual_report_document(records,evidence_summary=None):
-    """Build an offline report from metrics only; never embed prompts or answers."""
+    """Metrics-only, bilingual offline report; prompts and scorers are untouched."""
+    from Shared.bull_llm.results_report import render_report
     records=list(records or [])
-    model_rows=benchmark_model_summary_rows(records)
-    detail_rows=benchmark_summary_rows(records)
-    from Shared.bull_llm.decision_support import build_decision_support
-    decision=build_decision_support(model_rows)
-    generated=datetime.now().isoformat(timespec='seconds')
-    ok=sum(_record_execution_ok(row) for row in records)
-    errors=len(records)-ok
-    transport_failures=sum(
-        int(_rec_v4(row,'client_recovery.transport_failures',0) or 0) for row in records
+    return render_report(
+        benchmark_model_summary_rows(records),benchmark_summary_rows(records),
+        version=APP_VERSION,language=get_language(),
+        generated=datetime.now().isoformat(timespec='seconds'),
+        evidence_summary=evidence_summary,
     )
-    interrupted=sum(
-        int(_rec_v4(row,'client_recovery.interrupted_attempts',0) or 0) for row in records
-    )
-    max_speed=max([
-        float(row.get('primary_eval_warm_avg')) for row in model_rows
-        if row.get('primary_eval_warm_avg') is not None
-    ],default=0.0)
-
-    summary_rows=[]; quality_cards=[]; speed_cards=[]; warnings=[]
-    for row in sorted(model_rows,key=lambda item:str(item.get('model') or '').casefold()):
-        model=html_lib.escape(str(row.get('model') or '?'))
-        is_chat=int(row.get('chat_available_tests') or 0)>0
-        native=row.get('chat_native_score') if is_chat else row.get('overall_native_score')
-        assisted=row.get('chat_assisted_score') if is_chat else row.get('overall_assisted_score')
-        partial=False
-        if is_chat and native is None:
-            native=row.get('chat_native_score_partial')
-            partial=native is not None
-        if is_chat and assisted is None:
-            assisted=row.get('chat_assisted_score_partial')
-        speed=row.get('primary_eval_warm_avg')
-        generation=row.get('native_generation_completion_rate',row.get('native_completion_rate'))
-        task=row.get('native_task_completion_rate')
-        recovery=row.get('recovery_rate') if is_chat else row.get('overall_recovery_rate')
-        stability=row.get('chat_native_sd') if is_chat else None
-        worst_seed=row.get('chat_native_worst_seed') if is_chat else None
-        vram=row.get('vram_peak_mib')
-        status=(
-            'Полный CHAT' if row.get('chat_suite_status')=='complete'
-            else f'Частичный CHAT {int(row.get("chat_available_tests") or 0)}/{int(row.get("chat_required_tests") or 0)}'
-            if is_chat else 'Выбранные тесты'
-        )
-        if partial:
-            warnings.append(f'{model}: quality рассчитана по неполному набору CHAT и помечена как partial.')
-        if native is None:
-            warnings.append(f'{model}: автоматический quality score недоступен для этого набора.')
-        if is_chat and stability is None:
-            warnings.append(f'{model}: SD недоступно; для устойчивости нужны несколько полных seeds.')
-        summary_rows.append(
-            '<tr>'
-            f'<th scope="row">{model}</th>'
-            f'<td>{html_lib.escape(status)}</td>'
-            f'<td>{"≈" if partial and native is not None else ""}{_report_percent(native)}</td>'
-            f'<td>{_report_percent(assisted)}</td>'
-            f'<td>{_report_percent(generation)}</td>'
-            f'<td>{_report_percent(task)}</td>'
-            f'<td>{_report_percent(recovery)}</td>'
-            f'<td>{_report_number(speed,1," tok/s")}</td>'
-            f'<td>{_report_percent(stability,1)}</td>'
-            f'<td>{html_lib.escape(str(worst_seed)) if worst_seed is not None else "—"}</td>'
-            f'<td>{_report_number(float(vram)/1024.0,1," GiB") if vram is not None else "—"}</td>'
-            '</tr>'
-        )
-        quality_cards.append(
-            '<article class="model-card">'
-            f'<h3>{model}</h3>'
-            f'<div class="bar-label"><span>Native model quality</span><strong>{_report_percent(native)}</strong></div>'
-            f'{_report_bar(native,"native")}'
-            f'<div class="bar-label"><span>Final system quality</span><strong>{_report_percent(assisted)}</strong></div>'
-            f'{_report_bar(assisted,"assisted")}'
-            f'<p class="micro">Generation {_report_percent(generation)} · Task contract {_report_percent(task)} · Recovery used {_report_percent(recovery)} · '
-            f'{"Critical failures "+str(int(row.get("critical_failure_count") or 0)) if is_chat else "quality — по выбранным scored tests"}</p>'
-            '</article>'
-        )
-        speed_width=(float(speed)/max_speed) if speed is not None and max_speed>0 else 0.0
-        speed_cards.append(
-            '<div class="speed-row">'
-            f'<span>{model}</span>{_report_bar(speed_width,"speed")}'
-            f'<strong>{_report_number(speed,1," tok/s")}</strong></div>'
-        )
-
-    category_names=[]
-    for row in model_rows:
-        for category in (row.get('chat_category_scores_native') or {}):
-            if category not in category_names:
-                category_names.append(category)
-    category_header=''.join(
-        f'<th>{html_lib.escape(CHAT_CATEGORY_LABELS.get(str(name),str(name)))}</th>'
-        for name in category_names
-    )
-    category_rows=[]
-    for row in sorted(model_rows,key=lambda item:str(item.get('model') or '').casefold()):
-        cells=[]; scores=row.get('chat_category_scores_native') or {}
-        for name in category_names:
-            value=scores.get(name)
-            shade=max(0,min(100,int(float(value or 0)*100)))
-            cells.append(
-                f'<td><span class="heat" style="--heat:{shade}%">{_report_percent(value)}</span></td>'
-            )
-        category_rows.append(
-            f'<tr><th scope="row">{html_lib.escape(str(row.get("model") or "?"))}</th>{"".join(cells)}</tr>'
-        )
-
-    detailed=[]
-    for row in sorted(detail_rows,key=lambda item:(str(item.get('benchmark')),str(item.get('model')))):
-        detailed.append(
-            '<tr>'
-            f'<td>{html_lib.escape(str(row.get("benchmark") or "?"))}</td>'
-            f'<td>{html_lib.escape(str(row.get("model") or "?"))}</td>'
-            f'<td>{_report_percent(row.get("native_model_score"))}</td>'
-            f'<td>{_report_percent(row.get("assisted_final_score"))}</td>'
-            f'<td>{_report_number(row.get("primary_eval_warm_avg"),1," tok/s")}</td>'
-            f'<td>{_report_number(row.get("pipeline_wall_avg"),1," s")}</td>'
-            f'<td>{int(row.get("runs_completed") or 0)}/{int(row.get("runs_planned") or 0)}</td>'
-            f'<td>{int(row.get("runs_task_completed") or 0)}/{int(row.get("runs_planned") or 0)}</td>'
-            f'<td>{html_lib.escape(str(row.get("rank_stability_status") or "—"))}</td>'
-            '</tr>'
-        )
-
-    evidence_analytics=(evidence_summary or {}).get('analytics') or {}
-    confidence_source=evidence_analytics.get('confidence_intervals') or [
-        {
-            'benchmark':row.get('benchmark'),'model':row.get('model'),
-            'mean':row.get('native_score_avg'),'low':row.get('native_score_ci95_low'),
-            'high':row.get('native_score_ci95_high'),
-            'available':None not in (row.get('native_score_ci95_low'),row.get('native_score_ci95_high')),
-        }
-        for row in detail_rows
-    ]
-    confidence_rows=[]
-    for point in confidence_source:
-        mean=point.get('mean'); low=point.get('low'); high=point.get('high')
-        available=bool(point.get('available')) and None not in (mean,low,high)
-        if available:
-            left=max(0.0,min(100.0,float(low)*100.0))
-            right=max(left,min(100.0,float(high)*100.0))
-            dot=max(0.0,min(100.0,float(mean)*100.0))
-            plot=(
-                '<div class="ci-track">'
-                f'<span class="ci-range" style="left:{left:.2f}%;width:{max(1.0,right-left):.2f}%"></span>'
-                f'<span class="ci-dot" style="left:{dot:.2f}%"></span></div>'
-            )
-            label=f'{_report_percent(mean)} · 95% CI {_report_percent(low)}–{_report_percent(high)}'
-        else:
-            plot='<div class="ci-track unavailable"></div>'
-            label='Недостаточно сопоставимых runs'
-        confidence_rows.append(
-            '<div class="ci-row">'
-            f'<span>{html_lib.escape(str(point.get("model") or "?"))}<small>{html_lib.escape(str(point.get("benchmark") or "?"))}</small></span>'
-            f'{plot}<strong>{label}</strong></div>'
-        )
-
-    latency_source=evidence_analytics.get('latency_distributions') or [
-        {
-            'benchmark':row.get('benchmark'),'model':row.get('model'),
-            'mean':row.get('pipeline_wall_avg'),'sd':row.get('pipeline_wall_sd'),
-            'min':row.get('pipeline_wall_min'),'max':row.get('pipeline_wall_max'),
-            'ci95_low':row.get('pipeline_wall_ci95_low'),'ci95_high':row.get('pipeline_wall_ci95_high'),
-        }
-        for row in detail_rows
-    ]
-    latency_max=max([
-        float(point.get('max')) for point in latency_source if point.get('max') is not None
-    ],default=0.0)
-    latency_rows=[]
-    for point in latency_source:
-        minimum=point.get('min'); maximum=point.get('max'); mean=point.get('mean')
-        if latency_max>0 and None not in (minimum,maximum,mean):
-            left=max(0.0,min(100.0,float(minimum)/latency_max*100.0))
-            right=max(left,min(100.0,float(maximum)/latency_max*100.0))
-            dot=max(0.0,min(100.0,float(mean)/latency_max*100.0))
-            plot=(
-                '<div class="ci-track latency">'
-                f'<span class="ci-range" style="left:{left:.2f}%;width:{max(1.0,right-left):.2f}%"></span>'
-                f'<span class="ci-dot" style="left:{dot:.2f}%"></span></div>'
-            )
-        else:
-            plot='<div class="ci-track unavailable"></div>'
-        latency_rows.append(
-            '<div class="ci-row">'
-            f'<span>{html_lib.escape(str(point.get("model") or "?"))}<small>{html_lib.escape(str(point.get("benchmark") or "?"))}</small></span>'
-            f'{plot}<strong>{_report_number(mean,1," s")} · SD {_report_number(point.get("sd"),1," s")} · '
-            f'{_report_number(minimum,1)}–{_report_number(maximum,1," s")}</strong></div>'
-        )
-
-    context_source=evidence_analytics.get('context_curves') or []
-    if not context_source:
-        by_model={}
-        for row in detail_rows:
-            context=row.get('context_length')
-            if context is None: continue
-            by_model.setdefault(str(row.get('model') or '?'),[]).append({
-                'context_length':context,'native_score':row.get('native_score_avg'),
-                'warm_tokens_per_second':row.get('primary_eval_warm_avg'),
-            })
-        context_source=[{'model':model,'points':points} for model,points in sorted(by_model.items())]
-    context_cards=[]
-    for curve in context_source:
-        unique={int(point['context_length']):point for point in (curve.get('points') or []) if point.get('context_length') is not None}
-        points=[unique[key] for key in sorted(unique)]
-        if len(points)<2: continue
-        min_x=math.log2(max(1,int(points[0]['context_length']))); max_x=math.log2(max(1,int(points[-1]['context_length'])))
-        span=max(1e-9,max_x-min_x); coords=[]
-        for point in points:
-            score=point.get('native_score')
-            if score is None: continue
-            x=20+(math.log2(max(1,int(point['context_length'])))-min_x)/span*260
-            y=110-max(0.0,min(1.0,float(score)))*90
-            coords.append(f'{x:.1f},{y:.1f}')
-        if len(coords)<2: continue
-        labels=' · '.join(
-            f'{int(point["context_length"]):,} ctx: {_report_percent(point.get("native_score"))} / {_report_number(point.get("warm_tokens_per_second"),1," tok/s")}'
-            for point in points
-        )
-        context_cards.append(
-            '<article class="curve-card">'
-            f'<h3>{html_lib.escape(str(curve.get("model") or "?"))}</h3>'
-            '<svg viewBox="0 0 300 130" role="img" aria-label="Native quality by context length">'
-            '<line x1="20" y1="110" x2="280" y2="110" class="axis"/><line x1="20" y1="20" x2="20" y2="110" class="axis"/>'
-            f'<polyline points="{" ".join(coords)}" class="curve"/></svg>'
-            f'<p class="micro">{html_lib.escape(labels)}</p></article>'
-        )
-    context_section=(
-        '<section><h2>Context curves</h2><p class="lead">Native quality и warm speed по реально протестированным размерам контекста.</p>'
-        '<div class="curve-grid">'+''.join(context_cards)+'</div></section>'
-    ) if context_cards else (
-        '<section><h2>Context curves</h2><p class="lead">Для кривой нужны минимум два сопоставимых значения context length на модель. '
-        'В этом прогоне доступна только одна точка или контекст не был зафиксирован.</p></section>'
-    )
-
-    if not model_rows:
-        warnings.append('Нет сохранённых model records для построения сводки.')
-    warning_html=''.join(f'<li>{item}</li>' for item in dict.fromkeys(warnings)) or '<li>Метрики доступны в полном объёме.</li>'
-    category_section=(
-        '<section><h2>Категории CHAT</h2><p class="lead">Native quality по независимым группам задач.</p>'
-        '<div class="table-wrap"><table><thead><tr><th>Модель</th>'+category_header+
-        '</tr></thead><tbody>'+''.join(category_rows)+'</tbody></table></div></section>'
-    ) if category_names else ''
-
-    decision_cards=[]
-    for profile in decision['profiles']:
-        tied_models=profile.get('tied_models') or []
-        winner=html_lib.escape(str(profile.get('winner') or ('равные кандидаты: '+', '.join(map(str,tied_models)) if tied_models else 'нет данных')))
-        weights=', '.join(
-            f'{name} {float(value)*100:.0f}%'
-            for name,value in profile.get('weights',{}).items() if float(value)>0
-        )
-        metric=(
-            f'Native {_report_percent(profile.get("quality"))} · '
-            f'{_report_number(profile.get("speed"),1," tok/s")} · '
-            f'VRAM {_report_number(float(profile["vram_mib"])/1024.0,1," GiB") if profile.get("vram_mib") is not None else "—"}'
-            if profile.get('winner') else html_lib.escape(str(profile.get('reason') or ''))
-        )
-        decision_cards.append(
-            '<article class="decision-card">'
-            f'<span>{html_lib.escape(str(profile.get("label") or profile.get("id")))}</span>'
-            f'<strong>{winner}</strong><p>{metric}</p><small>{html_lib.escape(weights)}</small></article>'
-        )
-    scatter_points=[]
-    for index,point in enumerate(decision['points'],1):
-        if point.get('quality_norm') is None or point.get('speed_norm') is None:
-            continue
-        x=max(2.0,min(98.0,float(point['speed_norm'])*100.0))
-        y=max(2.0,min(98.0,float(point['quality_norm'])*100.0))
-        label=html_lib.escape(str(point.get('model') or '?'))
-        scatter_points.append(
-            f'<span class="scatter-point" style="left:{x:.2f}%;bottom:{y:.2f}%" '
-            f'title="{label}: Native mean {_report_percent(point.get("quality"))}, {_report_number(point.get("speed"),1," tok/s")}">'
-            f'{index}<b>{label}</b></span>'
-        )
-    decision_section=(
-        '<section><h2>Какая модель лучше для задачи</h2>'
-        '<p class="lead">Профили — это подсказка внутри этого прогона, а не новый score и не универсальный рейтинг.</p>'
-        '<div class="decision-grid">'+''.join(decision_cards)+'</div>'
-        '<h3 class="chart-title">Карта «качество ↔ время»</h3>'
-        '<p class="micro">Вправо — быстрее; вверх — выше Native quality. Оси нормированы только между моделями этого отчёта.</p>'
-        '<div class="scatter"><span class="zone z-quality">Качество</span><span class="zone z-all">Сильный баланс</span>'
-        '<span class="zone z-review">Нужна проверка</span><span class="zone z-speed">Скорость</span>'
-        +''.join(scatter_points)+'</div>'
-        '<p class="axis-x">медленнее ← время выполнения → быстрее</p></section>'
-    ) if scatter_points else (
-        '<section><h2>Какая модель лучше для задачи</h2>'
-        '<p class="lead">Недостаточно сопоставимых Native quality и warm speed. BULL не будет выдумывать победителя.</p></section>'
-    )
-
-    return f'''<!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BULL Benchmark Report</title>
-<style>
-:root{{--bg:#f4f8f6;--panel:#fff;--ink:#10231a;--muted:#587064;--line:#cfe0d7;--native:#0b9f55;--assist:#1769aa;--speed:#9b6b08;--glow:#35ed8b}}
-*{{box-sizing:border-box}} body{{margin:0;background:linear-gradient(135deg,#eef8f2,#f8fbfa 48%,#edf5ff);color:var(--ink);font:15px/1.5 Segoe UI,Arial,sans-serif}}
-main{{max-width:1240px;margin:auto;padding:32px 20px 60px}} header{{background:#10231a;color:#fff;border-radius:22px;padding:28px;box-shadow:0 18px 48px #173f2a26;position:relative;overflow:hidden}}
-header:after{{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 34px,#35ed8b12 35px 36px);pointer-events:none}}
-h1{{margin:0 0 6px;font-size:clamp(26px,4vw,44px)}} h2{{margin:0 0 4px;font-size:23px}} h3{{margin:0 0 18px;font-size:17px;overflow-wrap:anywhere}}
-.eyebrow{{color:#84f7b7;font-weight:700;letter-spacing:.12em;text-transform:uppercase}} .lead,.micro{{color:var(--muted)}} header .lead{{color:#d4e8dd}}
-.kpis{{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:22px}} .kpi{{background:#ffffff12;border:1px solid #ffffff28;padding:12px;border-radius:14px}} .kpi strong{{display:block;font-size:24px;color:#fff}}
-section{{margin-top:20px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 8px 28px #173f2a10}}
-.cards{{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:16px}} .model-card{{border:1px solid var(--line);border-radius:15px;padding:16px;background:#fbfefd}}
-.bar-label{{display:flex;justify-content:space-between;gap:12px;margin-top:10px;font-size:13px}} .metric-track{{height:12px;background:#e5efea;border-radius:999px;overflow:hidden;margin:5px 0 10px}} .metric-bar{{height:100%;border-radius:inherit}} .native{{background:linear-gradient(90deg,#087942,var(--native),var(--glow))}} .assisted{{background:linear-gradient(90deg,#105385,var(--assist),#6cbcff)}} .speed{{background:linear-gradient(90deg,#765005,var(--speed),#edbd4d)}}
-.speed-row{{display:grid;grid-template-columns:minmax(140px,1.2fr) minmax(220px,4fr) 100px;gap:12px;align-items:center;margin:12px 0}} .speed-row .metric-track{{margin:0}}
-.table-wrap{{overflow:auto;margin-top:14px}} table{{width:100%;border-collapse:collapse;min-width:850px}} th,td{{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}} th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){{text-align:left}} thead th{{position:sticky;top:0;background:#eaf4ef;color:#294b3a;font-size:12px;text-transform:uppercase;letter-spacing:.04em}}
-.heat{{display:inline-block;min-width:58px;padding:4px 8px;border-radius:8px;background:linear-gradient(90deg,#dfece5 var(--heat),transparent var(--heat));font-weight:700}}
-.ci-row{{display:grid;grid-template-columns:minmax(190px,1.5fr) minmax(260px,4fr) minmax(210px,1.6fr);gap:14px;align-items:center;margin:13px 0}} .ci-row span small{{display:block;color:var(--muted);overflow-wrap:anywhere}} .ci-track{{height:16px;background:#e5efea;border-radius:999px;position:relative}} .ci-track.unavailable{{background:repeating-linear-gradient(135deg,#edf2ef 0 8px,#d9e5df 8px 16px)}} .ci-range{{position:absolute;top:4px;height:8px;border-radius:999px;background:linear-gradient(90deg,#0b9f55,#35ed8b)}} .ci-dot{{position:absolute;top:1px;width:4px;height:14px;border-radius:2px;background:#10231a;transform:translateX(-2px)}} .ci-track.latency .ci-range{{background:linear-gradient(90deg,#1769aa,#6cbcff)}}
-.curve-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:14px}} .curve-card{{border:1px solid var(--line);border-radius:15px;padding:16px;background:#fbfefd}} .curve-card svg{{width:100%;height:auto}} .axis{{stroke:#9cb5a8;stroke-width:1}} .curve{{fill:none;stroke:#0b9f55;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}}
-.decision-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:16px 0 24px}} .decision-card{{border:1px solid var(--line);border-radius:14px;padding:15px;background:#fbfefd}} .decision-card span,.decision-card strong{{display:block}} .decision-card span{{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}} .decision-card strong{{font-size:18px;margin:5px 0;overflow-wrap:anywhere}} .decision-card p,.decision-card small{{margin:0;color:var(--muted)}}
-.chart-title{{margin-top:22px}} .scatter{{height:360px;position:relative;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:linear-gradient(90deg,#fff8e7 0 50%,#edf9f3 50%),linear-gradient(0deg,#fff 0 50%,#edf5ff 50%)}} .scatter:before,.scatter:after{{content:"";position:absolute;background:#8ba79a66}} .scatter:before{{left:50%;top:0;bottom:0;width:1px}} .scatter:after{{left:0;right:0;top:50%;height:1px}} .zone{{position:absolute;padding:10px;color:#557066;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}} .z-quality{{left:0;top:0}} .z-all{{right:0;top:0}} .z-review{{left:0;bottom:0}} .z-speed{{right:0;bottom:0}} .scatter-point{{position:absolute;transform:translate(-50%,50%);width:28px;height:28px;border-radius:50%;background:#10231a;color:#fff;display:grid;place-items:center;font-weight:800;border:3px solid #35ed8b;box-shadow:0 4px 12px #10231a55}} .scatter-point b{{display:none;position:absolute;left:32px;top:-4px;background:#10231a;color:#fff;padding:5px 8px;border-radius:7px;white-space:nowrap;font-size:11px;z-index:3}} .scatter-point:hover b{{display:block}} .axis-x{{text-align:center;color:var(--muted);font-size:12px}}
-.notice{{border-left:5px solid #e5aa23;background:#fff9e9}} footer{{margin-top:18px;color:var(--muted);font-size:13px}}
-@media(max-width:700px){{.kpis{{grid-template-columns:1fr 1fr}}.speed-row{{grid-template-columns:1fr 80px}}.speed-row .metric-track{{grid-column:1/-1}}.ci-row{{grid-template-columns:1fr}}}}
-@media print{{body{{background:#fff}}main{{max-width:none;padding:0}}header,section{{box-shadow:none;break-inside:avoid}}}}
-</style></head><body><main>
-<header><div class="eyebrow">BULL · Benchmark Lab · {html_lib.escape(APP_VERSION)}</div><h1>Наглядный отчёт</h1>
-<p class="lead">Качество модели, итог системы, скорость и устойчивость показаны раздельно.</p>
-<div class="kpis"><div class="kpi"><span>Моделей</span><strong>{len(model_rows)}</strong></div><div class="kpi"><span>Сохранено runs</span><strong>{ok}/{len(records)}</strong></div><div class="kpi"><span>Ошибки records</span><strong>{errors}</strong></div><div class="kpi"><span>Сбои клиента</span><strong>{transport_failures+interrupted}</strong></div></div></header>
-<section><h2>Шкалы качества</h2><p class="lead">Native model quality — первый ответ модели. Final system quality — результат после разрешённого recovery/finalizer.</p><div class="cards">{''.join(quality_cards)}</div></section>
-<section><h2>Скорость warm-запусков</h2><p class="lead">Шкала нормирована только внутри этого отчёта; tok/s не входит в quality score.</p>{''.join(speed_cards)}</section>
-{decision_section}
-<section><h2>Сводная таблица</h2><div class="table-wrap"><table><thead><tr><th>Модель</th><th>Покрытие</th><th>Native</th><th>Final system</th><th>Generation</th><th>Task contract</th><th>Recovery used</th><th>Warm speed</th><th>SD quality</th><th>Worst seed</th><th>VRAM peak</th></tr></thead><tbody>{''.join(summary_rows)}</tbody></table></div></section>
-{category_section}
-<section><h2>95% confidence intervals</h2><p class="lead">Точка — среднее Native quality, полоса — интервал неопределённости. При недостаточной выборке вывод не строится.</p>{''.join(confidence_rows)}</section>
-<section><h2>Latency distributions</h2><p class="lead">Точка — среднее pipeline time, полоса — наблюдаемый min/max; SD показано отдельно.</p>{''.join(latency_rows)}</section>
-{context_section}
-<section><h2>Подробно по тестам</h2><div class="table-wrap"><table><thead><tr><th>Тест</th><th>Модель</th><th>Native</th><th>Final system</th><th>Warm speed</th><th>Wall time</th><th>Generation</th><th>Task contract</th><th>Rank stability</th></tr></thead><tbody>{''.join(detailed)}</tbody></table></div></section>
-<section class="notice"><h2>Как читать отчёт</h2><ul><li>Native и Final system нельзя смешивать в один рейтинг.</li><li>Generation означает технически завершённую выдачу; Task contract — соблюдение обязательной структуры и схемы.</li><li>Warm определяется по фактическому load duration, а не по номеру seed.</li><li>SD, min/max, worst seed и Pareto требуют нескольких сопоставимых запусков.</li><li>Сетевые retries и restart recovery исключены из model quality.</li>{warning_html}</ul></section>
-<footer>Создано {html_lib.escape(generated)}. Отчёт автономный: внешние ресурсы, prompts и raw-ответы не встроены.</footer>
-</main></body></html>'''
 
 
 def save_benchmark_visual_report(raw_json_path,records,evidence_summary=None):
@@ -11844,69 +11530,29 @@ def benchmark_decision_summary(models,custom_weights=None):
 
 
 def _terminal_quality_speed_map(decision,width=38,height=10):
-    """Small relative map. X is faster; Y is higher native quality."""
-    points=[
-        point for point in (decision.get('points') or [])
-        if point.get('quality_norm') is not None and point.get('speed_norm') is not None
-    ]
-    if len(points)<2:
-        return []
-    width=max(24,min(58,int(width))); height=max(7,min(14,int(height)))
-    grid=[[' ' for _ in range(width)] for _ in range(height)]
-    mid_x=width//2; mid_y=height//2
-    for y in range(height): grid[y][mid_x]='│'
-    for x in range(width): grid[mid_y][x]='─'
-    grid[mid_y][mid_x]='┼'
-    legend=[]
-    alphabet='123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    for index,point in enumerate(points):
-        marker=alphabet[index] if index<len(alphabet) else '*'
-        x=min(width-1,max(0,round(float(point['speed_norm'])*(width-1))))
-        y=(height-1)-min(height-1,max(0,round(float(point['quality_norm'])*(height-1))))
-        grid[y][x]=marker if grid[y][x] in (' ','│','─','┼') else '*'
-        legend.append(
-            f"{marker} {point['model']} · Native {float(point['quality'])*100:.1f}% · "
-            f"{float(point['speed']):.1f} tok/s"
-        )
-    rows=['  выше quality ↑','  ┌'+'─'*width+'┐']
-    rows.extend('  │'+''.join(row)+'│' for row in grid)
-    rows.extend(['  └'+'─'*width+'┘','  медленнее ← время выполнения → быстрее'])
-    return rows+['  '+line for line in legend]
+    from Shared.bull_llm.results_report import terminal_map
+    return terminal_map(decision,language=get_language(),width=int(width)+12)
 
 
 def print_benchmark_decision_support(models,custom_weights=None):
+    from Shared.bull_llm.results_report import terminal_decisions
     decision=benchmark_decision_summary(models,custom_weights=custom_weights)
-    ui_section('ВЫБОР МОДЕЛИ // ДЛЯ ЭТОГО ПРОГОНА')
-    labels={
-        'quality':'Качество','speed':'Скорость','balance':'Баланс',
-        'low_memory':'Мало памяти','custom':'Мои приоритеты',
-    }
-    for profile in decision.get('profiles') or []:
-        label=labels.get(profile.get('id'),profile.get('label') or profile.get('id'))
-        winner=profile.get('winner')
-        if winner:
-            parts=[f'Native mean {float(profile["quality"])*100:.1f}%']
-            if profile.get('decision_quality_basis')=='ci95_low':
-                parts.append(f'conservative 95% CI low {float(profile["decision_quality"])*100:.1f}%')
-            if profile.get('speed') is not None: parts.append(f'{float(profile["speed"]):.1f} tok/s')
-            if profile.get('vram_mib') is not None: parts.append(f'VRAM {float(profile["vram_mib"])/1024:.1f} GiB')
-            green(); ui_print(f'  ★ {label:<18} {winner}'); white()
-            gray(); ui_print('      '+' · '.join(parts)); white()
-        elif profile.get('tied_models'):
-            yellow(); ui_print(f'  = {label:<18} равные кандидаты: {", ".join(profile["tied_models"])}'); white()
-            gray(); ui_print('      одинаковая utility; BULL не выбирает по имени модели'); white()
-        else:
-            yellow(); ui_print(f'  — {label:<18} недостаточно сопоставимых метрик'); white()
-    map_rows=_terminal_quality_speed_map(decision)
-    if map_rows:
-        ui_print(); ui_print('  Карта «качество ↔ время» (относительно внутри этого прогона)')
-        for row in map_rows: ui_print(row)
-    gray(); ui_print('  Профиль — это подсказка выбора, а не новый quality score и не универсальный рейтинг.'); white()
+    ui_section('MODEL CHOICE / TOP 3' if get_language()=='en' else 'ВЫБОР МОДЕЛИ / ТОП-3')
+    width=max(40,min(110,shutil.get_terminal_size((90,30)).columns-2))
+    for row in terminal_decisions(decision,language=get_language(),width=width):
+        ui_print(row)
     return decision
 
 
-def benchmark_summary(records):
+def benchmark_summary(records,detailed=False):
     if not records:return
+    if not detailed:
+        from Shared.bull_llm.results_report import terminal_model_metrics
+        models=benchmark_model_summary_rows(records)
+        print_benchmark_decision_support(models)
+        for text in terminal_model_metrics(models,language=get_language(),width=max(40,min(110,shutil.get_terminal_size((90,30)).columns-2))):
+            ui_print(text)
+        return
     white(); print('Результаты benchmark'); line()
     rows=benchmark_summary_rows(records); multi=len({x['benchmark'] for x in rows})>1
     by={}
@@ -12891,13 +12537,16 @@ def benchmark_progress_text(state):
     )
 
 
-def render_benchmark_run_summary(record,saved,total):
+def render_benchmark_run_summary(record,saved,total,records=None):
     """Print a compact, evidence-backed checkpoint after every completed job."""
+    from Shared.bull_llm.results_report import clean,rolling_test_lines,wrap_lines
     identity=record.get('identity') or {}
+    english=get_language()=='en'
+    width=max(40,min(110,shutil.get_terminal_size((90,30)).columns-2))
     if not _record_execution_ok(record):
         yellow(); print(
-            f"  Промежуточный итог {saved}/{total}: {identity.get('benchmark','test')} · "
-            f"{short_model(identity.get('model','model'),28)} · run не засчитан"
+            f"  {'Saved' if english else 'Сохранено'} {saved}/{total}: {clean(identity.get('benchmark','test'))} · "
+            f"{clean(short_model(identity.get('model','model'),28))} · {'run not counted' if english else 'run не засчитан'}"
         ); white()
         return
     native=_rec_v4(record,'score.native.value')
@@ -12917,10 +12566,16 @@ def render_benchmark_run_summary(record,saved,total):
     if system.get('cpu_util_avg') is not None: metrics.append(f"CPU {float(system['cpu_util_avg']):.0f}%")
     if system.get('ram_used_peak_bytes') is not None and system.get('ram_total_bytes'):
         metrics.append(f"RAM {float(system['ram_used_peak_bytes'])/1024**3:.1f}/{float(system['ram_total_bytes'])/1024**3:.1f}G")
-    green(); print(
-        f"  Промежуточный итог {saved}/{total} · {identity.get('benchmark','test')} · "
-        + ' · '.join(metrics)
-    ); white()
+    matrix()
+    for text in wrap_lines([
+        f"  {'Saved' if english else 'Сохранено'} {saved}/{total} · {identity.get('benchmark','test')} · {identity.get('model','model')}",
+        '  '+' · '.join(metrics),
+    ],width):
+        print(text)
+    white()
+    if records is not None:
+        for text in rolling_test_lines(records,record,language=get_language(),width=width):
+            print(text)
 
 
 def _redact_runtime_diagnostic(value):
@@ -13376,7 +13031,7 @@ def execute_benchmark_checkpoint(path,cp,catalog=None):
                 cp['records'][key]=rec; cp['updated_at']=datetime.now().isoformat(timespec='seconds')
                 _checkpoint_finish_attempt(path,cp,key,attempt,attempt_status,attempt_error)
                 state=benchmark_progress_state(cp,total,done)
-                render_benchmark_run_summary(rec,state['saved'],total)
+                render_benchmark_run_summary(rec,state['saved'],total,records=cp['records'].values())
         finally:
             _apply_runtime_context(profile_ctx); NUM_THREAD=profile_threads
             unload_model(model_name)
@@ -15870,11 +15525,12 @@ def benchmark_result_menu(last_command=None,last_benchmark_path=None):
         ui_menu_item('5','Ответы моделей','Открыть raw-ответы и остаться на этом экране')
         ui_menu_item('6','Повторить этот тест' if repeatable else 'Повтор недоступен','Resume уже завершил checkpoint' if not repeatable else 'С теми же моделями и параметрами')
         ui_menu_item('7','Запустить другой тест','Вернуться к выбору теста')
+        ui_menu_item('8','Подробные метрики в терминале' if get_language()=='ru' else 'Detailed terminal metrics','По тестам и seeds' if get_language()=='ru' else 'By test and seed')
         ui_menu_item('0','Главное меню','Вернуться к основным действиям')
         ui_print()
 
         try:
-            choice=read_user_input('Выбор [0-7] › ').strip().casefold()
+            choice=read_user_input('Выбор [0-8] › ' if get_language()=='ru' else 'Choice [0-8] › ').strip().casefold()
         except (KeyboardInterrupt,EOFError):
             ui_print()
             return '/home'
@@ -15882,13 +15538,13 @@ def benchmark_result_menu(last_command=None,last_benchmark_path=None):
         if choice in ('0','home','главное меню'):
             return '/home'
 
-        if choice in ('1','summary','сводка'):
+        if choice in ('1','summary','сводка','8','details'):
             ui_print()
             if last_benchmark_path:
                 try:
                     records=_load_benchmark_records_for_view(last_benchmark_path)
                     clear_console(); ui_header('КРАТКАЯ СВОДКА','BULL > Результат','Результаты без выхода из программы')
-                    benchmark_summary(records)
+                    benchmark_summary(records,detailed=choice in ('8','details'))
                 except Exception as e:
                     show_actionable_error('Ошибка сводки',e)
             else:
@@ -15956,7 +15612,7 @@ def benchmark_result_menu(last_command=None,last_benchmark_path=None):
         if choice in ('7','benchmark','bench'):
             return '__benchmark_menu__'
 
-        yellow(); ui_print('Выбери пункт 0–7.'); white()
+        yellow(); ui_print('Выбери пункт 0–8.' if get_language()=='ru' else 'Choose an option 0–8.'); white()
 
 
 

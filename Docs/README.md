@@ -8,6 +8,7 @@ The current documentation is maintained in two equivalent language trees:
 | --- | --- | --- |
 | Installation, menus, chat and reports | [User guide](en/USER_GUIDE.md) | [Руководство пользователя](ru/USER_GUIDE.md) |
 | Built-in and user-owned benchmarks | [Benchmarks](en/BENCHMARKS.md) | [Бенчмарки](ru/BENCHMARKS.md) |
+| Live output, rankings and HTML reports | [Results](en/RESULTS.md) | [Результаты](ru/RESULTS.md) |
 | Local, SSH and Internet connections | [Connections](en/CONNECTIONS.md) | [Подключения](ru/CONNECTIONS.md) |
 | Privacy and threat model | [Security](en/SECURITY.md) | [Безопасность](ru/SECURITY.md) |
 | Agent Lab and GPU Lab | [Experimental features](en/EXPERIMENTAL.md) | [Экспериментальные функции](ru/EXPERIMENTAL.md) |
