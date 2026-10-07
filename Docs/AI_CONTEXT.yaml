@@ -301,6 +301,14 @@ benchmark:
     - ru_debureaucratize
     - logic_constraints
     - simpson
+  language_tracks:
+    pack: BenchmarkPacks/bull_language_comparison
+    scorer: bilingual_language_contract_v1
+    russian_suite: language_ru
+    english_suite: language_en
+    bilingual_suite: bilingual
+    paired_contract: same semantic task, JSON contract, context and output budget; prompt language differs
+    interpretation: compare Native score, task completion, warm throughput and wall time by track; do not merge tracks into one quality score
   category_weights:
     russian_language_style: 0.30
     dialogue_context: 0.20
@@ -613,7 +621,7 @@ schemas:
   evidence_provenance: bull-evidence-provenance@1
 
 verification:
-  current_offline_regression: 400/400
+  current_offline_regression: 401/401
   clean_python_no_site_packages: pass
   runtime_third_party_python_dependencies: none_on_windows
   scorer_gold_set: 15/15

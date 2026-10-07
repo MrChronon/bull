@@ -103,6 +103,25 @@ After a run, BULL offers:
 Recommendations are relative to that run. They reuse measured metrics and apply
 quality/task gates; they are not a universal leaderboard or a new benchmark score.
 
+### Russian, English, and bilingual tracks
+
+`language_ru` and `language_en` measure quality and speed separately for Russian
+and English prompts. Their paired tasks have identical intent, JSON contract,
+context, and output budget; only the prompt language changes.
+
+```text
+/bench language_ru MODELS
+/bench language_en MODELS
+/bench bilingual MODELS
+```
+
+`/bench bilingual` runs both variants of every task in one balanced plan. Compare
+Native score, task completion, warm tok/s, and wall time within each language
+track. Do not combine Russian and English scores into a single quality number.
+The interactive route is **Compare models → Advanced tests → Language tracks**.
+The scorer also checks the answer prose language; the terminal JSON contract is
+not used to infer it.
+
 During a run, the live line can show approximate token rate plus GPU/VRAM and
 aggregate CPU/RAM for the active inference host. After each saved run, BULL prints
 a compact checkpoint: native/final score when a scorer exists, TASK, speed and the

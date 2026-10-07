@@ -1360,6 +1360,23 @@ def benchmark_model_summary_rows(records):
             test=_rec_v4(record,'identity.benchmark'); value=_rec_v4(record,'score.native.value')
             if value is not None: by_test.setdefault(test,[]).append(value)
         test_means={name:_mean(values) for name,values in by_test.items()}
+        language_tracks={}
+        for track in ('ru','en'):
+            track_rows=[x for x in ok if _rec_v4(x,'identity.language_track')==track]
+            if not track_rows:
+                continue
+            scores=[_rec_v4(x,'score.native.value') for x in track_rows if _rec_v4(x,'score.native.value') is not None]
+            warm=[
+                _rec_v4(x,'primary.eval_rate') for x in track_rows
+                if _rec_v4(x,'primary.eval_rate') is not None
+                and (_rec_v4(x,'primary.load_state') or benchmark_load_state(_rec_v4(x,'primary.load_seconds')))=='warm'
+            ]
+            walls=[_rec_v4(x,'final.pipeline_wall_seconds') for x in track_rows if _rec_v4(x,'final.pipeline_wall_seconds') is not None]
+            language_tracks[track]={
+                'runs':len(track_rows),'native_score':_mean(scores),
+                'task_completion':(_mean([float(_record_task_completed(x,'primary')) for x in track_rows])),
+                'warm_tok_s':_mean(warm),'wall_seconds':_mean(walls),
+            }
         worst_test=min(test_means,key=test_means.get) if test_means else None
         native_worst=min(native_seed,key=lambda x:(x['score'],x['seed'])) if native_seed else None
         assisted_worst=min(assisted_seed,key=lambda x:(x['score'],x['seed'])) if assisted_seed else None
@@ -1420,6 +1437,7 @@ def benchmark_model_summary_rows(records):
             'critical_failure_count':len(failures),'critical_failure_rate':(len(failures)/len(chat) if chat else None),
             'critical_failures':failures,
             'worst_test':worst_test,'worst_test_score':test_means.get(worst_test) if worst_test else None,
+            'language_tracks':language_tracks,
             'worst_seed':native_worst.get('seed') if native_worst else None,
             'ru_language_stress_native_score':_mean([_rec_v4(x,'score.native.value') for x in ok if _rec_v4(x,'identity.benchmark_category')=='ru_language_stress']),
             'groundedness_score':_mean([_rec_v4(x,'score.native.value') for x in ok if _rec_v4(x,'identity.benchmark') in ('groundedness','groundedness_adversarial')]),
@@ -3156,7 +3174,8 @@ def _system_sampler_command(interval_ms=1000):
         "$cpu=(Get-CimInstance Win32_Processor | Measure-Object -Property LoadPercentage -Average).Average; "
         "$total=[double]$os.TotalVisibleMemorySize*1KB; "
         "$used=$total-([double]$os.FreePhysicalMemory*1KB); "
-        "'{0},{1},{2}' -f $cpu,$used,$total; "
+        "[Console]::Out.WriteLine(('{0},{1},{2}' -f $cpu,$used,$total)); "
+        "[Console]::Out.Flush(); "
         f"Start-Sleep -Milliseconds {delay} "
         "}"
     )
@@ -6108,7 +6127,7 @@ def benchmark_registry_policy(built=None):
     definitions=built if built is not None else builtin_benchmarks()
     # Pack scorers are engine-owned and explicitly allowlisted. Packs remain
     # data-only and cannot introduce executable scoring code.
-    scorers={'none','ru_dialogue_contract_v1'}
+    scorers={'none','ru_dialogue_contract_v1','bilingual_language_contract_v1'}
     scorers.update(str(item.get('score_type') or 'none') for item in definitions.values())
     return RegistryPolicy(
         engine_version=APP_VERSION,
@@ -6237,11 +6256,39 @@ CHAT_CATEGORY_GROUPS={
     },
 }
 
+# These tracks are deliberately separate from the frozen CHAT Core. A
+# bilingual pair has the same task and structured contract in Russian and
+# English, so language effects remain measurable rather than being mixed into
+# a general quality score.
+LANGUAGE_SUITE_DEFINITIONS={
+    'language_ru':{
+        'title':'Russian language track',
+        'tests':('lang_ru_state_update','lang_ru_causal_caution','lang_ru_instruction_precision'),
+        'track':'ru',
+    },
+    'language_en':{
+        'title':'English language track',
+        'tests':('lang_en_state_update','lang_en_causal_caution','lang_en_instruction_precision'),
+        'track':'en',
+    },
+    'bilingual':{
+        'title':'Bilingual paired track',
+        'tests':(
+            'lang_ru_state_update','lang_en_state_update',
+            'lang_ru_causal_caution','lang_en_causal_caution',
+            'lang_ru_instruction_precision','lang_en_instruction_precision',
+        ),
+        'track':'paired',
+    },
+}
+
 
 def benchmark_suite_tests(name):
     key=str(name or '').casefold().replace('-','_')
     if key in ('chat','chat_core','chat_final'):
         return list(CHAT_CORE_TESTS)
+    if key in LANGUAGE_SUITE_DEFINITIONS:
+        return list(LANGUAGE_SUITE_DEFINITIONS[key]['tests'])
     if key in ('all','all_tests','all_compare'):
         return list(load_benchmarks())
     raise ValueError('Неизвестный benchmark suite: '+str(name))
@@ -6260,7 +6307,15 @@ def make_chat_suite_spec(suite,models,runs=None,mode=None,seed_mode=None,seeds=N
     key=str(suite or '').casefold().replace('-','_')
     if key not in ('chat_core','chat_final'):
         raise ValueError('CHAT suite должен быть chat_core или chat_final.')
-    preset=chat_final_preset() if key=='chat_final' else {
+    return make_named_suite_spec(key,models,runs,mode,seed_mode,seeds,catalog,run_overrides)
+
+
+def make_named_suite_spec(suite,models,runs=None,mode=None,seed_mode=None,seeds=None,catalog=None,run_overrides=None):
+    """Build a reproducible named-suite plan without changing its cases."""
+    key=str(suite or '').casefold().replace('-','_')
+    if key not in ('chat_core','chat_final',*LANGUAGE_SUITE_DEFINITIONS):
+        raise ValueError('Неизвестный именованный benchmark suite: '+str(suite))
+    preset=chat_final_preset() if key=='chat_final' or key in LANGUAGE_SUITE_DEFINITIONS else {
         'suite':'chat_core','runs':1,'seed_mode':'fixed','seeds':[BENCH_SEED_BASE],
         'think':False,'mode':'native','strict_fair_compare':True,
         'order_policy':'balanced','run_profile':'fair_default',
@@ -6271,16 +6326,23 @@ def make_chat_suite_spec(suite,models,runs=None,mode=None,seed_mode=None,seeds=N
     overrides={'strict_fair_compare':True}
     overrides=_deep_merge(overrides,run_overrides or {})
     spec=make_benchmark_spec(
-        benchmark_suite_tests('chat_core'),list(models),effective_runs,False,
+        benchmark_suite_tests(key),list(models),effective_runs,False,
         mode or preset['mode'],effective_seed_mode,label=key,
         catalog=catalog,run_profile='fair_default',
         run_overrides=overrides,seeds=seed_values,
         fair_compare=True,order_policy='balanced',schedule_seed=BENCH_SEED_BASE,
     )
     spec['named_suite']=key
-    spec['suite_definition']='chat_core'
-    spec['chat_category_weights']={name:value['weight'] for name,value in CHAT_CATEGORY_GROUPS.items()}
-    spec['chat_primary_ranking']='native_model_score'
+    spec['suite_definition']='chat_core' if key in ('chat_core','chat_final') else key
+    if key in ('chat_core','chat_final'):
+        spec['chat_category_weights']={name:value['weight'] for name,value in CHAT_CATEGORY_GROUPS.items()}
+        spec['chat_primary_ranking']='native_model_score'
+    else:
+        spec['language_comparison']={
+            'track':LANGUAGE_SUITE_DEFINITIONS[key]['track'],
+            'paired_execution':key=='bilingual',
+            'comparison_unit':'same semantic task and structured contract; prompt language differs',
+        }
     return spec
 
 
@@ -8757,6 +8819,46 @@ def _score_ru_dialogue_contract_v1(answer,item):
     }
 
 
+def _score_bilingual_language_contract_v1(answer,item):
+    """Score a bounded bilingual task without inferring language from JSON."""
+    raw=str(answer or '')
+    marker=re.search(r'(?im)^\s*BENCHMARK_RESULT\s*$',raw)
+    prose=raw[:marker.start()] if marker else raw
+    latin=len(re.findall(r'[A-Za-z]',prose))
+    cyrillic=len(re.findall(r'[А-Яа-яЁё]',prose))
+    expected=str(item.get('expected_language') or '').casefold()
+    enough_text=(latin+cyrillic)>=20
+    if expected=='ru':
+        language_ok=enough_text and cyrillic>=max(12,latin*2)
+        purity_ok=latin<=max(8,cyrillic*0.20)
+        observed='ru' if language_ok else 'mixed_or_non_ru'
+    elif expected=='en':
+        language_ok=enough_text and latin>=max(12,cyrillic*2)
+        purity_ok=cyrillic<=max(4,latin*0.10)
+        observed='en' if language_ok else 'mixed_or_non_en'
+    else:
+        language_ok=False; purity_ok=False; observed='unknown_expected_language'
+    obj,parse_error=_extract_json_after_marker(raw)
+    reference=item.get('reference') or {}
+    weight=(0.55/len(reference)) if reference else 0.0
+    checks=[
+        _check('reference field '+str(key),isinstance(obj,dict) and _structured_value_matches(obj.get(key),value),weight)
+        for key,value in reference.items()
+    ]
+    checks.extend([
+        _check('BENCHMARK_RESULT is terminal JSON',parse_error is None,0.10),
+        _check('required response language',language_ok,0.25),
+        _check('no material language switching',purity_ok,0.10),
+    ])
+    result=_weighted_checks('bilingual_language_contract_v1',checks,parse_error,obj)
+    result['language']={
+        'expected':expected,'observed':observed,'latin_letters':latin,
+        'cyrillic_letters':cyrillic,'language_ok':language_ok,'purity_ok':purity_ok,
+    }
+    result['structured_exact']=bool(parse_error is None and all(row['ok'] for row in checks if row['name'].startswith('reference field ')))
+    return result
+
+
 def benchmark_score(name,item,answer):
     score_type=item.get('score_type','none')
     if score_type=='none':
@@ -8785,6 +8887,9 @@ def benchmark_score(name,item,answer):
 
     if score_type=='ru_dialogue_contract_v1':
         return _score_ru_dialogue_contract_v1(answer,item)
+
+    if score_type=='bilingual_language_contract_v1':
+        return _score_bilingual_language_contract_v1(answer,item)
 
     if score_type in ('user_contract_v1','user_contract_v2'):
         from Shared.bull_llm.user_tests import score_user_test,score_user_test_v1
@@ -8990,19 +9095,30 @@ class LiveInferenceProgress:
             g=self.sampler.latest() if self.sampler else None
         except Exception:
             g=None
-        if not g:
+        # An unavailable sensor must be visible as N/A, never mistaken for a
+        # zero reading or silently omitted from the live benchmark line.
+        if not self.sampler:
             return ''
+        g=g or {}
         parts=[]
         if g.get('gpu_util') is not None:
             parts.append(f"GPU {g['gpu_util']:.0f}%")
+        else:
+            parts.append('GPU N/A')
         if g.get('vram_used_mib') is not None and g.get('vram_total_mib'):
             parts.append(f"VRAM {g['vram_used_mib']/1024:.1f}/{g['vram_total_mib']/1024:.1f}G")
+        else:
+            parts.append('VRAM N/A')
         if g.get('gpu_temp') is not None:
             parts.append(f"{g['gpu_temp']:.0f}°C")
         if g.get('cpu_util') is not None:
             parts.append(f"CPU {g['cpu_util']:.0f}%")
+        else:
+            parts.append('CPU N/A')
         if g.get('ram_used_bytes') is not None and g.get('ram_total_bytes'):
             parts.append(f"RAM {g['ram_used_bytes']/1024**3:.1f}/{g['ram_total_bytes']/1024**3:.1f}G")
+        else:
+            parts.append('RAM N/A')
         return ' | '.join(parts)
 
     def render(self,force=False):
@@ -10098,6 +10214,8 @@ def benchmark_record(name,item,cfg,think_value,run_index,total_runs,bench_mode='
             'client_source_sha256':client_source_sha256(),
             'benchmark':name,
             'benchmark_category':item.get('category','custom'),
+            'language_track':item.get('language_track'),
+            'bilingual_pair_id':item.get('bilingual_pair_id'),
             'benchmark_version':int(item.get('version') or 1),
             'benchmark_prompt_sha256':benchmark_prompt_sha256(item),
             'benchmark_reference_sha256':benchmark_reference_sha256(item),
@@ -11586,6 +11704,27 @@ def benchmark_summary(records,detailed=False):
         print_benchmark_decision_support(models)
         for text in terminal_model_metrics(models,language=get_language(),width=max(40,min(110,shutil.get_terminal_size((90,30)).columns-2))):
             ui_print(text)
+        if any(row.get('language_tracks') for row in models):
+            ui_section('LANGUAGE TRACKS // RU vs EN')
+            ui_print('  Separate measurements; RU and EN are not merged into one quality score.')
+            for row in models:
+                tracks=row.get('language_tracks') or {}
+                if not tracks:
+                    continue
+                parts=[]
+                for key,label in (('ru','RU'),('en','EN')):
+                    track=tracks.get(key)
+                    if not track:
+                        continue
+                    quality=track.get('native_score'); speed=track.get('warm_tok_s'); task=track.get('task_completion')
+                    parts.append(
+                        f"{label}: quality {quality*100:.1f}%" if quality is not None else f"{label}: quality N/A"
+                    )
+                    if speed is not None:
+                        parts[-1]+=f" · {speed:.1f} tok/s"
+                    if task is not None:
+                        parts[-1]+=f" · TASK {task*100:.0f}%"
+                ui_print('  '+short_model(row.get('model') or '?',28)+' · '+' | '.join(parts))
         return
     white(); print('Результаты benchmark'); line()
     rows=benchmark_summary_rows(records); multi=len({x['benchmark'] for x in rows})>1
@@ -12303,6 +12442,8 @@ def make_benchmark_spec(tests,models,runs,think_value,mode='native',seed_mode='f
             t:{
                 'version':int(benches[t].get('version') or 1),
                 'category':benches[t].get('category','custom'),
+                'language_track':benches[t].get('language_track'),
+                'bilingual_pair_id':benches[t].get('bilingual_pair_id'),
                 'prompt_sha256':benchmark_prompt_sha256(benches[t]),
                 'reference_sha256':benchmark_reference_sha256(benches[t]),
                 'execution_sha256':benchmark_test_execution_fingerprint(benches[t]),
@@ -12320,6 +12461,8 @@ def make_benchmark_spec(tests,models,runs,think_value,mode='native',seed_mode='f
             t:{
                 'name':t,'version':int(benches[t].get('version') or 1),
                 'category':benches[t].get('category','custom'),'source':benches[t].get('source','builtin'),
+                'language_track':benches[t].get('language_track'),
+                'bilingual_pair_id':benches[t].get('bilingual_pair_id'),
                 'description':benches[t].get('description',''),'prompt':str(benches[t].get('prompt') or ''),
                 'result_instruction':str(benches[t].get('result_instruction') or ''),
                 'score_type':benches[t].get('score_type','none'),
@@ -12604,7 +12747,9 @@ def render_benchmark_run_summary(record,saved,total,records=None):
     if system.get('cpu_util_avg') is not None: metrics.append(f"CPU {float(system['cpu_util_avg']):.0f}%")
     if system.get('ram_used_peak_bytes') is not None and system.get('ram_total_bytes'):
         metrics.append(f"RAM {float(system['ram_used_peak_bytes'])/1024**3:.1f}/{float(system['ram_total_bytes'])/1024**3:.1f}G")
-    matrix()
+    # A completed, checkpointed run is a success state—not a theme action.
+    # It must remain green in every palette, including default BULL red.
+    green()
     for text in wrap_lines([
         f"  {'Saved' if english else 'Сохранено'} {saved}/{total} · {identity.get('benchmark','test')} · {identity.get('model','model')}",
         '  '+' · '.join(metrics),
@@ -14644,6 +14789,11 @@ Comparable CHAT suite:
   /bench chat_core   12 tests, selected models, explicit plan before running
   /bench chat_final  CHAT core, seeds 42/43/44, native, FAST, balanced order
 
+Language tracks:
+  /bench language_ru  paired tasks in Russian
+  /bench language_en  paired tasks in English
+  /bench bilingual    both languages for every paired task
+
 Benchmark packs:
   /bench pack list
   /bench pack validate [pack_id[@version]]
@@ -14749,6 +14899,11 @@ CHAT Assisted — итог после помощи клиента; он всег
 Сопоставимый CHAT-набор:
   /bench chat_core   12 тестов, выбранные модели, явный план перед запуском
   /bench chat_final  CHAT core, 3 seed (42/43/44), native, FAST, balanced order
+
+Языковые треки:
+  /bench language_ru  парные задачи на русском
+  /bench language_en  парные задачи на английском
+  /bench bilingual    обе языковые версии каждой парной задачи
 
 Benchmark packs:
   /bench pack list
@@ -15082,17 +15237,28 @@ def benchmark_single_setup(current_model=None):
     }
 
 
-def benchmark_chat_wizard(final=False):
+def benchmark_chat_wizard(final=False,suite_override=None):
     """Prepare a transparent CHAT suite command; no inference is run here."""
-    suite='chat_final' if final else 'chat_core'
-    preset=chat_final_preset() if final else {
+    suite=str(suite_override or ('chat_final' if final else 'chat_core')).casefold().replace('-','_')
+    is_language_suite=suite in LANGUAGE_SUITE_DEFINITIONS
+    preset=chat_final_preset() if (final or is_language_suite) else {
         'runs':1,'seed_mode':'fixed','seeds':[BENCH_SEED_BASE],'mode':'native','think':False,
         'strict_fair_compare':True,'order_policy':'balanced','run_profile':'fair_default',
     }
-    clear_console(); ui_header(
-        'CHAT FINAL // 3-SEED' if final else 'CHAT CORE',
-        'Benchmark Lab > CHAT','Качество модели и assisted-result будут показаны раздельно'
+    title=(
+        'BILINGUAL // PAIRED' if suite=='bilingual' else
+        'LANGUAGE // RUSSIAN' if suite=='language_ru' else
+        'LANGUAGE // ENGLISH' if suite=='language_en' else
+        'CHAT FINAL // 3-SEED' if final else 'CHAT CORE'
     )
+    subtitle=(
+        'Одна задача на русском и английском; качество и скорость показываются раздельно'
+        if suite=='bilingual' else
+        'Качество и скорость для prompts на одном языке'
+        if is_language_suite else
+        'Качество модели и assisted-result будут показаны раздельно'
+    )
+    clear_console(); ui_header(title,'Benchmark Lab > '+('Language tracks' if is_language_suite else 'CHAT'),subtitle)
     models=installed_models(); show_models(models,None)
     selector=read_user_input('Модели: all или номера через запятую [all] › ').strip() or 'all'
     chosen=select_benchmark_models(selector,models)
@@ -15123,9 +15289,9 @@ def benchmark_chat_wizard(final=False):
     sampling_setup=benchmark_sampling_source_setup(chosen,catalog)
     if not sampling_setup:
         return None
-    benches=load_benchmarks(); tests=benchmark_suite_tests('chat_core')
+    benches=load_benchmarks(); tests=benchmark_suite_tests(suite)
     ui_section('ПЛАН ПЕРЕД ЗАПУСКОМ')
-    ui_print(f'  Suite:          {suite} → chat_core')
+    ui_print(f'  Suite:          {suite}'+(' · paired translations' if suite=='bilingual' else ''))
     ui_print(f'  Models ({len(chosen)}):     '+', '.join(short_model(x,28) for x in chosen))
     ui_print(f'  Tests ({len(tests)}):      '+', '.join(tests))
     ui_print(f'  Runs / seeds:   {runs} · '+', '.join(map(str,seeds)))
@@ -15147,7 +15313,7 @@ def benchmark_chat_wizard(final=False):
             f"  {short_model(model,24):<24} ctx {','.join(map(str,contexts))} · threads {profile['threads']} · "
             f"temp {sampling['temperature']} · top_p {sampling['top_p']} · top_k {sampling['top_k']} · min_p {sampling['min_p']}"
         )
-    ui_print('  Score:          CHAT Native — основной; CHAT Assisted — рядом; speed отдельно')
+    ui_print('  Score:          Native model quality; speed reported separately')
     if read_user_input('Запустить этот план? [Y/n] › ').strip().casefold() in ('n','no','нет','0'):
         ui_print('Запуск отменён.'); return None
     sampling_tokens=[f"sampling_source={sampling_setup['sampling_source']}"]
@@ -15379,9 +15545,10 @@ def benchmark_advanced_menu():
         ui_menu_item('P','Профили конфигурации','Версионированные tested profiles')
         ui_menu_item('S','Parameter sweep','Сетка выбранного параметра')
         ui_menu_item('C','CHAT core','Стандартный набор с ручными runs/seeds')
+        ui_menu_item('L','Языковые треки','Отдельно русский, английский или парный bilingual-прогон')
         ui_menu_item('?','Помощь','Тесты, pipeline и интерпретация')
         ui_print(); ui_footer('benchmark; H = главное меню')
-        choice=read_user_input('Выбор [0-8, P, S, H, ?] › ').strip().casefold()
+        choice=read_user_input('Выбор [0-8, P, S, C, L, H, ?] › ').strip().casefold()
 
         if choice in ('?','help'):
             help_topic('benchmark'); read_user_input('\nEnter = назад › '); continue
@@ -15397,6 +15564,17 @@ def benchmark_advanced_menu():
         if choice in ('c','chat','chat_core'):
             command=benchmark_chat_wizard(final=False)
             if command:return command,True
+            continue
+        if choice in ('l','language','languages','bilingual'):
+            ui_section('ЯЗЫКОВЫЕ ТРЕКИ')
+            ui_menu_item('1','Русский','Только русские prompts')
+            ui_menu_item('2','English','Only English prompts')
+            ui_menu_item('3','Bilingual','Одинаковые задачи на русском и английском','PAIRED')
+            selected=read_user_input('Трек [1-3, Enter=назад] › ').strip().casefold()
+            suite={'1':'language_ru','ru':'language_ru','2':'language_en','en':'language_en','3':'bilingual','bi':'bilingual'}.get(selected)
+            if suite:
+                command=benchmark_chat_wizard(suite_override=suite)
+                if command:return command,True
             continue
         if choice in ('1','list'):
             return '/bench list',False
@@ -15445,7 +15623,7 @@ def benchmark_advanced_menu():
             return '__benchmark_menu__',False
         if choice in ('h','home'):
             return '/home',False
-        yellow(); ui_print('Выбери 0-8, P, S, H или ?.'); white(); time.sleep(.6)
+        yellow(); ui_print('Выбери 0-8, P, S, C, L, H или ?.'); white(); time.sleep(.6)
 
 
 def startup_benchmark_wizard(runtime_guard=None):
@@ -17087,7 +17265,8 @@ def main():
                     except Exception:pass
                 continue
 
-            if u in ('/bench chat_core','/bench chat_final') or u.startswith('/bench chat_core ') or u.startswith('/bench chat_final '):
+            named_suites=('chat_core','chat_final','language_ru','language_en','bilingual')
+            if any(u==f'/bench {suite}' or u.startswith(f'/bench {suite} ') for suite in named_suites):
                 parts=u.split(); suite=parts[1]
                 original_model=cfg['model']; original_mode=mode; original_tv=session.get('think_value')
                 try:
@@ -17098,14 +17277,14 @@ def main():
                         selector=read_user_input('Модели: all или номера через запятую [all] › ').strip() or 'all'
                     chosen=select_benchmark_models(selector,models)
                     if not chosen: print('Не выбраны модели.'); continue
-                    default_runs=3 if suite=='chat_final' else 1
-                    default_seed_mode='sweep' if suite=='chat_final' else 'fixed'
+                    default_runs=3 if suite in ('chat_final','language_ru','language_en','bilingual') else 1
+                    default_seed_mode='sweep' if default_runs==3 else 'fixed'
                     tokens=parts[3:] if len(parts)>=4 else [str(default_runs),'native',default_seed_mode]
                     runs,bmode,seed_mode,seeds,options=parse_bench_runtime_options(tokens,'native')
                     if bmode not in ('native','client'):
-                        raise ValueError('CHAT suite поддерживает pipeline native или client.')
+                        raise ValueError('Named suite supports pipeline native or client.')
                     overrides=options.get('overrides') or {}; confirmed=_bench_bool(overrides.pop('confirmed',False))
-                    spec=make_chat_suite_spec(
+                    spec=make_named_suite_spec(
                         suite,chosen,runs,bmode,seed_mode,seeds,catalog=catalog,run_overrides=overrides,
                     )
                     # The profile wizard has already made the user choose

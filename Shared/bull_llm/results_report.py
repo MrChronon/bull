@@ -473,7 +473,7 @@ def render_report(model_rows, detail_rows, *, version='', language='en', generat
         body += ['</tr>']
     body += ['</tbody></table></div><p class="micro">' + t('Automatic checks do not replace expert review. Plain-text user prompts without a scorer have no quality rank.',
                 'Автоматические проверки не заменяют эксперта. Пользовательский текст без scorer не получает место по качеству.') + '</p></section>']
-    body += [_category_table(rows, points, badge, language)]
+    body += [_category_table(rows, points, badge, language), _language_tracks_table(rows, points, badge, language)]
 
     body += ['<section id="settings"><div class="eyebrow">05 / ' + t('REPRODUCE', 'ВОСПРОИЗВЕДЕНИЕ') + '</div><h2>' + t('Recorded model settings', 'Записанные параметры моделей') + '</h2><p class="lead">' +
              t('Values are from the run, not guessed from a model name. Multiple values mean settings varied. Unknown inherited defaults remain unknown.',
@@ -575,6 +575,33 @@ def _category_table(rows, points, badge, language):
             out += ['<td>'+pct(value)+'</td>']
         out += ['</tr>']
     return ''.join(out)+'</tbody></table></div></details></section>'
+
+
+def _language_tracks_table(rows, points, badge, language):
+    """Render paired RU/EN measurements without manufacturing a combined score."""
+    if not any((row.get('language_tracks') or {}) for row in rows):
+        return ''
+    t=lambda en,ru: choose(language,en,ru)
+    out=['<section><div class="eyebrow">LANGUAGE / TRACKS</div><h2>'+t('Russian and English prompt tracks','Треки русских и английских prompts')+'</h2><p class="lead">'+t(
+        'Each value is measured separately. BULL does not merge Russian and English results into one quality score.',
+        'Каждое значение измерено отдельно. BULL не объединяет русский и английский результаты в один балл качества.')+
+        '</p><div class="table-wrap"><table><thead><tr><th>'+t('Model','Модель')+'</th><th>RU</th><th>EN</th><th>'+t('RU − EN quality','Качество RU − EN')+'</th></tr></thead><tbody>']
+    for row,p in zip(rows,points):
+        tracks=row.get('language_tracks') or {}
+        def cell(track):
+            values=tracks.get(track)
+            if not values:
+                return '—'
+            q=pct(values.get('native_score'))
+            speed=fmt(values.get('warm_tok_s'),' tok/s')
+            task=pct(values.get('task_completion'))
+            return q+'<small>'+t('TASK ','TASK ')+task+' · '+speed+'</small>'
+        ru=(tracks.get('ru') or {}).get('native_score'); en=(tracks.get('en') or {}).get('native_score')
+        delta='—' if ru is None or en is None else f'{(float(ru)-float(en))*100:+.1f} pp'
+        out += ['<tr><th>'+badge(p['model'])+' '+h(p['model'])+'</th><td>'+cell('ru')+'</td><td>'+cell('en')+'</td><td>'+delta+'</td></tr>']
+    return ''.join(out)+'</tbody></table></div><p class="micro">'+t(
+        'A difference describes this run only. Compare task completion and throughput alongside score before drawing a conclusion.',
+        'Разница описывает только этот прогон. Перед выводом сопоставьте score с выполнением контракта и скоростью.')+'</p></section>'
 
 
 def _failure_details(rows, points, badge, language):

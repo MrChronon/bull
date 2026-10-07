@@ -45,7 +45,7 @@ spec.loader.exec_module(mod)
 mod.set_language('ru')
 
 passed=[]
-STARTUP_CHECK_TOTAL=400
+STARTUP_CHECK_TOTAL=401
 print('BULL_STARTUP_TOTAL\t'+str(STARTUP_CHECK_TOTAL),flush=True)
 
 def test(name,fn):
@@ -2495,6 +2495,14 @@ def test_live_progress_renders_heartbeat_and_gpu():
     assert 'CPU 37%' in text
     assert 'RAM 12.0/32.0G' in text
     assert 'score 90%' in text
+    class NoSystemReading:
+        def latest(self):
+            return {'gpu_util':50.0,'vram_used_mib':4096.0,'vram_total_mib':8192.0}
+    missing=mod.LiveInferenceProgress('fixture',1000,NoSystemReading(),interval=99)._gpu_text()
+    assert 'CPU N/A' in missing and 'RAM N/A' in missing
+    command=mod._system_sampler_command(777)
+    script=base64.b64decode(command[-1]).decode('utf-16le')
+    assert '[Console]::Out.Flush()' in script
     eq(mod.SystemSampler.parse_line('37,12884901888,34359738368'),{
         'cpu_util':37.0,'ram_used_bytes':12884901888.0,'ram_total_bytes':34359738368.0,
     })
@@ -5061,6 +5069,51 @@ def test_chat_final_dry_run_builds_exact_three_seed_plan_without_inference():
         mod.stream_chat=old_stream
 
 
+def test_language_tracks_are_separate_and_bilingual_pairs_are_contract_equivalent():
+    benches=mod.load_benchmarks()
+    assert set(mod.benchmark_suite_tests('language_ru'))=={
+        'lang_ru_state_update','lang_ru_causal_caution','lang_ru_instruction_precision',
+    }
+    assert set(mod.benchmark_suite_tests('language_en'))=={
+        'lang_en_state_update','lang_en_causal_caution','lang_en_instruction_precision',
+    }
+    bilingual=mod.benchmark_suite_tests('bilingual')
+    assert len(bilingual)==6 and set(bilingual)==set(mod.benchmark_suite_tests('language_ru')+mod.benchmark_suite_tests('language_en'))
+    assert benches['lang_ru_state_update']['reference']==benches['lang_en_state_update']['reference']
+    assert benches['lang_ru_state_update']['bilingual_pair_id']=='state_update'
+    catalog={'model-a':{'name':'model-a','digest':'a'*64}}
+    spec=mod.make_named_suite_spec('bilingual',['model-a'],catalog=catalog)
+    assert spec['language_comparison']['paired_execution'] is True
+    assert spec['tests']==bilingual and spec['runs']==3
+    answer=(
+        'The latest confirmed budget is 1.7 million rubles. The deadline is 22 November 2026, and cloud use is forbidden. '
+        'The old budget and deadline were replaced by the user.\nBENCHMARK_RESULT\n'
+        '{"budget_million":1.7,"deadline":"2026-11-22","cloud_allowed":false}'
+    )
+    score=mod.benchmark_score('lang_en_state_update',benches['lang_en_state_update'],answer)
+    assert score['value']==1.0 and score['language']['observed']=='en'
+    wrong=mod.benchmark_score('lang_en_state_update',benches['lang_en_state_update'],
+        'Текущий бюджет составляет 1,7 миллиона рублей, а облако запрещено полностью.\nBENCHMARK_RESULT\n'
+        '{"budget_million":1.7,"deadline":"2026-11-22","cloud_allowed":false}')
+    assert wrong['value']<0.75 and wrong['language']['language_ok'] is False
+    records=[]
+    for name,track,score_value,rate in (
+        ('lang_ru_state_update','ru',.9,18.0),('lang_en_state_update','en',.8,24.0),
+    ):
+        row=_chat_record('instruction',42,score_value,score_value)
+        row['identity']['benchmark']=name
+        row['identity']['benchmark_category']=benches[name]['category']
+        row['identity']['language_track']=track
+        row['identity']['bilingual_pair_id']='state_update'
+        row['primary']['eval_rate']=rate
+        records.append(row)
+    model_rows=mod.benchmark_model_summary_rows(records)
+    assert set(model_rows[0]['language_tracks'])=={'ru','en'}
+    assert model_rows[0]['language_tracks']['ru']['native_score']==.9
+    html=mod.benchmark_visual_report_document(records)
+    assert ('Russian and English prompt tracks' in html or 'Треки русских и английских prompts' in html)
+
+
 def test_benchmark_scorer_selftest_section_is_mandatory_and_serializable():
     result=mod.benchmark_scorer_selftest()
     assert result['ok'] is True,result
@@ -5455,6 +5508,7 @@ test('terminal CHAT summary adds comparative analysis',test_terminal_chat_summar
 test('CHAT suites + category-balanced model summary',test_chat_suites_final_preset_and_category_balanced_model_summary)
 test('native/assisted attribution + failure origin',test_native_assisted_attribution_and_failure_origin_are_explicit)
 test('CHAT final dry-run exact 3-seed plan',test_chat_final_dry_run_builds_exact_three_seed_plan_without_inference)
+test('RU/EN language tracks and bilingual paired contract',test_language_tracks_are_separate_and_bilingual_pairs_are_contract_equivalent)
 test('benchmark scorer selftest mandatory + serializable',test_benchmark_scorer_selftest_section_is_mandatory_and_serializable)
 test('user prompt store is versioned + fail-closed',test_user_prompt_store_is_versioned_atomic_and_fail_closed)
 test('custom prompt wizard builds standard command',test_custom_prompt_wizard_builds_simple_standard_command)

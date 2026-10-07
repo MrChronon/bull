@@ -1,0 +1,37 @@
+{
+  "content": {
+    "case_count": 6,
+    "cases_file": "cases.json",
+    "sha256": "ccf7a6f23b1ddd92776e899333eff48a616c26999f1be682e0095465c0ecb120"
+  },
+  "description": "Paired Russian and English prompts with equivalent contracts for language-specific quality and speed measurements.",
+  "documentation": "README.md",
+  "engine": {
+    "minimum_version": "0.28.0.7"
+  },
+  "gold": {
+    "file": "gold.json",
+    "sha256": "4a1c20ec08dfffb18844ccef905b11ca8107e03eea47e8a2e72f21e1f58c718d"
+  },
+  "id": "bull_language_comparison",
+  "license": {
+    "file": "LICENSE.txt",
+    "id": "MIT",
+    "name": "MIT License"
+  },
+  "provenance": {
+    "contains_personal_data": false,
+    "generator": "Tools/build_language_comparison_pack.py",
+    "source": "BULL public paired language track"
+  },
+  "schema": "bull-benchmark-pack-manifest",
+  "schema_version": 1,
+  "status": "candidate",
+  "taxonomy": [
+    "language_comparison_en",
+    "language_comparison_ru"
+  ],
+  "title": "BULL Language Comparison",
+  "version": "1.0.0",
+  "visibility": "public"
+}

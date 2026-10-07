@@ -1,0 +1,12 @@
+{
+  "compiled_sha256": "11e65db1ca588d9941a735105c9b9113cc0761371db7e0c19fe40cfae9bc82ee",
+  "content_sha256": "ccf7a6f23b1ddd92776e899333eff48a616c26999f1be682e0095465c0ecb120",
+  "gold_sha256": "4a1c20ec08dfffb18844ccef905b11ca8107e03eea47e8a2e72f21e1f58c718d",
+  "manifest_sha256": "f52593d0ac59c660755a83cf44741236599b1fb9639159a5965912591da5d4c0",
+  "pack": {
+    "id": "bull_language_comparison",
+    "version": "1.0.0"
+  },
+  "schema": "bull-benchmark-pack-lock",
+  "schema_version": 1
+}
