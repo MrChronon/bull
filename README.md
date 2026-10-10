@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/MrChronon/bull/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/MrChronon/bull?style=for-the-badge&color=FF3C52&label=release"></a>
+  <a href="https://github.com/MrChronon/bull/releases/tag/v0.29.0.1"><img alt="Stable release v0.29.0.1" src="https://img.shields.io/badge/release-v0.29.0.1-FF3C52?style=for-the-badge"></a>
   <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/github/license/MrChronon/bull?style=for-the-badge&color=FF6B7A"></a>
   <a href="https://github.com/MrChronon/bull/releases"><img alt="Total downloads across all release assets" src="https://img.shields.io/github/downloads/MrChronon/bull/total?style=for-the-badge&color=FF3C52&label=total%20downloads"></a>
   <img alt="Windows 11" src="https://img.shields.io/badge/Windows_11-supported-FF6B7A?style=for-the-badge&logo=windows11&logoColor=white">
