@@ -1,13 +1,14 @@
 # BULL v0.29.0.1 — Pack Library fixes
 
-Current edition: **11 October 2026 pre-release**, with the 10 October fixes. Read the
+Current edition: **11 October 2026 stable**, with the 10 October fixes. Read the
 [complete correction record](FOLLOWUP_2026_10_10.md), current
 [English release notes](en/RELEASE_NOTES.md) / [описание на русском](ru/RELEASE_NOTES.md)
 and [roadmap 1.10](BULL_TRANSITION_ROADMAP.md). Live terminal/folder-deletion
 and model-inference acceptance remain open after automated release gates.
 
 Documentation synchronized **11 October 2026** without prompt/scorer/runtime
-changes. The final ZIP must be rebuilt from this tree. See
+changes. Stable promotion preserves the published ZIP/tag; `main` documentation
+records the later status without replacing archive bytes. See
 [release readiness](RELEASE_READINESS.md) for portable instructions, current
 metadata and the manual acceptance boundary.
 

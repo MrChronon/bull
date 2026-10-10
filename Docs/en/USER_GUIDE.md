@@ -1,13 +1,14 @@
 # BULL v0.29.0.1 user guide
 
-Documentation synchronized 11 October 2026 for pre-release v0.29.0.1.
-The 10 October behavior is unchanged. This pre-release is for user testing,
-not a fully accepted stable version. See [release readiness](../RELEASE_READINESS.md)
+Documentation synchronized 11 October 2026 for stable v0.29.0.1.
+The 10 October behavior is unchanged. The owner designated this as latest stable.
+See [release readiness](../RELEASE_READINESS.md)
 for automated gates and still-open manual acceptance.
 
 The bilingual GitHub handoff includes [repository metadata](../GITHUB_REPOSITORY.md),
 [release text](../../GITHUB_RELEASE_v0.29.0.1.md) and a [publishing guide](RELEASING.md).
-Pre-release publication does not close manual acceptance.
+Stable promotion does not close manual acceptance or change the published ZIP/tag.
+Bundled documents retain their initial wording; current status is recorded here.
 
 BULL is a Windows terminal application for model chat and reproducible
 comparisons of quality, speed and resources. It supports Ollama and llama.cpp,
@@ -29,7 +30,7 @@ Ollama/llama.cpp server separately. Settings and saved reports work offline.
 
 1. Obtain the ZIP and matching SHA-256, verify and extract into a new directory.
    Use the exact-version links in the root README or GitHub Releases; v0.29.0.1
-   is a pre-release. GitHub's automatic Source code is not the installation ZIP.
+   is stable/latest. GitHub's automatic Source code is not the installation ZIP.
 2. Run `Setup.exe` (the bull with an install-arrow icon), choose English or Russian,
    then **BULL Red** or **BULL Matrix**. Setup and BULL retain that choice.
    `Setup.cmd` is a fallback entrypoint.

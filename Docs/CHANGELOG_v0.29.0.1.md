@@ -1,8 +1,9 @@
 # BULL v0.29.0.1 changelog
 
-## Current pre-release edition · 11 October 2026
+## Current stable edition · 11 October 2026
 
-Pre-release for user testing. Full regression is **668 checks**; startup remains **18**.
+Owner-designated stable/latest; tag and ZIP/checksum remain unchanged.
+Full regression is **668 checks**; startup remains **18**. Manual acceptance is open.
 See the [10 October correction record](FOLLOWUP_2026_10_10.md),
 [current release notes](en/RELEASE_NOTES.md) / [русское описание](ru/RELEASE_NOTES.md)
 and [release readiness](RELEASE_READINESS.md) for the complete scope and open acceptance.
@@ -17,10 +18,12 @@ and [release readiness](RELEASE_READINESS.md) for the complete scope and open ac
   reporting are separate corrections; historical scorer v1 and prompts remain unchanged.
 - 11 October synchronizes author/storage instructions, portable AGENTS.md,
   prompting-guide metadata, citation and issue forms. It does not change prompts,
-  scorer implementations or the inference runtime. Rebuild the final ZIP from this tree.
+  scorer implementations or the inference runtime. Subsequent stable promotion
+  preserves published ZIP/checksum/tag; current documentation advances separately.
 - Full release preparation adds paired community policies, version-specific
   README links, public roadmap/releasing guides, dependency notices, bilingual
-  GitHub forms/body and a repository handoff. No remote publication or new runtime behavior.
+  GitHub forms/body and a repository handoff. Publication and stable promotion are
+  explicitly owner-authorized; neither adds new runtime behavior.
 
 ## Earlier patch snapshot · 644 checks
 

@@ -3,13 +3,15 @@
 Test packs now live independently of the benchmark engine. Choose the tasks
 that fit your work instead of accepting one mandatory built-in suite.
 
-Pre-release edition: **11 October 2026**, including the 10 October follow-up;
+Stable edition: **11 October 2026**, including the 10 October follow-up;
 older release notes describe historical builds, not the current acceptance state.
 
 Documentation synchronized 11 October 2026: current author-library paths and
 exact-version commands, portable AGENTS.md, citation and issue forms. No prompt,
-scorer or runtime change in this synchronization. Rebuild the ZIP/checksum from
-the final tree; [release readiness](../RELEASE_READINESS.md) retains open manual acceptance.
+scorer or runtime change in this synchronization. Stable promotion changes only
+metadata/current documentation; published ZIP/checksum and tag are preserved.
+[Release readiness](../RELEASE_READINESS.md) retains open manual acceptance and
+explains the historical pre-release wording inside the unchanged archive.
 
 The full repository kit now includes paired community policies, installation and
 public roadmap/releasing guides, bilingual Issue/PR forms, dependency notices

@@ -9,14 +9,29 @@ language: ru
 github_publication_2026_10_11:
   owner_authorization: explicit_release_publication_and_repository_home_update
   tag: v0.29.0.1
-  status: public_prerelease_edition; not_latest_stable; manual_acceptance_open
+  initial_status: public_prerelease_edition; subsequently_promoted_to_stable
+  status: public_stable_latest; owner_designated; manual_acceptance_open
   release_link: root_README_version_specific_release_and_asset_links
   date_timezone: Europe/Moscow
   repository_channels: Issues_and_required_labels_verified; Discussions_and_private_vulnerability_reporting_enabled
   source: audited_fresh_ZIP_snapshot_on_existing_public_history; no_private_git_history
-  byte_integrity: root_gitattributes_disables_line_ending_conversion; public_commit_matches_manifest_and_ZIP
+  byte_integrity: root_gitattributes_disables_line_ending_conversion; tagged_public_commit_matches_manifest_and_ZIP; main_has_later_documentation_only_changes
   assets: [BULL-v0.29.0.1-Bundle.zip, BULL-v0.29.0.1-Bundle.sha256.txt]
   gates: UTF8_668; cp1251_668; startup_18; manifest_privacy_exact_ZIP_and_isolated_Setup
+  runtime_prompt_and_scorer_changes: none
+
+github_stable_promotion_2026_10_11:
+  owner_authorization: explicit_full_stable_release_request
+  release: v0.29.0.1
+  github_status: prerelease_false; draft_false; make_latest_true
+  scope: release_metadata_and_current_EN_RU_documentation_only
+  tag_commit: '796c349d5170f13521bde0d5ab2832df79a615aa'
+  zip_sha256: fc4447ddfd7e7c5ae86a2de4264b6b92192786c757e2a151a3ef2cc2bb143cfe
+  preserved: published_tag_ZIP_checksum_pack_bytes_application_bytes_and_original_publication_date
+  manifest_scope: immutable_tagged_distribution; not_later_main_documentation_commits
+  archived_documentation: initial_prerelease_wording_retained_to_preserve_published_bytes
+  current_documentation: main_and_GitHub_Release_body_reflect_stable_designation
+  manual_acceptance: still_open; stable_designation_is_not_evidence_of_completed_live_checks
   runtime_prompt_and_scorer_changes: none
 
 github_release_preparation_2026_10_11:
@@ -25,10 +40,10 @@ github_release_preparation_2026_10_11:
   release_body: GITHUB_RELEASE_v0.29.0.1.md
   maintainer_guides: [Docs/en/RELEASING.md, Docs/ru/RELEASING.md]
   rights: LICENSE_unchanged; THIRD_PARTY_NOTICES.md; no_third_party_models_engines_or_Python_bundled
-  release_links: version_specific_tag; candidate_status_explicit; latest_badge_not_candidate_download
+  release_links: version_specific_tag_and_assets; latest_badge_now_targets_owner_designated_stable
   delivery: rebuilt_ZIP_and_checksum; fresh_audited_repository_snapshot_without_private_git_history
   publication: preparation_was_local; subsequent_owner_authorized_publication_in_github_publication_2026_10_11
-  acceptance: unchanged_open_manual_checks; use_draft_or_prerelease_until_acceptance
+  acceptance: unchanged_open_manual_checks; subsequent_owner_designated_stable_promotion_recorded_separately
   runtime_prompt_and_scorer_changes: none
 
 documentation_sync_2026_10_11:
@@ -70,7 +85,7 @@ project:
   qualified_name: BULL — Benchmark Lab
   release: v0.29.0.1
   release_name: Pack Library
-  publication: GitHub_prerelease; not_latest_stable; manual_acceptance_open
+  publication: GitHub_stable; latest; owner_designated; manual_acceptance_open
   frozen_stable_baseline: v17.3.2
   platform:
     primary: Windows 11
@@ -1094,7 +1109,7 @@ planned_roadmap:
     PK1:
       name: BULL Pack Library
       target_version: v0.29.0.1
-      status: implemented_public_prerelease; manual_acceptance_open
+      status: implemented_public_stable; owner_designated; manual_acceptance_open
       implementation_started: true
       requirements_accepted_on: '2026-10-09'
       specification: Docs/PACK_LIBRARY_SPEC.md
@@ -1165,7 +1180,7 @@ planned_roadmap:
         checkpoint_binding: new complete snapshots resume independently of installed packs; old partial snapshots require exact installed content
         code_checks: selected engine executable scorers require explicit EXECUTE consent bound to case IDs and immutable content; not a sandbox
         removal: one validated version moved to Trash; manual recovery and disk cleanup documented
-        publication: included_in_v0.29.0.1_prerelease; earlier_gate_counts_are_historical
+        publication: included_in_v0.29.0.1_stable; earlier_gate_counts_are_historical
         verification: Run-Tests.ps1 465/465; cp1251 selection checks 20/20; 223 mandatory files present; source privacy audit passed
       implemented_author_workshop:
         stage: PK1.4 Author Workshop
@@ -1189,7 +1204,7 @@ planned_roadmap:
         native_pack_conversion: unavailable without author sources; never substitute keyword rules for native scorers
         parameters: bounded allowlist compiled to established defaults; ctx not num_ctx; named run overrides retain existing precedence
         limits: registry and ZIP budgets remain; per-source 256 KiB prompt 50000 chars criteria 20; no loose-loader 100-task truncation
-        publication: included_in_v0.29.0.1_prerelease; stable_v0.28.0.7_unchanged
+        publication: included_in_v0.29.0.1_stable; earlier_releases_preserved
         verification: Run-Tests.ps1 498/498 including 33 author-workshop contracts; full cp1251 498/498; 230 mandatory files; source audit 297 files passed
       implemented_evidence_release:
         module: Shared/bull_llm/evaluation/pack_evidence.py
@@ -1216,7 +1231,7 @@ planned_roadmap:
       status: open_after_automated_followup_gates
       automated: UTF8_668_cp1251_668_startup_18_manifest_exact_ZIP_and_extracted_Setup_passed
       manual: [clean_install_and_repeat_terminal_geometry, immediate_theme_switch, folder_deletion_after_exit, live_chat_benchmark_resume_local_and_SSH]
-      publication: owner_authorized_prerelease; acceptance_remains_open
+      publication: owner_designated_stable_latest; acceptance_remains_open
     RPT1:
       name: pack_specific_report_profiles
       status: planned; specialized_RU_EN_view_already_implemented
@@ -1318,7 +1333,7 @@ planned_roadmap:
   implementation_or_publication_completed_by_this_plan: false
 
 client_setup:
-  status: implemented_in_v0.29.0.1_prerelease
+  status: implemented_in_v0.29.0.1_stable
   entrypoint: Setup.exe; Setup.cmd_fallback; Setup.ps1_bootstrap
   native_launchers: Tools/BullLauncher.cs_compiled_by_Tools/Build-Windows-Launchers.ps1_at_release_build; unsigned_NET_Framework; bounded_exact_binary_allowlist
   implementation: Tools/install_bull.py; Shared/bull_llm/installer.py

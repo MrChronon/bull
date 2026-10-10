@@ -3,8 +3,8 @@
 [Русский](../ru/ROADMAP.md) · [Engineering plan 1.10](../BULL_TRANSITION_ROADMAP.md)
 
 This public summary reflects the approved plan, not new deadlines or a promise
-that planned features are already shipped. Current edition: v0.29.0.1 pre-release,
-11 October 2026; publication does not close manual acceptance.
+that planned features are already shipped. Current edition: v0.29.0.1 stable,
+11 October 2026; owner-designated stable status does not close manual acceptance.
 
 ## Implemented
 

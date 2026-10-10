@@ -6,8 +6,8 @@ included in the public bundle and do not depend on a private parent workspace.
 
 ## Current scope
 
-- Current product: BULL v0.29.0.1 Pack Library, a public pre-release for user
-  testing. Manual acceptance is open; future publication still requires the
+- Current product: BULL v0.29.0.1 Pack Library, the owner-designated stable
+  release. Manual acceptance is open; future publication still requires the
   owner's explicit authorization.
 - Frozen historical stable baseline: v17.3.2. Do not substitute its navigation
   or storage layout for current behavior.
@@ -39,6 +39,10 @@ included in the public bundle and do not depend on a private parent workspace.
   source manifest hashes alone do not update an existing archive.
 - Never equate passed offline tests with closed manual acceptance or publish
   without the owner's explicit request. Use small, verified commits.
+- Metadata-only stable promotion must preserve the published tag, ZIP and checksum.
+  Current documentation may advance on `main`; the release manifest belongs to
+  the immutable tagged distribution, not later documentation commits. Do not
+  rebuild/replace the same published version merely to update its status wording.
 
 Cloud LLM pack authors should use `Docs/en/PACK_AUTHOR_LLM.md` or
 `Docs/ru/PACK_AUTHOR_LLM.md` together with the corresponding Author Workshop

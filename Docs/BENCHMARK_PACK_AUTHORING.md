@@ -1,6 +1,6 @@
 # BULL Benchmark Pack Authoring Guide
 
-Current contract: **BULL v0.29.0.1 Pack Library**, pre-release for user testing.
+Current contract: **BULL v0.29.0.1 Pack Library**, stable by owner designation.
 Updated **11 October 2026**; publication and manual acceptance are separate.
 
 Versioned benchmark packs let BULL discover a new safe task without editing the

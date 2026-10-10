@@ -1,6 +1,6 @@
 # Installing BULL
 
-Current edition: v0.29.0.1 pre-release, 11 October 2026; manual acceptance is open.
+Current edition: v0.29.0.1 stable, 11 October 2026; manual acceptance is open.
 The uninstalled archive has `Setup.exe`, not a root `BULL.exe`.
 
 1. Verify the archive's SHA-256 and extract into a separate directory.

@@ -5,7 +5,11 @@
 
 ## v0.29.0.1 — Pack Library
 
-**Pre-release · 11 October 2026 / Предварительный релиз · 11 октября 2026.**
+**Stable · 11 October 2026 / Стабильный релиз · 11 октября 2026.**
+
+Owner-authorized promotion to latest stable; release metadata/documentation only.
+Published tag, ZIP/checksum and application/pack bytes are unchanged. / По решению
+владельца — latest stable; tag, архив, checksum, программа и наборы не заменяются.
 
 - Independent optional pack ZIPs, persistent user library, one exact version/subset per run.
 - Setup: language → theme → packs/skip → full verification → connection/skip → launch/exit.

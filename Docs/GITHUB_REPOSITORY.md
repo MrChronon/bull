@@ -1,8 +1,8 @@
 # GitHub repository handoff / Комплект репозитория
 
 Publication edition: **BULL v0.29.0.1 — Pack Library**, 11 October 2026,
-owner-authorized pre-release. Manual acceptance remains open.
-Публикация разрешена владельцем как pre-release; ручная приёмка ещё открыта.
+owner-designated stable/latest. Manual acceptance remains open.
+По решению владельца — stable/latest; ручная приёмка ещё открыта.
 
 Release-time settings checked: Issues and the `bug`/`enhancement` labels are
 available; Discussions and private vulnerability reporting are enabled.
@@ -70,13 +70,15 @@ application folder or a blanket copy of the development workspace.
 - Tag: `v0.29.0.1`; title: `BULL v0.29.0.1 — Pack Library`.
 - Body: [prepared EN/RU text](../GITHUB_RELEASE_v0.29.0.1.md).
 - Assets: `BULL-v0.29.0.1-Bundle.zip` and `BULL-v0.29.0.1-Bundle.sha256.txt`.
-- Use draft for asset verification, then publish as pre-release while acceptance is open.
+- Use draft for asset verification; release classification requires owner authorization.
+  v0.29.0.1 is promoted to stable/latest with unchanged tag and assets.
 - If this tag/assets already exist publicly, do not replace their bytes or move
   the tag: choose a new version through the release process.
 - The automatic GitHub source archive is not the tested installation ZIP.
 
-До публикации — draft; при открытой приёмке для пользовательского тестирования —
-pre-release. Существующие опубликованные tag/assets не заменяйте. Дата CITATION
-добавляется только при реальной публикации с повторной упаковкой изменённых файлов.
+До публикации — draft; классификация — по разрешению владельца. Текущая v0.29.0.1
+переведена в stable/latest. Существующие tag/assets не заменяйте; дата CITATION
+остаётся датой первоначальной публикации. Документация `main` обновлена отдельно;
+manifest и архивные документы относятся к исходной поставке в теге.
 
 [English releasing](en/RELEASING.md) · [Публикация на русском](ru/RELEASING.md)

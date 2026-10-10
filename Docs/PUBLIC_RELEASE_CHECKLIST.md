@@ -2,7 +2,7 @@
 
 Use this checklist for every GitHub release.
 
-Current edition: **v0.29.0.1 pre-release**, documentation synchronized **11 October 2026**.
+Current edition: **v0.29.0.1 stable/latest**, documentation synchronized **11 October 2026**.
 See [release readiness](RELEASE_READINESS.md): open manual acceptance is not a passed gate.
 
 ## Automated gates
@@ -43,8 +43,11 @@ See [release readiness](RELEASE_READINESS.md): open manual acceptance is not a p
   bilingual GitHub release body are present in the exact ZIP/manifest inventory.
 - Follow [GitHub repository handoff](GITHUB_REPOSITORY.md). Check real issue labels,
   Discussions and private reporting settings; local documents do not enable them.
-- Target the exact public source commit. Keep an open-acceptance build as draft or
-  pre-release; never replace an already-published tag/archive with new bytes.
+- Target the exact public source commit. Classification needs explicit owner
+  authorization and honest acceptance limits; never replace a published tag/archive.
+- For metadata-only stable promotion, preserve tag/ZIP/checksum and original date.
+  Verify stable/latest and synchronized EN/RU pages; later `main` documentation
+  is not part of the tagged distribution manifest. Keep archive history intact.
 - CITATION.cff uses the current version; add its release date only on publication.
   Issue Forms do not offer retired GPU Lab or AllInOne routes as current features.
 - Historical audit/changelog scopes are explicit. Current totals are 668 full

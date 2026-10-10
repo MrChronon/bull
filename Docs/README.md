@@ -21,14 +21,15 @@ The current documentation is maintained in two equivalent language trees:
 Release documentation: **BULL v0.29.0.1 Pack Library**. Use the release ZIP and
 matching checksum; do not copy a configured old bundle over a fresh installation.
 
-Documentation synchronized **11 October 2026** for pre-release v0.29.0.1;
+Documentation synchronized **11 October 2026** for stable v0.29.0.1;
 the 10 October behavior is unchanged and manual acceptance remains open.
 Current automated release gates: 668/668 offline, 668/668 cp1251 and 18/18 startup.
 See [corrections and acceptance limits](FOLLOWUP_2026_10_10.md) and
 [roadmap 1.10](BULL_TRANSITION_ROADMAP.md): implemented work, open manual acceptance
 and future stages are listed separately. [Release readiness](RELEASE_READINESS.md)
-separates archive verification from manual acceptance. Rebuild the final ZIP and
-checksum after this synchronization; do not distribute an older archive as current.
+separates archive verification from manual acceptance. Stable promotion preserves
+the published ZIP/checksum/tag; current `main` documents are a later status update,
+not replacement archive contents. New distribution bytes require a new release.
 
 `AI_CONTEXT.yaml` is the machine-readable engineering contract used by coding
 agents. It is language-neutral and does not replace the user guides. The public

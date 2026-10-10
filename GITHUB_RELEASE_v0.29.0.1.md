@@ -3,9 +3,13 @@
 ## English
 
 Independent test packs, simpler setup and clearer comparisons for local LLMs.
-**Preview scope:** automated release checks pass; manual Terminal, shutdown,
-clean-machine and live-inference acceptance remains open. This is not a
-fully accepted stable-release claim.
+**Stable release · 11 October 2026.** Designated as the latest stable version
+by the project owner. Automated release checks pass; remaining manual checks
+are listed under verification limits below.
+
+[Download Windows bundle](https://github.com/MrChronon/bull/releases/download/v0.29.0.1/BULL-v0.29.0.1-Bundle.zip) ·
+[SHA-256 checksum](https://github.com/MrChronon/bull/releases/download/v0.29.0.1/BULL-v0.29.0.1-Bundle.sha256.txt) ·
+[English guide](https://github.com/MrChronon/bull/blob/main/Docs/en/USER_GUIDE.md)
 
 ### What's included
 
@@ -43,20 +47,33 @@ manifest/privacy/ZIP checks and isolated fresh-install diagnostics. Every launch
 reruns essential checks; Setup runs the full suite without model inference.
 Counts are automated coverage, not proof of semantic quality or all environments.
 
+Remaining manual validation: first/repeated Windows Terminal rendering and immediate
+theme switching; folder deletion after normal exit; clean-machine dependency setup;
+live chat, benchmark and interrupted resume on the intended local/SSH backends.
+Stable designation does not mark these checks as completed.
+
+This is a metadata-only promotion of the published v0.29.0.1 build. The tag,
+ZIP and checksum are unchanged; documents inside the archive retain the initial
+pre-release wording. Current repository documentation reflects stable status.
+
 Compare native and client-assisted results separately. Missing resources are
 unknown, not zero. Language scores cover six constrained tasks, not general
 linguistic competence. Executable engine checks/chat tools are not an OS sandbox.
 Linux/macOS, marketplace and arbitrary pack-report plug-ins are not shipped.
 See [results](https://github.com/MrChronon/bull/blob/v0.29.0.1/Docs/en/RESULTS.md),
-[acceptance](https://github.com/MrChronon/bull/blob/v0.29.0.1/Docs/RELEASE_READINESS.md)
+[acceptance](https://github.com/MrChronon/bull/blob/main/Docs/RELEASE_READINESS.md)
 and [roadmap](https://github.com/MrChronon/bull/blob/v0.29.0.1/Docs/en/ROADMAP.md).
 
 ## Русский
 
 Независимые наборы тестов, последовательная установка и понятное сравнение LLM.
-**Preview:** автоматические проверки пройдены; ручная приёмка терминала, выхода,
-чистой установки и live inference ещё открыта. Полностью принятой stable-версией
-эта сборка не объявляется.
+**Стабильный релиз · 11 октября 2026.** По решению владельца проекта — последняя
+stable-версия. Автоматические проверки пройдены; оставшиеся ручные проверки
+перечислены в ограничениях валидации ниже.
+
+[Скачать комплект Windows](https://github.com/MrChronon/bull/releases/download/v0.29.0.1/BULL-v0.29.0.1-Bundle.zip) ·
+[Контрольная сумма SHA-256](https://github.com/MrChronon/bull/releases/download/v0.29.0.1/BULL-v0.29.0.1-Bundle.sha256.txt) ·
+[Русское руководство](https://github.com/MrChronon/bull/blob/main/Docs/ru/USER_GUIDE.md)
 
 ### Что входит
 
@@ -92,12 +109,21 @@ and [roadmap](https://github.com/MrChronon/bull/blob/v0.29.0.1/Docs/en/ROADMAP.m
 Setup выполняет полную регрессию без запросов к моделям. Это покрытие автотестов,
 не доказательство смыслового качества или поддержки всех окружений.
 
+Ручная валидация ещё открыта: первое/повторное отображение Windows Terminal,
+мгновенная смена темы, удаление папки после штатного выхода, установка зависимостей
+на чистой машине и live chat/benchmark/resume на целевых local/SSH backends.
+Статус stable не означает, что эти проверки завершены.
+
+Перевод опубликованной v0.29.0.1 в stable меняет только метаданные. Tag, ZIP
+и checksum сохранены; внутри архива остаётся первоначальное описание pre-release.
+Актуальная документация репозитория отражает статус stable.
+
 Native и помощь клиента раздельны; недоступные ресурсы — неизвестны, не ноль.
 Шесть языковых задач не доказывают общую компетентность. Исполняемые проверки
 и tools не являются OS-песочницей. Linux/macOS, marketplace и произвольные
 report plug-ins не входят в поставку. См.
 [результаты](https://github.com/MrChronon/bull/blob/v0.29.0.1/Docs/ru/RESULTS.md),
-[приёмку](https://github.com/MrChronon/bull/blob/v0.29.0.1/Docs/RELEASE_READINESS.md)
+[приёмку](https://github.com/MrChronon/bull/blob/main/Docs/RELEASE_READINESS.md)
 и [roadmap](https://github.com/MrChronon/bull/blob/v0.29.0.1/Docs/ru/ROADMAP.md).
 
 MIT for BULL; third-party models, engines, libraries and packs retain their licenses.

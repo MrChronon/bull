@@ -31,12 +31,11 @@
 
 ---
 
-**Current release: v0.29.0.1 — Pack Library (pre-release).**
+**Latest stable release: v0.29.0.1 — Pack Library.**
 [Download the Windows bundle](https://github.com/MrChronon/bull/releases/download/v0.29.0.1/BULL-v0.29.0.1-Bundle.zip) ·
 [SHA-256 checksum](https://github.com/MrChronon/bull/releases/download/v0.29.0.1/BULL-v0.29.0.1-Bundle.sha256.txt).
-Extract into a new folder and start **Setup.exe**. Manual acceptance is still
-open; the “latest release” badge refers to the latest stable version, not this
-pre-release. See [verification and open acceptance](Docs/RELEASE_READINESS.md).
+Extract into a new folder and start **Setup.exe**. The release and “latest” badge
+now point to v0.29.0.1. See [verified coverage and known validation limits](Docs/RELEASE_READINESS.md).
 
 > **BULL is not a hosted leaderboard.** It is an open, portable benchmark lab for
 > inspecting local model quality, stability, speed, recovery and runtime behavior
@@ -246,9 +245,12 @@ help and Agent Benchmark; GPU Lab is removed. See the
 [release notes](Docs/en/RELEASE_NOTES.md) and
 [documentation index](Docs/README.md).
 The [roadmap](Docs/BULL_TRANSITION_ROADMAP.md) separates completed features,
-open acceptance and future pack-report/language work. v0.29.0.1 is distributed
-as a pre-release for user testing, not a fully accepted stable version.
-The installation ZIP and public tag use the same hash-verified source snapshot.
+open acceptance and future pack-report/language work. v0.29.0.1 is the
+owner-designated stable release; remaining manual checks are documented separately.
+Stable promotion changes release metadata and current documentation only. The
+installation ZIP, checksum and tag remain the original hash-verified snapshot;
+its bundled documents retain the initial pre-release wording. Documentation on
+`main` reflects the later stable designation. No application or pack bytes changed.
 
 ## Repository guide
 

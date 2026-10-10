@@ -2,7 +2,7 @@
 
 [Русский](../ru/RELEASING.md) · [Repository handoff](../GITHUB_REPOSITORY.md)
 
-Current version: **v0.29.0.1**, an owner-authorized pre-release for user testing.
+Current version: **v0.29.0.1**, the owner-designated latest stable release.
 Future source pushes, drafts/tags, repository settings and publication require
 owner authorization. This guide is a procedure, not authorization by itself.
 
@@ -31,7 +31,9 @@ Check source/ZIP documentation bytes and the external checksum too.
 Record first/repeat Terminal geometry, immediate Red/Matrix switching, clean exit,
 folder release, clean-machine dependencies and live chat/benchmark/resume on the
 intended local/SSH backends. Automated fixtures do not certify those scenarios.
-Unresolved checks require a candidate/pre-release label, not a “fully verified” claim.
+Normally use a candidate/pre-release while checks are unresolved. An explicit owner
+decision may designate stable with those limits disclosed; never claim unrun checks
+are completed or call every environment fully verified.
 
 ## 3. Prepare the public snapshot
 
@@ -50,7 +52,8 @@ Do not publish secrets or QA/runtime files. Keep the canonical logo/license inta
 Check the proposed tag is unused. Target the exact public source commit matching
 the ZIP, not a moving development branch. Create a **draft** with the prepared
 [bilingual body](../../GITHUB_RELEASE_v0.29.0.1.md) and both ZIP/checksum assets.
-Use **pre-release** while manual acceptance is open; do not mark it latest stable.
+Use the classification explicitly authorized by the owner. v0.29.0.1 was initially
+published as pre-release, then explicitly designated **stable/latest** without new bytes.
 Review the complete draft before publication. GitHub documents these controls in
 [Managing releases](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository).
 
@@ -62,6 +65,12 @@ On actual publication, update status and CITATION's date consistently, rebuild
 the final bundle/checksum and verify the draft assets before making it public.
 Do not edit published archive bytes or retarget an existing public tag.
 If publication is postponed, leave `date-released` absent rather than guessing.
+
+For a metadata-only promotion, update release status/body and current EN/RU pages
+in a documentation commit. Keep the original date, tag target and both asset bytes;
+verify stable/latest through GitHub and recheck downloads. The manifest remains
+the tagged distribution inventory. Archived pre-release wording is historical,
+not a reason to replace a published ZIP under the same version.
 
 ## 5. Post-publication inspection
 
