@@ -1,0 +1,188 @@
+[
+  {
+    "id": "analytics_case",
+    "version": 3,
+    "category": "code_analytics",
+    "runner_ref": "single_turn_v1",
+    "scorer_ref": "analytics_case_v3",
+    "verifier_ref": "benchmark_contract_v1",
+    "definition": {
+      "category": "code_analytics",
+      "reference": {
+        "metrics": [
+          {
+            "variant": "A",
+            "users": 12,
+            "purchasers": 5,
+            "conversion": 0.4166666666666667,
+            "revenue": 500.0,
+            "arpu": 41.666666666666664,
+            "arppu": 100.0
+          },
+          {
+            "variant": "B",
+            "users": 12,
+            "purchasers": 8,
+            "conversion": 0.6666666666666666,
+            "revenue": 600.0,
+            "arpu": 50.0,
+            "arppu": 75.0
+          }
+        ],
+        "conversion_diff": 0.25,
+        "z_stat": 1.2290197355980537,
+        "z_p_value": 0.21906440661100834,
+        "ci_low": -0.1359416094772964,
+        "ci_high": 0.6359416094772963,
+        "arpu_diff": 8.333333333333336,
+        "welch_t": 0.4394519058191579,
+        "welch_p": 0.6649329866857383,
+        "decision": "inconclusive",
+        "alpha": 0.05,
+        "cleaning": {
+          "dedupe_latest": true,
+          "latest_status_paid_only": true,
+          "half_open_july_window": true,
+          "user_level_conversion": true,
+          "zero_revenue_users_in_denominator": true
+        }
+      },
+      "version": 3,
+      "description": "Компактный исполняемый analytics case: cleaning + SQL + Python + statistics + visualization",
+      "recommended_benchmark_mode": "client",
+      "min_context": 16384,
+      "force_final_answer": true,
+      "primary_predict": 5600,
+      "recovery_predict": 2400,
+      "rescue_predict": 1600,
+      "max_words": 300,
+      "score_type": "analytics_case_v3",
+      "completion_contract": {
+        "sql_blocks": 1,
+        "python_blocks": 1,
+        "terminal_result_json": true
+      },
+      "benchmark_defaults": {
+        "num_predict": 5600,
+        "force_final_answer": true,
+        "sampling_preset": "coder_precise",
+        "recovery": {
+          "enabled": true,
+          "strategy": "continue_then_targeted_rescue_v3",
+          "max_passes": 2,
+          "continuation_predict": 2400,
+          "scratch_predict": 4800,
+          "rescue_predict": 1600,
+          "force_result_marker": true,
+          "format_preservation": true
+        }
+      },
+      "prompt": "Ты senior data analyst. Реши комплексный аналитический кейс целиком: очистка данных, SQL, Python, статистика, визуализация и продуктовый вывод.\n\nЭкспериментальная популяция - РОВНО все 24 строки таблицы `users`. Пользователи без валидных заказов остаются в знаменателях. Вариант у пользователя фиксирован таблицей `users`.\n\nТаблица `users`:\n```csv\nuser_id,variant,signup_date\nu01,A,2026-07-01\nu02,A,2026-07-02\nu03,A,2026-07-03\nu04,A,2026-07-04\nu05,A,2026-07-05\nu06,A,2026-07-06\nu07,A,2026-07-07\nu08,A,2026-07-08\nu09,A,2026-07-09\nu10,A,2026-07-10\nu11,A,2026-07-11\nu12,A,2026-07-12\nu13,B,2026-07-01\nu14,B,2026-07-02\nu15,B,2026-07-03\nu16,B,2026-07-04\nu17,B,2026-07-05\nu18,B,2026-07-06\nu19,B,2026-07-07\nu20,B,2026-07-08\nu21,B,2026-07-09\nu22,B,2026-07-10\nu23,B,2026-07-11\nu24,B,2026-07-12\n```\n\nСырые заказы `orders_raw`:\n```csv\norder_id,user_id,order_time,amount,status,updated_at\no01,u01,2026-07-03 10:00,30,paid,2026-07-03 10:05\no02,u01,2026-07-04 10:00,50,paid,2026-07-04 10:05\no03,u02,2026-07-05 10:00,90,paid,2026-07-05 10:05\no03,u02,2026-07-05 10:00,90,paid,2026-07-06 09:00\no04,u03,2026-07-06 10:00,100,paid,2026-07-06 10:05\no05,u04,2026-07-07 10:00,110,paid,2026-07-07 10:05\no06,u05,2026-07-08 10:00,120,paid,2026-07-08 10:05\no07,u06,2026-07-09 10:00,70,paid,2026-07-09 10:05\no07,u06,2026-07-09 10:00,70,refunded,2026-07-12 12:00\no08,u07,2026-07-10 10:00,60,cancelled,2026-07-10 10:05\no09,u08,2026-08-01 00:00,200,paid,2026-08-01 00:05\no10,u09,2026-06-30 23:59,40,paid,2026-07-01 00:05\no11,u13,2026-07-03 11:00,20,paid,2026-07-03 11:05\no12,u13,2026-07-04 11:00,30,paid,2026-07-04 11:05\no13,u14,2026-07-05 11:00,60,paid,2026-07-05 11:05\no14,u15,2026-07-06 11:00,65,paid,2026-07-06 11:05\no15,u16,2026-07-07 11:00,70,paid,2026-07-07 11:05\no16,u17,2026-07-08 11:00,75,paid,2026-07-08 11:05\no17,u18,2026-07-09 11:00,80,paid,2026-07-09 11:05\no18,u19,2026-07-10 11:00,95,paid,2026-07-10 11:05\no19,u20,2026-07-11 11:00,105,paid,2026-07-11 11:05\no20,u21,2026-07-12 11:00,50,paid,2026-07-12 11:05\no20,u21,2026-07-12 11:00,50,refunded,2026-07-14 09:00\no21,u22,2026-07-13 11:00,100,cancelled,2026-07-13 11:05\no22,u23,2026-08-02 12:00,100,paid,2026-08-02 12:05\no23,u24,2026-07-15 12:00,150,pending,2026-07-15 12:05\n```\n\nЕдиные правила очистки, обязательные и для SQL, и для Python. ПОРЯДОК ОПЕРАЦИЙ однозначный:\n1. Сначала на ВСЕЙ `orders_raw`, не фильтруя ни дату, ни status, для каждого `order_id` оставь РОВНО одну строку с максимальным `updated_at`. В контрольных данных нет ничьих по максимальному `updated_at`.\n2. Только после этой дедупликации примени временное окно: `order_time >= 2026-07-01 00:00:00` и `order_time < 2026-08-01 00:00:00`.\n3. После дедупликации оставь только строки, у которых последняя версия имеет `status = 'paid'`.\n- revenue пользователя = сумма `amount` его валидных заказов;\n- purchaser = пользователь с хотя бы одним валидным заказом;\n- conversion считается на уровне пользователей, а не заказов;\n- ARPU = revenue / все пользователи варианта;\n- ARPPU = revenue / purchasers.\n\nСтатистика задана однозначно:\n- conversion effect = `p_B - p_A`;\n- для H0: p_A=p_B используй двухсторонний pooled two-proportion z-test;\n- 95% CI для `p_B-p_A` построй как Wald interval с UNPOOLED standard error и коэффициентом 1.96;\n- для revenue используй user-level revenue, включая нули пользователей без покупок, и двухсторонний Welch t-test B против A;\n- alpha = 0.05; не называй эффект доказанным, если p >= alpha.\n\nЗадание:\n1. Кратко перечисли ключевые ловушки очистки/grain, которые могут исказить результат.\n2. Напиши РОВНО ОДИН блок ```sql``` с запросом, который возвращает по вариантам A и B столбцы строго в таком порядке:\n   `variant, users, purchasers, conversion, revenue, arpu, arppu`.\n   SQL должен использовать только общий поднабор PostgreSQL/SQLite: CTE, ROW_NUMBER, CASE, COALESCE, GROUP BY, LEFT JOIN; не используй `DATE '...'`, `FILTER`, `QUALIFY` или dialect-specific функции.\n3. Напиши РОВНО ОДИН блок ```python```. В нём определи функцию `analyze_ab(users, orders)`, которая возвращает кортеж `(metrics, stats, fig)`:\n   - `metrics`: pandas DataFrame с теми же 7 столбцами и двумя строками A, B;\n   - `stats`: dict с ключами `conversion_diff`, `z_stat`, `z_p_value`, `ci_low`, `ci_high`, `arpu_diff`, `welch_t`, `welch_p`;\n   - `fig`: matplotlib Figure ровно с двумя axes в одной строке. Первый axis - bar chart conversion A/B, второй - bar chart ARPU A/B. Не вызывай `plt.show()`.\n4. В тексте интерпретируй conversion, ARPU и ARPPU, оба статистических теста и CI.\n5. Дай продуктовый вывод одним из: A, B, inconclusive.\n\nSQL и Python должны независимо воспроизводить одни и те же очищенные метрики. Не подменяй user-level revenue transaction-level наблюдениями. Объясняющий текст вне code blocks и BENCHMARK_RESULT - не более 300 слов. Не повторяй таблицы, CSV или условие; не создавай test fixtures, StringIO, демонстрационные DataFrame, print, assert или test harness. Python-блок содержит только imports и функцию analyze_ab. Сначала закончи исполняемое решение и BENCHMARK_RESULT.",
+      "result_instruction": "Финальный контракт важнее любых общих рекомендаций о стиле. Выведи ровно один SQL-блок, затем ровно один Python-блок, а сразу после закрытия Python-блока - строку BENCHMARK_RESULT и один JSON-объект. После JSON ничего не пиши.\nПоля JSON:\n- dedupe_latest, latest_status_paid_only, half_open_july_window, user_level_conversion, zero_revenue_users_in_denominator: true/false;\n- conversion_diff, z_stat, z_p_value, ci_low, ci_high, arpu_diff, welch_t, welch_p: числа;\n- decision: одно из [\"A\", \"B\", \"inconclusive\"].\nНе дублируй SQL/Python или входные данные внутри JSON. Не добавляй тестовый harness."
+    }
+  },
+  {
+    "id": "funnel",
+    "version": 3,
+    "category": "analytics_reasoning",
+    "runner_ref": "single_turn_v1",
+    "scorer_ref": "funnel_v3",
+    "verifier_ref": "benchmark_contract_v1",
+    "definition": {
+      "category": "analytics_reasoning",
+      "reference": {
+        "view_to_save": 0.4,
+        "save_to_apply": 0.5,
+        "apply_to_interview": 0.25,
+        "interview_to_offer": 0.3,
+        "loss_view_to_save": 0.6,
+        "loss_save_to_apply": 0.5,
+        "loss_apply_to_interview": 0.75,
+        "loss_interview_to_offer": 0.7,
+        "largest_relative_loss_stage": "apply_to_interview",
+        "required_reason_count": 3,
+        "minimum_data_checks": 2
+      },
+      "version": 3,
+      "description": "Анализ продуктовой воронки: расчёты + полнота аналитического ответа",
+      "primary_predict": 3200,
+      "recovery_predict": 1500,
+      "max_words": 450,
+      "score_type": "funnel_v3",
+      "prompt": "Представь, что ты аналитик данных в приложении для поиска работы.\n\nЗа последние 30 дней:\n- 1200 пользователей просмотрели вакансии;\n- 480 пользователей сохранили хотя бы одну вакансию;\n- 240 пользователей отправили хотя бы один отклик;\n- 60 пользователей получили приглашение на интервью;\n- 18 пользователей получили оффер.\n\nОтвет должен содержать ровно четыре пронумерованных раздела:\n1. Конверсии: рассчитай конверсию между каждым последовательным этапом.\n2. Наибольшая относительная потеря: определи этап и величину потери.\n3. Возможные причины: приведи ровно три отдельные строки с метками `Причина 1:`, `Причина 2:`, `Причина 3:`.\n4. Данные для проверки: приведи минимум две отдельные строки с метками `Проверка 1:`, `Проверка 2:` и при необходимости следующие.\n\nПричины должны быть гипотезами, а проверки должны описывать данные/измерения, которые помогут эти гипотезы проверить.\nОтветь на русском языке, не более чем в 450 словах.",
+      "result_instruction": "Для автоматической проверки в самом конце ответа, после основного текста, выведи строку BENCHMARK_RESULT и затем один JSON-объект. После JSON ничего не пиши.\nПоля JSON:\n- view_to_save, save_to_apply, apply_to_interview, interview_to_offer: числа-доли от 0 до 1;\n- largest_relative_loss_stage: одно из [\"view_to_save\", \"save_to_apply\", \"apply_to_interview\", \"interview_to_offer\", \"other\"].\nНе заменяй основной анализ этим JSON-блоком."
+    }
+  },
+  {
+    "id": "python_debug",
+    "version": 1,
+    "category": "code_python",
+    "runner_ref": "single_turn_v1",
+    "scorer_ref": "python_debug_v1",
+    "verifier_ref": "benchmark_contract_v1",
+    "definition": {
+      "category": "code_python",
+      "reference": {
+        "algorithm": "sort_and_sweep",
+        "complexity": "O(n log n)",
+        "mutates_input": false
+      },
+      "version": 1,
+      "description": "Python debugging: корректность функции на скрытых edge cases",
+      "primary_predict": 2400,
+      "recovery_predict": 1000,
+      "max_words": 220,
+      "score_type": "python_debug_v1",
+      "completion_contract": {
+        "python_blocks": 1,
+        "terminal_result_json": true
+      },
+      "prompt": "Исправь функцию объединения замкнутых целочисленных интервалов.\n\nКонтракт `normalize_intervals(intervals)`:\n- вход — список двухэлементных списков целых чисел;\n- границы каждой пары могут быть записаны в обратном порядке;\n- верни НОВЫЙ список нормализованных интервалов, отсортированный по левой границе;\n- объединяй пересекающиеся и соседние целочисленные интервалы: `[1, 3]` и `[4, 5]` объединяются;\n- не изменяй входной список;\n- пустой вход возвращает пустой список.\n\nОшибочная версия:\n```python\ndef normalize_intervals(intervals):\n    intervals.sort()\n    merged = [intervals[0]]\n    for start, end in intervals[1:]:\n        if start < merged[-1][1]:\n            merged[-1][1] = end\n        else:\n            merged.append([start, end])\n    return merged\n```\n\nОтветь кратко: назови ошибки, затем приведи РОВНО ОДИН Python-блок только с исправленной функцией. Не добавляй imports, print, assert, тесты или файловый/сетевой ввод-вывод.",
+      "result_instruction": "В самом конце выведи BENCHMARK_RESULT и один JSON-объект с полями:\n- algorithm: одно из [\"sort_and_sweep\", \"other\"];\n- complexity: строка;\n- mutates_input: true/false.\nПосле JSON ничего не пиши."
+    }
+  },
+  {
+    "id": "retention_d7",
+    "version": 5,
+    "category": "code_data",
+    "runner_ref": "single_turn_v1",
+    "scorer_ref": "retention_d7_v5",
+    "verifier_ref": "benchmark_contract_v1",
+    "definition": {
+      "category": "code_data",
+      "reference": {
+        "technical_issue": "dt_accessor_on_object",
+        "date_dtype_strategy": [
+          "pandas_datetime_like",
+          "python_date"
+        ],
+        "d7_rule": "exact_calendar_day_plus_7",
+        "user_grain": "one_row_per_user",
+        "no_activity_in_denominator": true,
+        "registration_rule": "earliest",
+        "cohorts": [
+          {
+            "reg_date": "2026-01-01",
+            "users_registered": 4,
+            "users_retained_d7": 2,
+            "retention_d7": 0.5
+          },
+          {
+            "reg_date": "2026-01-02",
+            "users_registered": 3,
+            "users_retained_d7": 2,
+            "retention_d7": 0.6666666666666666
+          }
+        ]
+      },
+      "version": 5,
+      "description": "Python/pandas: точный D7 retention, grain, дедупликация и исполняемый код",
+      "primary_predict": 5000,
+      "recovery_predict": 1900,
+      "max_words": 650,
+      "score_type": "retention_d7_v5",
+      "prompt": "Ты senior Python-разработчик и data analyst. Проведи code review решения для 7-дневного retention и докажи корректность исправления на контрольных данных.\n\nЕсть DataFrame `events` со столбцами:\n- `user_id`\n- `event_time`: pandas datetime\n- `event_name`\n\n`registration` означает регистрацию.\n`activity` означает активность.\nОдин пользователь может иметь много `activity`-событий и технически несколько `registration`-событий; датой регистрации считается самое раннее `registration`.\n\nДля каждой даты регистрации нужно получить:\n- `users_registered`\n- `users_retained_d7`\n- `retention_d7`\n\nПользователь считается retained D7, если у него было хотя бы одно `activity`-событие РОВНО на 7-й КАЛЕНДАРНЫЙ день после даты первой регистрации.\nЭто сравнение календарных дат, а не интервал \"не менее 168 часов\".\nОдин пользователь должен учитываться не более одного раза в каждой метрике.\nПользователи без `activity` должны оставаться в знаменателе.\nНе вводи дополнительных бизнес-требований, цензурирования когорт или правил про полноту окна наблюдения: их нет в условии.\nВсе timestamps в контрольных данных timezone-naive и находятся в одной временной зоне.\n\nТекущий код:\n\n```python\nimport pandas as pd\n\nregistrations = (\n    events[events[\"event_name\"] == \"registration\"]\n    .groupby(\"user_id\")[\"event_time\"]\n    .min()\n    .reset_index()\n)\n\nregistrations[\"reg_date\"] = registrations[\"event_time\"].dt.date\n\nactivity = events[events[\"event_name\"] == \"activity\"].copy()\nactivity[\"activity_date\"] = activity[\"event_time\"].dt.date\n\ndf = registrations.merge(activity, on=\"user_id\", how=\"left\")\n\ndf[\"days_since_reg\"] = (\n    df[\"activity_date\"] - df[\"reg_date\"]\n).dt.days\n\ndf[\"retained_d7\"] = df[\"days_since_reg\"] >= 7\n\nresult = (\n    df.groupby(\"reg_date\")\n      .agg(\n          users_registered=(\"user_id\", \"count\"),\n          users_retained_d7=(\"retained_d7\", \"sum\")\n      )\n      .reset_index()\n)\n\nresult[\"retention_d7\"] = (\n    result[\"users_retained_d7\"] / result[\"users_registered\"]\n)\n```\n\nКонтрольные данные:\n\n```python\ntest_events = pd.DataFrame(\n    [\n        (\"u1\", \"2026-01-01 23:50\", \"registration\"),\n        (\"u1\", \"2026-01-08 00:01\", \"activity\"),\n        (\"u1\", \"2026-01-08 18:00\", \"activity\"),\n        (\"u2\", \"2026-01-01 23:30\", \"registration\"),\n        (\"u2\", \"2026-01-09 01:00\", \"activity\"),\n        (\"u3\", \"2026-01-01 12:00\", \"registration\"),\n        (\"u7\", \"2026-01-03 08:00\", \"registration\"),\n        (\"u7\", \"2026-01-01 20:00\", \"registration\"),\n        (\"u7\", \"2026-01-08 04:00\", \"activity\"),\n        (\"u4\", \"2026-01-02 08:00\", \"registration\"),\n        (\"u4\", \"2026-01-09 23:59\", \"activity\"),\n        (\"u5\", \"2026-01-02 23:30\", \"registration\"),\n        (\"u5\", \"2026-01-09 00:01\", \"activity\"),\n        (\"u5\", \"2026-01-09 12:00\", \"activity\"),\n        (\"u5\", \"2026-01-10 12:00\", \"activity\"),\n        (\"u6\", \"2026-01-02 20:00\", \"registration\"),\n        (\"u6\", \"2026-01-08 21:00\", \"activity\"),\n        (\"u6\", \"2026-01-10 00:00\", \"activity\"),\n    ],\n    columns=[\"user_id\", \"event_time\", \"event_name\"],\n)\ntest_events[\"event_time\"] = pd.to_datetime(test_events[\"event_time\"])\n```\n\nЗадание:\n\n1. Найди ВСЕ существенные ошибки текущего решения. Отдельно выдели техническую ошибку и логические ошибки grain.\n2. Для каждой ошибки объясни механизм искажения метрики.\n3. Укажи, какие части исходного решения уже корректны.\n4. Напиши корректную исполняемую реализацию на pandas в РОВНО ОДНОМ блоке ```python```.\n   В этом блоке обязательно определи функцию `calculate_retention_d7(events) -> pd.DataFrame`.\n   Функция должна принимать исходный DataFrame `events` и возвращать итоговый DataFrame.\n5. Перед финальной агрегацией обеспечь grain не более одной строки на пользователя.\n6. Покажи ТОЧНЫЙ ожидаемый `result` для `test_events` с двумя когортами и всеми тремя метриками.\n7. Отдельно объясни два D7 activity, D8 без D7, календарный D7 для `u1` при <168 часах и роль двойной регистрации `u7`.\n8. Не меняй определение retention и не добавляй требований, которых нет в задаче.\n\nОтветь на русском языке. Не повторяй контрольные данные и не приводи исправленную реализацию больше одного раза. Объясняющий текст вне Python-блока и вне BENCHMARK_RESULT должен быть не более 650 слов.",
+      "result_instruction": "Для автоматической проверки в самом конце ответа, после основного текста, выведи строку BENCHMARK_RESULT и затем один JSON-объект. После JSON ничего не пиши.\nПоля JSON:\n- technical_issue: одно из [\"dt_accessor_on_object\", \"none\", \"other\"];\n- date_dtype_strategy: одно из [\"pandas_datetime_like\", \"python_date\", \"other\"];\n- d7_rule: одно из [\"exact_calendar_day_plus_7\", \"elapsed_168_hours\", \"day7_or_later\", \"other\"];\n- user_grain: одно из [\"one_row_per_user\", \"activity_event_rows\", \"other\"];\n- no_activity_in_denominator: true/false;\n- registration_rule: одно из [\"earliest\", \"latest\", \"all\", \"other\"];\n- cohorts: массив ровно из двух объектов с полями reg_date, users_registered, users_retained_d7, retention_d7.\nНе заменяй основной code review этим JSON-блоком."
+    }
+  }
+]

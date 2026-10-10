@@ -1,15 +1,76 @@
 schema: bull-llm-ai-context
 schema_version: 1
-document_version: 0.28.0.7
-client_version: v0.28.0.7
-documentation_version: v0.28.0.7
-updated: 2026-10-07
+document_version: 0.29.0.1
+client_version: v0.29.0.1
+documentation_version: v0.29.0.1
+updated: 2026-10-11
 language: ru
+
+github_publication_2026_10_11:
+  owner_authorization: explicit_release_publication_and_repository_home_update
+  tag: v0.29.0.1
+  status: public_prerelease_edition; not_latest_stable; manual_acceptance_open
+  release_link: root_README_version_specific_release_and_asset_links
+  date_timezone: Europe/Moscow
+  repository_channels: Issues_and_required_labels_verified; Discussions_and_private_vulnerability_reporting_enabled
+  source: audited_fresh_ZIP_snapshot_on_existing_public_history; no_private_git_history
+  byte_integrity: root_gitattributes_disables_line_ending_conversion; public_commit_matches_manifest_and_ZIP
+  assets: [BULL-v0.29.0.1-Bundle.zip, BULL-v0.29.0.1-Bundle.sha256.txt]
+  gates: UTF8_668; cp1251_668; startup_18; manifest_privacy_exact_ZIP_and_isolated_Setup
+  runtime_prompt_and_scorer_changes: none
+
+github_release_preparation_2026_10_11:
+  scope: full_EN_RU_repository_pages_policies_issue_forms_roadmap_and_release_handoff
+  repository_metadata: Docs/GITHUB_REPOSITORY.md
+  release_body: GITHUB_RELEASE_v0.29.0.1.md
+  maintainer_guides: [Docs/en/RELEASING.md, Docs/ru/RELEASING.md]
+  rights: LICENSE_unchanged; THIRD_PARTY_NOTICES.md; no_third_party_models_engines_or_Python_bundled
+  release_links: version_specific_tag; candidate_status_explicit; latest_badge_not_candidate_download
+  delivery: rebuilt_ZIP_and_checksum; fresh_audited_repository_snapshot_without_private_git_history
+  publication: preparation_was_local; subsequent_owner_authorized_publication_in_github_publication_2026_10_11
+  acceptance: unchanged_open_manual_checks; use_draft_or_prerelease_until_acceptance
+  runtime_prompt_and_scorer_changes: none
+
+documentation_sync_2026_10_11:
+  scope: author_storage_and_exact_version_commands; portable_agent_instructions; citation_issue_forms_and_historical_record_labels
+  instructions: AGENTS.md_in_public_bundle; no_private_parent_workspace_dependency
+  readiness: Docs/RELEASE_READINESS.md
+  runtime_prompt_and_scorer_changes: none
+  release_gate: rebuild_final_ZIP_and_checksum_from_synchronized_tree; do_not_reuse_pre_sync_archive
+  manual_acceptance: still_open; subsequent_publication_authorized_as_prerelease
+
+followup_2026_10_10:
+  verified_offline_regression: 668/668
+  root_client_exe_before_setup: absent
+  client_payload: Setup/BULL.launcher.bin; manifest_verified_before_materialization
+  materialization: after_full_regression_and_connection_setup_or_skip
+  home_status: [integrity, connection]
+  pack_status: Test_settings_and_Model_testing; read_only_pack_then_case_browser
+  diagnostics: basic_or_full_setup_regression
+  empty_chat: configuration_only; no_empty_autosave
+  gpu_lab: removed; normal_resource_telemetry_preserved
+  chat_think: capability_fallback_FAST; one_explicit_HTTP400_retry_tools_off_only
+  lifecycle: reap_owned_children_wait_close_pipes; never_stop_external_server
+  console_logo: 24_bounded_flushed_rows; canonical_48x24_unchanged
+  visual_acceptance: live_Windows_Terminal_pending; file_HTML_browser_blocked
+  exit_acceptance: owned_child_tests_passed; real_user_folder_deletion_pending; third_party_locks_not_excluded
+  live_model_inference: not_performed_in_followup; read_only_resource_probe_is_not_inference_acceptance
+  telemetry: all_four_counters_value_or_NA_reason; optional_GPU_counters_independent
+  live_telemetry_probe: finite_read_only_selected_pinned_host; GPU_VRAM_CPU_RAM_measured
+  ssh_spaces_fix: quote_UserKnownHostsFile_config_value; StrictHostKeyChecking_yes_unchanged
+  language_pack: bull_language_comparison@1.0.1; scorer_v2; v1_readable
+  packaging: exact_required_ZIP_allowlist; mandatory_manifest_inventory_gate; all_four_base_packs
+  benchmark_prompts_and_references: unchanged_from_language_pack_1.0.0
+  reports: separate_RU_EN_native_metrics_and_matched_pairs; no_merged_winner
+  roadmap: safe_engine_owned_or_declarative_pack_specific_report_profiles
+  evidence: Docs/FOLLOWUP_2026_10_10.md
 
 project:
   name: BULL
   qualified_name: BULL — Benchmark Lab
-  release: v0.28.0.7
+  release: v0.29.0.1
+  release_name: Pack Library
+  publication: GitHub_prerelease; not_latest_stable; manual_acceptance_open
   frozen_stable_baseline: v17.3.2
   platform:
     primary: Windows 11
@@ -25,6 +86,7 @@ project:
   license_status: MIT
 
 agent_rules:
+  portable_instructions: AGENTS.md_in_bundle_root
   mandatory_reads:
     - AGENTS.md
     - Docs/AI_CONTEXT.yaml
@@ -41,18 +103,22 @@ agent_rules:
     - prefer small verifiable commits in a clean repository
 
 release_layout:
-  bundle: BULL-v0.28.0.7-Bundle
-  public_archive_files: 256
-  public_archive_sha256: 492c7f1208845492a8fa5fcfee617da585612050e51e7a8dc075a4328c595b77
-  core: bull_client_v0.28.0.7.py
+  bundle: BULL-v0.29.0.1-Bundle
+  archive_inventory: RELEASE_MANIFEST.json
+  archive_checksum: external BULL-v0.29.0.1-Bundle.sha256.txt; never self-referential
+  previous_published_archive: {version: v0.28.0.7, files: 256}
+  core: bull_client_v0.29.0.1.py
   launchers:
-    client: BULL-v0.28.0.7.cmd
-    benchmark_lab: BULL-Benchmark-Lab-v0.28.0.7.cmd
-    agent_lab: BULL-Agent-Lab-v0.28.0.7.cmd
+    setup: Setup.exe; Setup.cmd_fallback
+    client: BULL.exe_materialized_only_after_Setup_completion
+    client_payload: Setup/BULL.launcher.bin; exact_manifest_hash_required
+    compatibility_client: BULL-v0.29.0.1.cmd
+    benchmark_lab: BULL-Benchmark-Lab-v0.29.0.1.cmd
+    agent_lab: BULL-Agent-Lab-v0.29.0.1.cmd
   apps:
-    client: Apps/bull_client_app_v0_28_0_7.py
-    benchmark_lab: Apps/benchmark_lab_v0_28_0_7.py
-    agent_lab: Apps/agent_benchmark_v0_28_0_7.py
+    client: Apps/bull_client_app_v0_29_0_1.py
+    benchmark_lab: Apps/benchmark_lab_v0_29_0_1.py
+    agent_lab: Apps/agent_benchmark_v0_29_0_1.py
   public_namespace: Shared/bull_llm
   shared_package: Shared/bull_llm
   schemas_directory: Schemas
@@ -119,7 +185,23 @@ architecture:
       - reports do not recalculate scores
       - artifact writes are rooted bounded finite-json and atomic
       - ollama and llama_cpp adapters share one contract suite
-      - current benchmark prompts scorers recovery and runtime options are unchanged
+      - T2 extraction preserved its benchmark prompts scorers recovery and runtime options; later corrections are separately versioned
+  simplified_navigation:
+    scope: current_v0.29.0.1_prerelease
+    home: [model_testing, chat, test_settings, connection_settings, program_settings, additional]
+    compare: [selected_pack, user_file, user_prompt, resume, saved_results, read_only_pack_browser_P, language_tracks]
+    test_settings: [install_base_ZIPs, import_local_or_HTTPS_ZIP, select_pack_and_cases, remove_version_to_BULL_bin, open_library, author_workshop, read_only_pack_browser_7]
+    additional: [session_status, application_diagnostics_basic_or_full, guide, command_reference, Agent Benchmark]
+    command_entry: Home or Chat; Additional command reference returns /help all
+    removed_ui_duplicates:
+      - unused menu_text renderer and connections_ui.advanced_menu alias
+      - redundant connection entry in engine settings
+      - duplicate library-management entry in Compare
+      - separate command-entry menu and Advanced command prompt
+      - visible profile-list and legacy CHAT Core shortcuts; slash commands retained
+      - unreachable named Home dispatcher branches; named shortcuts use slash dispatcher
+    preserved: [historical_test_content, historical_scorers, runtime_pipeline, profiles, resume, reports, chat_tools, Agent Benchmark]
+    storage_consolidation: deferred until an explicit migration design protects UserTests and prompt history
   brand:
     canonical_master: Assets/Brand/bull-logo-canonical.png
     lock: Assets/Brand/brand-lock.json
@@ -219,21 +301,29 @@ ssh_alias_onboarding:
   guide: Docs/SSH_QUICKSTART.md
 
 terminal_brand:
-  startup_mark: pre-rendered Chafa 1.18.3 full-color pixel bull at width 30
+  pack_library_patch:
+    checkpoint_storage: bounded Windows replace retry; complete fsynced payload retained on persistent failure; explicit recovery creates a new checkpoint
+    windows_cpu_ram: fixed engine-owned GetSystemTimes and GlobalMemoryStatusEx; JSON protocol independent of locale; unknown inference host never borrows local counters
+    semantic_status: saved successes remain green; missing GPU_VRAM_CPU_RAM each explicit N/A with fixed reason; optional_GPU_counters_independent
+    pack_installation: single number, comma-separated distinct numbers or all; batch install never activates multiple packs
+    home: Model testing 1; Chat 2; Test settings 3; Connection settings 4; Program settings 5; Additional 6
+  startup_mark: pre-rendered font-independent RGB background cells with ASCII spaces; 48 columns by 24 rows; single resample from locked crop
   startup_verification_splash:
     module: Shared/bull_llm/startup_window.py
-    asset_pattern: Assets/Brand/splash-{APP_VERSION}.png
+    asset_pattern: Assets/Brand/splash-{APP_VERSION}.png or splash-matrix-{APP_VERSION}.png for Matrix variants
     behavior: separate native desktop window during the mandatory startup gate; closes before offline-first connection handling
-    progress: exact completed/total check count plus current check name, both emitted by the offline harness; no inferred counter
+    progress: exact percentage and completed/total check count plus current check name; 18 essential checks; no inferred counter
+    artwork: approved rich red startup-hero.png or matching startup-hero-matrix.png; version is a live label, not baked text
+    gate: Tests/startup_smoke.py; immutable engine/app/schema/UI hashes against manifest; module imports and atomic JSON roundtrip; no inference or user-pack loading
     runtime_dependencies: Python stdlib Tk only; GUI absence fails open without weakening the gate
     safety: exact versioned local PNG only; no shell, renderer, external URL, or user-provided path
-  display_count: once per process
-  page_mark: the same canonical bounded Chafa render plus expanded product name on every ui_header
-  theme_behavior: default preserves the source asset exactly; other themes recolour saturated brand pixels without changing geometry
-  source_asset: Assets/Brand/bull-mark-512.png
-  render_asset: Assets/Brand/bull-mark-chafa-full-30.ansi.b64
-  runtime_chafa_dependency: false
-  terminal_escape_policy: SGR color only with bounded monochrome fallback
+  startup_mark_display_count: once per process; page headers redraw separately
+  page_mark: the same canonical bounded console render plus expanded product name on every ui_header
+  theme_behavior: active theme recolours saturated brand pixels at every render without changing canonical geometry
+  source_asset: locked master crop from Assets/Brand/bull-logo-canonical.png
+  render_asset: Assets/Brand/bull-mark-console-48.ansi.b64
+  generation: python Tools/build_brand_assets.py --terminal-only; no runtime image dependency
+  terminal_escape_policy: exact RGB background cells and row resets only; bounded ASCII silhouette without colours
   encoding: UTF-8 console bootstrap with forced-cp1251 release regression
   benchmark_behavior_changed: false
 
@@ -241,13 +331,13 @@ localization:
   startup_selector: English or Russian before backend initialization on first run only
   default_language: en
   persisted_in: ui_settings.json
-  later_change: More -> Language and appearance
+  later_change: Home -> Program settings
   english_catalog: Assets/Localization/ui.en.json
   current_documentation:
     index: Docs/README.md
     english: Docs/en
     russian: Docs/ru
-    paired_topics: [user_guide, benchmarks, connections, security, experimental, development, release_notes]
+    paired_topics: [user_guide, installation, benchmarks, results, connections, security, experimental, development, release_notes, pack_library, author_workshop, pack_author_llm, public_roadmap, releasing]
   dynamic_error_policy:
     - localize recovery guidance at the UI boundary
     - never echo legacy-language exception text into a different selected language
@@ -260,7 +350,15 @@ localization:
 
 ui_theme:
   default: bull_red
-  visible_choices: [bull_red, matrix_bull, high_contrast]
+  visible_choices: [bull_red, matrix_bright]
+  display_names: [BULL Red, BULL Matrix]
+  matrix_id: matrix_bright; legacy Matrix BULL, matrix_bull, matrix_balanced and matrix_soft migrate here
+  retired_contrast: no_menu_or_palette; old_saved_value_migrates_to_bull_red
+  persistence: ui_settings.json in application directory; language updates retain the theme; BULL_UI_THEME overrides at startup
+  console_initialization: Windows UTF-8 input/output code pages; revalidate colour handle after boot and on theme choice; no stale enabled flag
+  console_host: Setup.exe_and_BULL.exe_use_same_default_Terminal_profile_and_120x52_window; per_console_Consolas20_fallback; no_global_settings
+  shortcut_icons: red_root_ICO_or_Assets_Brand_bull_icon_matrix_ICO; exact_owned_target_and_working_directory_only; targeted_shell_notification; no_global_cache_deletion
+  verification: red_to_Matrix_Home_redraw_and_new_core_instance; display_name_and_environment_aliases; language_change_preservation; simulated first-launch console-mode reset
   brand_colors:
     primary: '#FF3C52'
     action: '#FF3C52'
@@ -304,12 +402,17 @@ benchmark:
     - simpson
   language_tracks:
     pack: BenchmarkPacks/bull_language_comparison
-    scorer: bilingual_language_contract_v1
+    current_version: 1.0.1
+    scorer: bilingual_language_contract_v2
+    historical_scorer: bilingual_language_contract_v1; unchanged; retained_hash_locked_1.0.0_fixture
+    scorer_scope: deterministic_terminal_JSON_fields_language_and_script_purity; not_comprehensive_semantic_quality
+    content_policy: prompts_references_context_and_generation_budgets_unchanged_from_1.0.0; no_automatic_pack_update_or_rescore
     russian_suite: language_ru
     english_suite: language_en
     bilingual_suite: bilingual
     paired_contract: same semantic task, JSON contract, context and output budget; prompt language differs
-    interpretation: compare Native score, task completion, warm throughput and wall time by track; do not merge tracks into one quality score
+    interpretation: separate_track_Native_checks_language_compliance_script_purity_task_completion_native_wall_time_warm_throughput_and_seed_ranges; no_merged_winner
+    selection: one_exact_installed_compatible_pack_before_model_discovery; validated_nonempty_track_snapshot
   category_weights:
     russian_language_style: 0.30
     dialogue_context: 0.20
@@ -546,6 +649,15 @@ visual_report:
   live_progress:
     per_completed_run: current_test_only_provisional_rollup
     never_claims: [overall_winner, completion_percent_from_token_budget]
+  language_profile:
+    modules: [Shared/bull_llm/bilingual_results.py, Shared/bull_llm/results_report.py]
+    status: implemented_RU_EN_terminal_and_HTML; generic_aggregate_HTML_collapsed_and_not_a_language_ranking
+    pair_identity: model_backend_digest_pack_scorer_seed_run_recorded_effective_settings_and_runtime_fingerprint
+    pairing: exact_one_RU_and_one_EN; ambiguous_and_unmatched_excluded_from_differences
+    differences: Native_score_RU_minus_EN_pp; native_wall_time_RU_minus_EN_seconds
+    pair_outcomes: [both_all_checks_pass, RU_only, EN_only, neither]
+    limitations: six_tasks_limited_discrimination; tokenizer_dependent_tok_per_second; seed_range_not_CI; v1_caveat; no_rescore
+    general_pack_profiles: not_implemented; planned_RPT1_engine_owned_or_schema_validated_declarative_only
 
 resume:
   checkpoint_schema_version: 9
@@ -622,11 +734,13 @@ schemas:
   evidence_provenance: bull-evidence-provenance@1
 
 verification:
-  current_offline_regression: 401/401
-  public_archive_manifest_files: 256
+  current_offline_regression: 668/668
+  mandatory_startup_checks: 18/18
+  published_v0_28_0_7_regression: 401/401
+  archive_inventory_authority: RELEASE_MANIFEST.json
   public_identifiers: BULL_only
-  clean_python_no_site_packages: pass
-  runtime_third_party_python_dependencies: none_on_windows
+  clean_python_no_site_packages: pass_for_essential_startup_checks
+  runtime_third_party_python_dependencies: none_for_basic_client; analytical_scorer_regression_requires_numpy_pandas_scipy_matplotlib
   scorer_gold_set: 15/15
   real_run_offline_audit:
     records: 216
@@ -678,6 +792,11 @@ packaging_and_brand_cleanup_hotfix:
     - inference and recovery pipeline is unchanged
 
 known_limits:
+  - terminal_mark_bounded_row_fix_implemented; full_height_width_first_and_repeat_launch_and_immediate_theme_switch_require_live_acceptance; restart_not_a_fix
+  - owned_child_shutdown_verified_automatically; all_Windows_folder_locks_not_proven_resolved; user_deletion_acceptance_open
+  - no_live_chat_benchmark_resume_inference_in_followup; selected_pinned_host_resource_probe_only
+  - specialized_RU_EN_report_implemented; generic_pack_report_profile_mechanism_not_implemented
+  - language_pack_six_tasks_have_limited_semantic_discrimination; scorer_v2_script_checks_not_expert_language_review
   - Agent Benchmark MVP is Ollama tools only with a versioned restricted Python repair fixture
   - Agent Tuning automated matrices and arbitrary isolated build environments are deferred
   - Agent context before requests and after tools is estimated; measured prompt counts remain separate
@@ -693,9 +812,9 @@ agent_benchmark:
   maturity: MVP
   module: Shared/bull_llm/agent_benchmark
   guide: Docs/en/EXPERIMENTAL.md and Docs/ru/EXPERIMENTAL.md
-  entrypoint: Apps/agent_benchmark_v0_28_0_7.py
-  launcher: BULL-Agent-Lab-v0.28.0.7.cmd
-  menu_path: More > Experimental features > Agent Benchmark
+  entrypoint: Apps/agent_benchmark_v0_29_0_1.py
+  launcher: BULL-Agent-Lab-v0.29.0.1.cmd
+  menu_path: Additional > Agent Benchmark
   config_schema: bull-agent-config
   run_schema: bull-agent-run
   schema_version: 1
@@ -723,7 +842,7 @@ agent_benchmark:
   crash_recovery: new clean attempt with parent_run_id; no mid-task automatic resume
   comparison: independent metrics; no universal score or automatic best configuration
   tests: Tests/agent_benchmark_regression.py
-  startup_gate: full suite; cache includes all Shared, Apps, Tests Python/JSON paths and hashes
+  startup_gate: 18_essential_checks_every_launch_no_cached_pass; full_suite_mandatory_in_Setup_Run-Tests_and_release_builds
 
 hardening_audit:
   version: v0.19.0.1 (retained)
@@ -770,13 +889,8 @@ ux_v0_20_0_0:
   unchanged: [benchmark prompts, scorers, runtime pipeline, generation options, Agent runner and task verifier]
   tests: Tests/ux_regression.py
 
-gpu_lab:
-  maturity: experimental v1
-  guide: Docs/en/EXPERIMENTAL.md and Docs/ru/EXPERIMENTAL.md
-  menu: More > Experimental features > GPU Lab
-  command: /gpu
-  module: Shared/bull_llm/gpu_lab
-  server: Server/Gpu-Lab-Worker.ps1
+gpu_lab_removed_history:
+  maturity: removed_by_user_request_2026_10_10; no menu module or worker shipped
   platform: Windows + Ollama only; local or existing pinned SSH
   selection: complete stable NVIDIA GPU UUIDs
   scope: new separate performance workloads; no quality scoring or code execution
@@ -798,7 +912,6 @@ gpu_lab:
   stats: count, mean, sample SD, min/max; verified and diagnostic rows separate; no ranking/CI/Pareto
   resume: completed pairs immutable; partial pair archived then replayed from fresh process
   compatibility: reject changed config, workload hash, inventory/driver, Ollama version or model digest
-  test: Tests/gpu_lab_regression.py; synthetic Windows executables, no model/GPU load
   live_hardware_and_wan_validated: false
   unchanged: existing benchmark prompts, scorers, inference pipeline, Agent runner and verifier
   rename: BULL public identity applied; legacy artifact schemas and compatibility aliases retained
@@ -905,6 +1018,7 @@ v0_27_release:
     - Compare models
     - Chat with a model
     - Connection
+    - Test packs
     - More
   progressive_disclosure:
     more: [saved results, language and appearance, saved session status, help, exact commands, experiments]
@@ -966,13 +1080,156 @@ v0_27_release:
 
 planned_roadmap:
   source: Docs/BULL_TRANSITION_ROADMAP.md
-  revision: '1.2'
+  revision: '1.10'
   approved_on: '2026-10-03'
-  scope: approved priorities and acceptance criteria; U1 is released, later stages are not implemented features
+  priorities_updated_on: '2026-10-10'
+  scope: PK1_and_followup_implemented_local; visual_exit_and_live_inference_acceptance_open; Linux_roadmap_only
   product_goal: help users choose installed models for their own tasks using trustworthy quality and timing evidence
-  interface: terminal first; reuse the existing four-action Home
-  delivery_order: [U1, U2, reliable_runs, P1]
+  interface: terminal first; five primary Home sections plus flat Additional tools; direct Test settings access
+  delivery_order: [PK1, P1, U2, reliable_runs]
+  before_next_architecture_stage: PK1_user_acceptance; preserve_existing_delivery_order
+  followup_backlog: [RPT1, LANG1]
+  followup_scheduling: relative_to_P1_U2_requires_owner_decision
   stages:
+    PK1:
+      name: BULL Pack Library
+      target_version: v0.29.0.1
+      status: implemented_public_prerelease; manual_acceptance_open
+      implementation_started: true
+      requirements_accepted_on: '2026-10-09'
+      specification: Docs/PACK_LIBRARY_SPEC.md
+      author_instructions: [Docs/en/PACK_AUTHOR_LLM.md, Docs/ru/PACK_AUTHOR_LLM.md]
+      foundation: existing PackRegistry and versioned manifest contracts
+      current_gap: no_known_unimplemented_PK1_core_step; terminal_visual_exit_and_live_inference_acceptance_open
+      goals:
+        - separate engine responsibilities from benchmark content
+        - install select disable remove and distribute packs independently of BULL
+        - explicitly show active pack versions selected tests evaluated skills and selection reasons
+        - preserve pack identity and hashes in records and checkpoints
+        - preserve existing prompt reference and score behavior during extraction
+      decisions:
+        base_bundle: separate optional ZIP content shipped with application; not embedded in engine
+        first_run: install base pack or import own ZIP or skip; benchmark without packs offers installation again
+        import: local_ZIP_or_explicit_HTTPS_archive_link; no_network_catalog_background_download_or_auto_update
+        windows_storage: '%LOCALAPPDATA%/BULL/BenchmarkPacks'
+        storage_visibility: show location source disk usage removal and clean-install instructions
+        run_selection: exactly one pack at an explicit version; whole pack or selected case IDs
+        mixed_domains: supported within a single pack; explicit coverage in preview and report
+        author_parameters: validated test and model defaults; preview effective values and user overrides; never mutate chat settings
+        executable_extensions: data-only now; isolated evaluation deferred
+        open_task_scoring: deterministic declared criteria plus separate manual review; no automatic LLM judge in PK1
+        authoring: manually or with cloud LLM; editable sources documentation criteria and human validation; independently distributed ZIP
+        version_updates: explicit new version; never mutate published versions or active checkpoint snapshots
+      steps:
+        PK1.0: requirements specification and paired LLM authoring instructions
+        PK1.1: safe ZIP validation atomic installation and shared immutable version storage
+        PK1.2: golden contracts and extraction of built-in content; remove mandatory CHAT Core dependency
+        PK1.3: first-run installation library single-pack selection selected cases and run preview
+        PK1.4: source-to-ZIP builder editable author workspace and positive negative fixture validation
+        PK1.5: report provenance resume bilingual guides and release gates
+      published_ui_available: true
+      implemented_foundation:
+        module: Shared/bull_llm/evaluation/pack_library.py
+        tests: Tests/pack_library_regression.py
+        scope: local ZIP preflight bounded extraction atomic install exact-version lookup and per-entry findings
+        production_catalog_wired: true
+        author_source_builder_available: true
+      implemented_engine_boundary:
+        module: Shared/bull_llm/evaluation/catalog.py
+        tests: Tests/engine_boundary_regression.py
+        diagnostic_gold: Tests/Fixtures/engine_boundary_gold.json
+        diagnostic_contracts: 16 definitions and 15 complete scorer-result hashes
+        production_catalog: validated pack definitions only; no embedded or diagnostic fallback
+        mandatory_pack: none
+        capabilities: static engine-owned runner scorer verifier allowlists independent of content
+        content_migration: CHAT Core unchanged; four remaining tasks in bull_extended_core@1.0.0
+        empty_catalog: valid; unavailable selected tests fail before backend access
+        compatibility: builtin_benchmarks facade is diagnostics and historical audit only
+        preserved: prompt reference execution contracts and scorer results
+        regression_result: 439/439
+        next_step: PK1_user_acceptance_then_P1_Linux; planned_only
+        remaining: none in PK1 engine boundary
+      implemented_selection:
+        stage: PK1.3 Choose and Run
+        modules: [Shared/bull_llm/evaluation/pack_selection.py, Shared/bull_llm/pack_library_ui.py]
+        tests: Tests/pack_selection_regression.py
+        first_run: Setup_optional_base_or_local_or_explicit_HTTPS_ZIP_or_skip; library_selection_separate_from_installation; no_model_inference
+        root: '%LOCALAPPDATA%/BULL/BenchmarkPacks'
+        bundled_zip_directory: BasePacks
+        production_catalog: one exact selected installed version; no bundle/private-root aggregate
+        loose_user_tasks: explicit separate workflow; never appended to selected pack
+        case_selection: whole pack or nonempty distinct subset
+        approval: ZIP preview plus manifest and compiled-content digest recheck before installation
+        snapshots: exact pack identity both hashes selected IDs coverage reason and title in spec and raw records
+        subset_label: explicit in plan terminal results and HTML; not an official full-pack score
+        checkpoint_binding: new complete snapshots resume independently of installed packs; old partial snapshots require exact installed content
+        code_checks: selected engine executable scorers require explicit EXECUTE consent bound to case IDs and immutable content; not a sandbox
+        removal: one validated version moved to Trash; manual recovery and disk cleanup documented
+        publication: included_in_v0.29.0.1_prerelease; earlier_gate_counts_are_historical
+        verification: Run-Tests.ps1 465/465; cp1251 selection checks 20/20; 223 mandatory files present; source privacy audit passed
+      implemented_author_workshop:
+        stage: PK1.4 Author Workshop
+        modules: [Shared/bull_llm/evaluation/author_workshop.py, Shared/bull_llm/evaluation/author_template.py, Shared/bull_llm/author_workshop_ui.py]
+        tool: Tools/build_author_pack.py
+        tests: Tests/author_workshop_regression.py
+        guides: [Docs/en/AUTHOR_WORKSHOP.md, Docs/ru/AUTHOR_WORKSHOP.md]
+        menu: Home -> Test settings -> Author Workshop
+        source_schema: bull-pack-workspace@1
+        fixtures_schema: bull-author-fixtures@1
+        source_formats: strict documented bull-user-test YAML and unscored UTF-8 TXT
+        compilation: existing user_contract_v2 and none refs only; manifest gold lock and source hashes generated
+        fixture_gate: positive score 1 and no failures; negatives exact score and failed IDs; every criterion has negative coverage
+        validation_scope: declared deterministic checks only; reference truth and domain validity require human review
+        storage: Workspaces for editable sources and PackExports for ZIPs under the shared library
+        default_trust: private experimental draft; rights reviewed before sharing
+        code_execution: none; no backend API or network calls
+        output: deterministic ZIP; atomic no-clobber publication; source digest bound to UI preview; unchanged installed versions and selection state
+        disclosure: ZIP retains source prompts criteria and fixture answers; not a share-safe report
+        copy_policy: exact installed workshop-authored pack plus verified sources and different explicit version
+        native_pack_conversion: unavailable without author sources; never substitute keyword rules for native scorers
+        parameters: bounded allowlist compiled to established defaults; ctx not num_ctx; named run overrides retain existing precedence
+        limits: registry and ZIP budgets remain; per-source 256 KiB prompt 50000 chars criteria 20; no loose-loader 100-task truncation
+        publication: included_in_v0.29.0.1_prerelease; stable_v0.28.0.7_unchanged
+        verification: Run-Tests.ps1 498/498 including 33 author-workshop contracts; full cp1251 498/498; 230 mandatory files; source audit 297 files passed
+      implemented_evidence_release:
+        module: Shared/bull_llm/evaluation/pack_evidence.py
+        tests: Tests/pack_evidence_regression.py
+        snapshot_schema: bull-pack-run-snapshot@1
+        storage: full manifest compiled definitions and consent-bound selection in private spec checkpoint and evidence
+        snapshot_budget: 16 MiB total; existing 8 MiB manifest and compiled JSON limits
+        resume: validated snapshot only; no installed-library lookup or newest-version fallback
+        changed_engine_checks: scorer and verifier implementation digests must match; force cannot bypass
+        legacy_checkpoint: without full snapshot needs the exact installed pack
+        public_provenance: allowlisted ID version hashes selected count total count coverage reason engine version; no author text prompts criteria or reference values
+        html: escaped pack identity title coverage and manifest/compiled hashes; no task snapshot
+        integrity_limit: hashes detect changes; not signatures or authenticated consent
+        regression: 518/518; 17 snapshot/evidence unit contracts and three additional client integrations
+        unchanged: built-in prompts scorers runtime recovery and base pack bytes
+        release_gates: Build-Release.ps1 source cp1251 staging manifest ZIP and unpacked integration
+        next: PK1_user_acceptance_then_P1_Linux; no_porting_in_this_release
+      acceptance:
+        - new compatible pack needs no application source changes
+        - menu chat and saved reports remain available without installed packs
+        - chosen run content is visible before inference
+        - pack updates do not mutate an active checkpoint
+    PK1_acceptance:
+      status: open_after_automated_followup_gates
+      automated: UTF8_668_cp1251_668_startup_18_manifest_exact_ZIP_and_extracted_Setup_passed
+      manual: [clean_install_and_repeat_terminal_geometry, immediate_theme_switch, folder_deletion_after_exit, live_chat_benchmark_resume_local_and_SSH]
+      publication: owner_authorized_prerelease; acceptance_remains_open
+    RPT1:
+      name: pack_specific_report_profiles
+      status: planned; specialized_RU_EN_view_already_implemented
+      target_version: TBD
+      safety: engine_owned_or_schema_validated_declarative_profiles; no_pack_HTML_JS_or_code
+      acceptance: allowlisted_metrics_units_denominators_unknowns_coverage; native_recovery_separate; offline_privacy; versioned_generic_fallback; no_rescore
+    LANG1:
+      name: discriminative_language_content_and_methodology
+      status: research_planned; scorer_v2_script_penalty_already_implemented
+      target_version: TBD
+      sequence: review_prompt_reference_and_language_requirements; separate_scorer_rubric_then_versioned_content; new_inference_baseline
+      acceptance: paired_coverage_false_positive_negative_fixtures_human_review_and_cross_model_discrimination; no_merged_winner
+      preservation: historical_versions_and_scores_immutable; no_runtime_change_in_same_content_or_scorer_change
     U1:
       name: BULL Clear Choice
       target_version: v0.28.0.7
@@ -996,7 +1253,7 @@ planned_roadmap:
         - strict JSON claims have explicit type and terminal-boundary checks
         - substring checks are not presented as semantic or linguistic evaluation
         - new users can create a task compare models and export without expert menus
-        - startup regression duration is measured before deciding on startup-gate changes
+        - startup regression split after measuring cold startup; 18 essential boot checks, full suite remains a release gate
       open_findings_from_v0_27_0_1: []
       resolved_in_development:
         - equal decision utilities now return equal candidates rather than model-name tie breakers
@@ -1007,9 +1264,10 @@ planned_roadmap:
       change_policy: separate scorer template report installer permissions and orchestration PRs; never silently rescore old artifacts
     U2:
       name: BULL Quick Compare
-      target_version: v0.28.1.0
+      target_version: TBD_after_PK1_and_P1
+      previous_version_target: v0.28.1.0
       status: planned
-      depends_on: [U1]
+      depends_on: [U1, PK1]
       candidate_pack: bull_choose@1.0.0
       target_case_count: '5-8'
       modes: [quick_overview, confirm_result]
@@ -1031,16 +1289,22 @@ planned_roadmap:
       delivery: separate fault-injection and hardware-metric changes
       acceptance: live local SSH disconnect restart and observed-placement evidence supplements mocks
     P1:
-      name: BULL Anywhere
+      name: BULL Anywhere - Linux
       target_version: TBD
       status: planned
+      depends_on: [PK1]
+      implementation_started: false
       prerequisite: extract production backend and transport through existing BackendAdapter contracts
-      initial_scope: [Linux client, macOS client, chat, compare, UserTests, local reports, HTTP, pinned SSH]
+      initial_scope: [Linux terminal client, chat, compare, independently installed packs, UserTests, local reports, HTTP, pinned SSH]
+      deferred_platforms: [macOS]
       excluded: [GPU Lab parity, Windows installer parity, server OS deployment, implicit MLX equivalence]
       controls_preserved: [SSH pinning, no untrusted ProxyCommand, data-only packs, offline-first]
       acceptance: separate Unix CI and documented live client-server matrix; no certified label without validation
-      scheduling: may precede full T5.2 when supported by user demand; does not displace U1 correctness
+      scheduling: next after PK1 acceptance; roadmap only until pack separation is complete
   later_stages:
+    config_boundary: separate model settings from test parameters with explicit precedence and provenance
+    isolated_evaluation: executable author scorers and complex checks only with an isolated executor and explicit permissions
+    creative_evaluation_research: manual rubric and blind review first; local or external LLM judges require resource privacy and bias study
     T6: Field Lab after isolated executor foundation; version TBD
     T7: Open Range SDK and external adapters; version TBD
     T8: BULL One v1.0.0 after the existing stability and release gates
@@ -1052,3 +1316,45 @@ planned_roadmap:
     excluded_success_proxies: [test count alone, GitHub stars, pack count]
   deferred: [GUI, hosted leaderboard, marketplace, branding redesign, automatic model downloads]
   implementation_or_publication_completed_by_this_plan: false
+
+client_setup:
+  status: implemented_in_v0.29.0.1_prerelease
+  entrypoint: Setup.exe; Setup.cmd_fallback; Setup.ps1_bootstrap
+  native_launchers: Tools/BullLauncher.cs_compiled_by_Tools/Build-Windows-Launchers.ps1_at_release_build; unsigned_NET_Framework; bounded_exact_binary_allowlist
+  implementation: Tools/install_bull.py; Shared/bull_llm/installer.py
+  dependencies: explicit_confirmed_private_Runtime_Python_venv_if_analytical_verifier_libraries_missing; binary_wheels_from_PyPI_only
+  launch_interpreter: private_installation_state_python_executable; all_three_launchers_use_the_verified_Python
+  language: en_or_ru_selected_before_python_preflight; persisted_for_application
+  theme: BULL_Red_or_BULL_Matrix_after_language_before_python_preflight; persisted_and_used_during_installation
+  sequence: [language, theme, optional_packs, mandatory_full_regression, optional_connection, complete, launch_or_exit]
+  packs: standard_ZIPs_or_explicit_HTTPS_or_local_ZIP; same_bounded_data_only_validation
+  default_selection: bull_chat_core_after_successful_standard_install
+  regression: all_668_internal_checks; no_inference; exact_harness_counts_required
+  removed: server_and_all_in_one_installation; no_server_provisioning_or_firewall_changes
+  optional_setup: packs_and_connection_can_be_configured_later
+  startup: force_18_essential_regression_checks_every_launch; no_cached_pass
+  first_launch_acceptance: direct_installer_launch_to_first_menu_and_immediate_theme_switch; real_terminal_check_pending; restart_is_not_a_fix
+  first_launch_implementation: installer_and_shortcuts_launch_same_BULL_exe; shared_Terminal_profile_or_native_console_font; live_user_visual_acceptance_not_claimed
+  readiness: read_only_installed_library_validation_and_selected_connection_probe
+  lamps: Home_header_integrity_and_connection; pack_status_only_in_Test_settings_and_Model_testing; green_success_or_yellow_warning_with_text; no_per_item_lamps; independent_of_theme
+  main_menu: [Model_testing, Chat, Test_settings, Connection_settings, Program_settings, Additional]
+  navigation: direct_pack_picker; user_file_and_prompt_are_separate_actions; flat_Additional_without_Experiments_gate
+  unchanged: benchmark_prompts_and_runtime_inference_pipeline; historical_scorer_v1_unchanged
+
+matrix_startup_theme:
+  setting: canonical_UI_THEME_loaded_before_startup_window
+  application: immediate_terminal_palette_and_canonical_logo_recolour
+  startup: saved_theme_on_next_launch; BULL_UI_THEME_override_preserved
+  artwork: Assets/Brand/startup-hero-matrix.png
+  versioned_asset: Assets/Brand/splash-matrix-v0.29.0.1.png
+  composition: green_analogue_of_approved_red_hero; same_1254_square_size_and_alpha
+  live_overlay: matching_frame_panel_and_progress_palette; current_version_and_true_check_count
+  digital_rain: right_artwork_edge_only; 5_columns_of_9_ASCII_glyphs; 100ms_Tk_timer; no_bull_or_panel_overlay
+  animation_state: deterministic_monotonic_time; no_benchmark_RNG; fixed_canvas_items; owned_timer_cancelled_on_close_or_draw_failure
+  quiet_checks: main_thread_idle_GUI_pump_every_100ms; no_synthetic_progress_or_output; optional_failure_cannot_fail_gate
+  scope: Matrix_startup_only; no_red_theme_menu_log_or_inference_animation
+  variants: [matrix_bright]
+  legacy_variant_migration: matrix_bright
+  errors_warnings_success: independent_semantic_colours_unchanged
+  missing_gui: checks_continue_without_splash
+  required_artwork: both_themes_verified_by_manifest_and_existing_startup_asset_gates

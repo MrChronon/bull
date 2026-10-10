@@ -1,0 +1,5 @@
+# Analytical verifier dependencies, not model weights or server components.
+numpy>=1.26,<3
+pandas>=2.2,<3
+scipy>=1.11,<2
+matplotlib>=3.8,<4

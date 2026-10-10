@@ -1,10 +1,10 @@
-# BULL v0.28.0.7 — удалённый доступ
+# BULL v0.29.0.1 — удалённый доступ
 
 ## Коротко
 
 Публичная сборка не знает адресов серверов и не пытается подключаться к ним автоматически. По умолчанию Client использует локальный Ollama на `127.0.0.1:11434`.
 
-В v0.28.0.7 рекомендуемый путь для уже настроенного OpenSSH —
+В v0.29.0.1 рекомендуемый путь для уже настроенного OpenSSH —
 **Подключения → Подключиться по SSH-алиасу**. Достаточно ввести `Host` из
 `%USERPROFILE%\.ssh\config`; BULL безопасно разрешает его через `ssh -G`.
 Если alias ещё не создан, используйте **Как создать SSH-ключ и алиас** или
@@ -17,7 +17,7 @@
 Для Windows-сервера fingerprint можно получить локальной командой:
 `ssh-keygen -lf C:/ProgramData/ssh/ssh_host_ed25519_key.pub -E sha256`.
 
-Альтернативный импорт через **Подключения → Дополнительно** использует два файла:
+Альтернативный импорт через **Настройки соединения программы → Импортировать Connection JSON** использует два файла:
 
 1. `*.connection.json` - публичное описание endpoint и SSH host key;
 2. private SSH key - секрет, который остаётся только у владельца Client.
@@ -88,18 +88,9 @@ TCP <PUBLIC_IP>:<EXTERNAL_SSH_PORT> -> <SERVER_LAN_IP>:22
 
 Перед настройкой NAT закрепите постоянный LAN-адрес за Server через DHCP reservation. Иначе после перезагрузки роутер может выдать другой адрес и перенаправление перестанет работать.
 
-Пример подготовки Server:
-
-```powershell
-.\Install-BULL-v0.28.0.7.ps1 `
-  -Role Server `
-  -Route direct `
-  -AuthorizedKeyPath C:\Transfer\bull_access.pub `
-  -PublicHost <PUBLIC-IP-OR-DNS> `
-  -EndpointPort 48222
-```
-
-Установщик выводит требуемое правило NAT и создаёт connection JSON с `route=direct`. Он не открывает внешний порт на роутере сам.
+Подготовьте OpenSSH и модели на сервере отдельно. BULL не разворачивает сервер
+и не меняет NAT. В настройках соединения клиента укажите внешний SSH-порт и
+проверьте fingerprint независимым каналом.
 
 Перед сохранением правила на роутере запустите на Server от администратора read-only проверку:
 
@@ -143,47 +134,25 @@ TCP <PUBLIC_IP>:<EXTERNAL_SSH_PORT> -> <SERVER_LAN_IP>:22
 
 Private key нельзя отправлять администратору или добавлять в репозиторий. На Server передаётся только `.pub`.
 
-## Установка Server
+## Подготовка сервера
 
-Запустите от администратора:
+Сервер администрируется отдельно от BULL. Установите Ollama или llama.cpp,
+настройте OpenSSH, отдельного пользователя и вход по ключам.
+Inference-порты должны оставаться на loopback; для SSH настройте ограниченное
+правило firewall и при необходимости overlay VPN. BULL не устанавливает эти
+компоненты и не меняет настройки машины.
 
-```powershell
-.\Install-BULL-v0.28.0.7.ps1 `
-  -Role Server `
-  -AuthorizedKeyPath C:\Transfer\bull_access.pub `
-  -PublicHost <VPN-IP-or-DNS>
-```
-
-Для overlay client:
-
-```powershell
-.\Install-BULL-v0.28.0.7.ps1 `
-  -Role Server `
-  -InstallTailscale `
-  -AuthorizedKeyPath C:\Transfer\bull_access.pub `
-  -PublicHost my-node.example-overlay.ts.net
-```
-
-Server installer:
-
-- включает OpenSSH Server и Client;
-- запускает `sshd` автоматически;
-- открывает только SSH TCP 22 в Windows Firewall;
-- добавляет переданный public key;
-- глобально запрещает password и keyboard-interactive authentication, оставляя только public key;
-- устанавливает Ollama и задаёт `OLLAMA_HOST=127.0.0.1:11434`;
-- экспортирует connection bundle с реальным SSH host public key и fingerprint.
-
-Перед изменением `sshd_config` создаётся backup `sshd_config.pre-bull.bak`, а новый config проверяется `sshd -t`.
+`Server/Test-BULL-RemoteReadiness.ps1` выполняет read-only проверку Windows-узла.
+Для Connection JSON можно использовать существующий экспорт параметров;
+приватный ключ передаётся отдельно и никогда не публикуется.
 
 ## Импорт на Client
 
 Через интерфейс:
 
 ```text
-Backend и подключение
--> Выбрать лабораторию
--> Импортировать доступ к серверу
+Настройки соединения программы
+-> Импортировать Connection JSON
 ```
 
 Или:

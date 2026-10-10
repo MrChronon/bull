@@ -1,4 +1,7 @@
-﻿$ErrorActionPreference = "Stop"
+﻿[CmdletBinding()]
+param([string]$OutputDirectory = '')
+
+$ErrorActionPreference = "Stop"
 Set-Location -LiteralPath $PSScriptRoot
 
 try {
@@ -14,8 +17,8 @@ $env:CUA_DD_PYTHON_TOOL_WARM_SPREADSHEET_RUNTIME = "0"
 $env:CUA_DD_INIT_ARTIFACT_TOOL_V2_RECORD_OPERATIONS = "0"
 $env:CUA_DD_INIT_ARTIFACT_TOOL_V2 = "0"
 
-$expectedVersion = "v0.28.0.7"
-$client = Join-Path $PSScriptRoot "bull_client_v0.28.0.7.py"
+$expectedVersion = "v0.29.0.1"
+$client = Join-Path $PSScriptRoot "bull_client_v0.29.0.1.py"
 if (-not (Test-Path -LiteralPath $client)) { throw "Mandatory client missing: $client" }
 
 $code = Get-Content -LiteralPath $client -Raw -Encoding UTF8
@@ -25,19 +28,73 @@ $version = $m.Groups['v'].Value
 if ($version -ne $expectedVersion) { throw "Unexpected APP_VERSION: $version" }
 
 $required = @(
+    "AGENTS.md",
+    ".gitattributes",
+    "CITATION.cff",
+    "Docs\RELEASE_READINESS.md",
+    "CHANGELOG.md",
+    "SECURITY.md",
+    "THIRD_PARTY_NOTICES.md",
+    "CONTRIBUTING_RU.md",
+    "SUPPORT.md",
+    "SUPPORT_RU.md",
+    "CODE_OF_CONDUCT.md",
+    "CODE_OF_CONDUCT_RU.md",
+    ".github\PULL_REQUEST_TEMPLATE.md",
+    ".github\ISSUE_TEMPLATE\benchmark_feedback.yml",
+    "Docs\GITHUB_REPOSITORY.md",
+    "GITHUB_RELEASE_v0.29.0.1.md",
+    "Docs\en\ROADMAP.md",
+    "Docs\ru\ROADMAP.md",
+    "Docs\en\RELEASING.md",
+    "Docs\ru\RELEASING.md",
+    "Docs\en\INSTALLATION.md",
+    "Docs\ru\INSTALLATION.md",
+    "Shared\bull_llm\system_telemetry.py",
+    "Shared\bull_llm\startup_checks.py",
+    "Tests\startup_smoke.py",
+    "Tests\usability_patch_regression.py",
+    "Assets\Brand\startup-hero.png",
+    "Assets\Brand\startup-hero-matrix.png",
+    "Shared\bull_llm\evaluation\pack_evidence.py",
+    "Tests\pack_evidence_regression.py",
+    "Shared\bull_llm\evaluation\author_workshop.py",
+    "Shared\bull_llm\evaluation\author_template.py",
+    "Shared\bull_llm\author_workshop_ui.py",
+    "Tests\author_workshop_regression.py",
+    "Tools\build_author_pack.py",
+    "Docs\en\AUTHOR_WORKSHOP.md",
+    "Docs\ru\AUTHOR_WORKSHOP.md",
+    "Shared\bull_llm\evaluation\pack_selection.py",
+    "Shared\bull_llm\pack_library_ui.py",
+    "Tests\pack_selection_regression.py",
+    "Tools\build_base_pack_archives.py",
+    "Docs\PACK_LIBRARY_GUIDE.md",
+    "Docs\en\PACK_LIBRARY_GUIDE.md",
+    "Docs\ru\PACK_LIBRARY_GUIDE.md",
+    "BasePacks\bull_chat_core@1.0.0.zip",
+    "BasePacks\bull_extended_core@1.0.0.zip",
+    "BasePacks\bull_ru_dialogue@1.0.0.zip",
+    "BasePacks\bull_language_comparison@1.0.1.zip",
     "Docs\README.md",
     "Docs\USER_GUIDE.md",
     "Docs\UI_GUIDE.md",
     "Docs\USER_TESTS.md",
     "Docs\AI_CONTEXT.yaml",
+    "Docs\PACK_LIBRARY_SPEC.md",
+    "Docs\PACK_ENGINE_BOUNDARY.md",
+    "Docs\en\PACK_ENGINE_BOUNDARY.md",
+    "Docs\ru\PACK_ENGINE_BOUNDARY.md",
+    "Docs\en\PACK_AUTHOR_LLM.md",
+    "Docs\ru\PACK_AUTHOR_LLM.md",
     "Docs\PROMPTING_GUIDE.md",
     "Docs\BACKEND_SETUP.md",
     "Docs\REMOTE_ACCESS.md",
     "Docs\CODE_AUDIT.md",
     "Docs\SECURITY.md",
     "Docs\PUBLIC_RELEASE_CHECKLIST.md",
-    "Docs\CHANGELOG_v0.28.0.7.md",
-    "Docs\RELEASE_NOTES_0.28.0.7.md",
+    "Docs\CHANGELOG_v0.29.0.1.md",
+    "Docs\RELEASE_NOTES_0.29.0.1.md",
     "Docs\MIGRATION_TO_BULL.md",
     "README.md",
     "README_RU.md",
@@ -72,24 +129,18 @@ $required = @(
     "Tests\agent_benchmark_regression.py",
     "Tests\hardening_regression.py",
     "Tests\ux_regression.py",
-    "Tests\gpu_lab_regression.py",
     "Tests\bridge_regression.py",
     "Tests\core_regression.py",
     "Tests\registry_regression.py",
+    "Tests\pack_library_regression.py",
+    "Tests\engine_boundary_regression.py",
     "Tests\evidence_regression.py",
     "Tests\ru_dialogue_regression.py",
     "Tests\decision_support_regression.py",
     "Tests\user_tests_regression.py",
-    "Tests\Build-Gpu-Lab-Fixture.ps1",
-    "Server\Gpu-Lab-Worker.ps1",
-    "Docs\GPU_LAB.md",
-    "Shared\bull_llm\gpu_lab\__init__.py",
-    "Shared\bull_llm\gpu_lab\contracts.py",
-    "Shared\bull_llm\gpu_lab\transport.py",
-    "Shared\bull_llm\gpu_lab\runner.py",
-    "Shared\bull_llm\gpu_lab\reports.py",
-    "Shared\bull_llm\gpu_lab\ui.py",
-    "Shared\bull_llm\gpu_lab\messages.py",
+    "Shared\bull_llm\diagnostics_ui.py",
+    "Tests\followup_ui_regression.py",
+    "Tests\language_route_regression.py",
     "Shared\bull_llm\terminal_ui.py",
     "Shared\bull_llm\startup_window.py",
     "Shared\bull_llm\connections_ui.py",
@@ -100,10 +151,10 @@ $required = @(
     "Shared\bull_llm\storage.py",
     "Shared\bull_llm\presentation.py",
     "Shared\bull_llm\i18n.py",
-    "Docs\AUDIT_v0.28.0.7.md",
+    "Docs\AUDIT_v0.29.0.1.md",
     "Docs\AGENT_BENCHMARK.md",
-    "Apps\agent_benchmark_v0_28_0_7.py",
-    "BULL-Agent-Lab-v0.28.0.7.cmd",
+    "Apps\agent_benchmark_v0_29_0_1.py",
+    "BULL-Agent-Lab-v0.29.0.1.cmd",
     "Schemas\agent_config_v1.schema.json",
     "Schemas\agent_run_v1.schema.json",
     "Shared\bull_llm\agent_benchmark\contracts.py",
@@ -116,9 +167,10 @@ $required = @(
     "Tests\Fixtures\ru_language_stress_sanitized_v2.json",
     "Tests\Fixtures\ru_language_stress_sanitized_v3.json",
     "Tests\Fixtures\benchmark_scorer_v3.json",
+    "Tests\Fixtures\engine_boundary_gold.json",
     "Apps\_bootstrap.py",
-    "Apps\benchmark_lab_v0_28_0_7.py",
-    "Apps\bull_client_app_v0_28_0_7.py",
+    "Apps\benchmark_lab_v0_29_0_1.py",
+    "Apps\bull_client_app_v0_29_0_1.py",
     "Shared\bull_llm\__init__.py",
     "Shared\bull_llm\schemas.py",
     "Shared\bull_llm\profiles.py",
@@ -137,16 +189,18 @@ $required = @(
     "Shared\bull_llm\evaluation\__init__.py",
     "Shared\bull_llm\evaluation\service.py",
     "Shared\bull_llm\evaluation\registry.py",
+    "Shared\bull_llm\evaluation\catalog.py",
+    "Shared\bull_llm\evaluation\pack_library.py",
     "Shared\bull_llm\reports.py",
     "backend_settings.json",
     "model_profiles.json",
     "benchmark_profiles.json",
-    "BULL-v0.28.0.7.cmd",
-    "BULL-Benchmark-Lab-v0.28.0.7.cmd",
-    "BULL-v0.28.0.7.ps1",
-    "BULL-v0.28.0.7.ico",
-    "BULL-v0.28.0.7.png",
-    "BULL-v0.28.0.7.svg",
+    "BULL-v0.29.0.1.cmd",
+    "BULL-Benchmark-Lab-v0.29.0.1.cmd",
+    "BULL-v0.29.0.1.ps1",
+    "BULL-v0.29.0.1.ico",
+    "BULL-v0.29.0.1.png",
+    "BULL-v0.29.0.1.svg",
     "Assets\Brand\bull-mark.svg",
     "Assets\Brand\bull-mark-light.svg",
     "Assets\Brand\bull-mark-mono.svg",
@@ -172,21 +226,46 @@ $required = @(
     "Assets\Brand\bull-mark-128.png",
     "Assets\Brand\bull-mark-256.png",
     "Assets\Brand\bull-mark-512.png",
-    "Assets\Brand\bull-mark-chafa-full-30.ansi.b64",
-    "Assets\Brand\splash-v0.28.0.7.png",
+    "Assets\Brand\bull-mark-console-48.ansi.b64",
+    "Assets\Brand\bull-icon-matrix.ico",
+    "Assets\Brand\bull-setup.ico",
+    "Assets\Brand\splash-v0.29.0.1.png",
+    "Assets\Brand\splash-matrix-v0.29.0.1.png",
     "Assets\Localization\ui.en.json",
     "Assets\Brand\favicon.png",
     "Assets\Brand\github-social-preview.png",
     "Assets\Brand\README.md",
     "Tools\build_brand_assets.py",
-    "Install-BULL-v0.28.0.7-Shortcut.ps1",
-    "Install-BULL-v0.28.0.7.ps1",
-    "Install-BULL-v0.28.0.7.cmd",
-    "Server\Install-BULL-Node.ps1",
+    "Tools\Update-BULL-Shortcuts.ps1",
+    "Tools\Build-Windows-Launchers.ps1",
+    "Tools\BullLauncher.cs",
+    "Setup.exe",
+    "Setup\BULL.launcher.bin",
+    "Setup.ps1",
+    "Setup.cmd",
+    "Shared\bull_llm\desktop_theme.py",
+    "Shared\bull_llm\console_presentation.py",
+    "Tests\theme_setup_regression.py",
+    "Tests\runtime_followup_regression.py",
+    "Tests\bilingual_scorer_regression.py",
+    "Shared\bull_llm\bilingual_results.py",
+    "Tests\bilingual_report_regression.py",
+    "Tests\Fixtures\bull_language_comparison@1.0.0.zip",
+    "Shared\bull_llm\owned_processes.py",
+    "Shared\bull_llm\client_launcher.py",
+    "Shared\bull_llm\installer.py",
+    "Shared\bull_llm\readiness.py",
+    "Shared\bull_llm\pack_download.py",
+    "Tools\install_bull.py",
+    "Setup\regression-requirements.txt",
+    "Tests\setup_regression.py",
+    "Tests\pack_download_regression.py",
+    "Docs\ru\INSTALLATION.md",
+    "Docs\en\INSTALLATION.md",
     "Server\Test-BULL-RemoteReadiness.ps1",
     "Server\connection.template.json",
     "Client\New-BULL-ClientKey.ps1",
-    "BULL-v0.28.0.7-README.txt",
+    "BULL-v0.29.0.1-README.txt",
     "Schemas\bull_benchmark_pack_manifest_v1.schema.json",
     "Schemas\bull_benchmark_record_v1.schema.json",
     "Schemas\bull_benchmark_summary_v1.schema.json",
@@ -197,6 +276,12 @@ $required = @(
     "BenchmarkPacks\bull_chat_core\pack.lock.json",
     "BenchmarkPacks\bull_chat_core\README.md",
     "BenchmarkPacks\bull_chat_core\LICENSE.txt",
+    "BenchmarkPacks\bull_extended_core\manifest.json",
+    "BenchmarkPacks\bull_extended_core\cases.json",
+    "BenchmarkPacks\bull_extended_core\gold.json",
+    "BenchmarkPacks\bull_extended_core\pack.lock.json",
+    "BenchmarkPacks\bull_extended_core\README.md",
+    "BenchmarkPacks\bull_extended_core\LICENSE.txt",
     "Tools\build_chat_core_pack.py",
     "Tools\build_language_comparison_pack.py",
     "BenchmarkPacks\bull_language_comparison\manifest.json",
@@ -244,7 +329,7 @@ if ($ai -notmatch ('documentation_version:\s*["'']?' + [regex]::Escape($version)
 Write-Host "Documentation gate: OK" -ForegroundColor Green
 
 $brandSvgs = @(
-    'BULL-v0.28.0.7.svg',
+    'BULL-v0.29.0.1.svg',
     'Assets\Brand\bull-logo-canonical.svg',
     'Assets\Brand\bull-mark.svg',
     'Assets\Brand\bull-mark-light.svg',
@@ -269,7 +354,7 @@ if ($brandLock.schema -ne 'bull-brand-lock' -or $brandLock.schema_version -ne 1 
     $canonicalHash -ne ([string]$brandLock.source_sha256).ToLowerInvariant()) {
     throw 'Canonical BULL logo or brand lock changed without approval.'
 }
-$iconBytes = [IO.File]::ReadAllBytes('BULL-v0.28.0.7.ico')
+$iconBytes = [IO.File]::ReadAllBytes('BULL-v0.29.0.1.ico')
 if ($iconBytes.Length -lt 6 -or $iconBytes[0] -ne 0 -or $iconBytes[1] -ne 0 -or
     $iconBytes[2] -ne 1 -or $iconBytes[3] -ne 0) {
     throw 'BULL Windows icon has an invalid ICO header.'
@@ -322,22 +407,27 @@ foreach ($scriptFile in Get-ChildItem -LiteralPath $PSScriptRoot -Recurse -File 
 }
 Write-Host 'PowerShell 5.1 encoding + parse gate: OK' -ForegroundColor Green
 
+Write-Host 'Compiling the two native launchers from the shipped source...' -ForegroundColor Cyan
+& powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'Tools\Build-Windows-Launchers.ps1')
+if ($LASTEXITCODE -ne 0) { throw 'Native launcher compilation failed.' }
+
 Write-Host 'Running full public release privacy gate...' -ForegroundColor Cyan
 & powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'Test-Public-Release.ps1') -Root $PSScriptRoot -AuditReleaseCandidatesOnly
 if ($LASTEXITCODE -ne 0) { throw "Public release audit failed with code $LASTEXITCODE" }
 
 # Exact obsolete-version gate.
 $allowedVersioned = @(
-    "bull_client_v0.28.0.7.py",
-    "BULL-v0.28.0.7.cmd",
-    "BULL-v0.28.0.7.ps1",
-    "BULL-v0.28.0.7.ico",
-    "BULL-v0.28.0.7.png",
-    "BULL-v0.28.0.7.svg",
-    "BULL-v0.28.0.7-README.txt",
-    "Install-BULL-v0.28.0.7-Shortcut.ps1",
-    "Install-BULL-v0.28.0.7.ps1",
-    "Install-BULL-v0.28.0.7.cmd"
+    "bull_client_v0.29.0.1.py",
+    "BULL-v0.29.0.1.cmd",
+    "BULL-v0.29.0.1.ps1",
+    "BULL-v0.29.0.1.ico",
+    "BULL-v0.29.0.1.png",
+    "BULL-v0.29.0.1.svg",
+    "BULL-v0.29.0.1-README.txt",
+    "Setup.exe",
+    "Setup\BULL.launcher.bin",
+    "Setup.ps1",
+    "Setup.cmd"
 )
 $obsolete = Get-ChildItem -LiteralPath . -File | Where-Object {
     ($_.Name -match '^(bull_client_v|BULL-v|Install-BULL-v)') -and
@@ -381,7 +471,7 @@ try {
     }
 }
 
-$rootExcludedDirs = @('Chats','Benchmarks','Exports','Workspace','Runtime')
+$rootExcludedDirs = @('Chats','Benchmarks','Exports','Workspace','Runtime','Workspaces','PackExports','Installed','Trash')
 $anywhereExcludedDirs = @('__pycache__','.git','.codex','.agents','.venv','venv')
 $excludedFilePatterns = @('*.llm-access*','connection*.private.json','*.pem','*.key','id_rsa','id_ed25519')
 $obsoleteReleasePaths = @(
@@ -390,7 +480,9 @@ $obsoleteReleasePaths = @(
     'Assets/Brand/splash-v0.28.0.1.png',
     'Assets/Brand/splash-v0.28.0.2.png',
     'Assets/Brand/splash-v0.28.0.3.png',
-    'Assets/Brand/splash-v0.28.0.6.png'
+    'Assets/Brand/splash-v0.28.0.6.png',
+    'Assets/Brand/splash-v0.28.0.7.png',
+    'Assets/Brand/splash-v0.29.0.0.png'
 )
 
 function Get-RelativePath([string]$fullPath) {
@@ -411,17 +503,18 @@ function Is-Excluded([string]$rel) {
     }
     return $false
 }
+$releaseZipPaths = @($required | Where-Object { $_ -like '*.zip' } | ForEach-Object { $_.Replace('\','/') })
 function Get-ReleaseSourceFiles {
     return Get-ChildItem -LiteralPath . -Recurse -File -Force | Where-Object {
         $rel=Get-RelativePath $_.FullName
         (-not (Is-Excluded $rel)) -and
-        ($_.Name -notlike '*.zip') -and
+        (($_.Name -notlike '*.zip') -or ($releaseZipPaths -ccontains $rel)) -and
         ($_.Name -ne 'RELEASE_MANIFEST.json')
     }
 }
 
 $sourceCandidates = Get-ReleaseSourceFiles
-$scannableTextExtensions = @('.py','.ps1','.cmd','.txt','.md','.yaml','.yml','.json','.toml','.ini','.cfg','.csv')
+$scannableTextExtensions = @('.py','.cs','.ps1','.cmd','.txt','.md','.yaml','.yml','.json','.toml','.ini','.cfg','.csv')
 foreach ($file in $sourceCandidates) {
     if ($file.Length -gt 0 -and $file.Length -lt 8MB -and
         $scannableTextExtensions -contains $file.Extension.ToLowerInvariant()) {
@@ -437,6 +530,12 @@ Write-Host "Runtime/cache data: excluded without deleting source files" -Foregro
 
 # Build the manifest only after all source/docs changes are final.
 $sourceFiles = Get-ReleaseSourceFiles
+$sourceInventory = @($sourceFiles | ForEach-Object { Get-RelativePath $_.FullName })
+foreach ($mandatory in $required) {
+    if ($sourceInventory -cnotcontains $mandatory.Replace('\','/')) {
+        throw "Mandatory release file excluded from inventory: $mandatory"
+    }
+}
 $manifest=[ordered]@{
     version=$version
     documentation_version=$version
@@ -479,6 +578,14 @@ $manifest.validation.manifest_hash_verification='passed'
 $manifest.validation.zip_integrity='verified by Build-Release.ps1 after archive creation'
 $manifest | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath 'RELEASE_MANIFEST.json' -Encoding UTF8
 
+Write-Host 'Essential startup gate...' -ForegroundColor Cyan
+if (Get-Command python -ErrorAction SilentlyContinue) {
+    & python -u (Join-Path $PSScriptRoot 'Tests\startup_smoke.py')
+} else {
+    & py -3 -u (Join-Path $PSScriptRoot 'Tests\startup_smoke.py')
+}
+if ($LASTEXITCODE -ne 0) { throw 'Essential startup gate failed.' }
+
 $stage=Join-Path ([System.IO.Path]::GetTempPath()) ('BULL-'+[guid]::NewGuid().ToString('N'))
 $bundleDir=Join-Path $stage "BULL-$version-Bundle"
 New-Item -ItemType Directory -Path $bundleDir -Force | Out-Null
@@ -518,9 +625,11 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "Staged public release audit failed with code $LASTEXITCODE" }
 
     $zipName="BULL-$version-Bundle.zip"
-    $zipPath=Join-Path (Split-Path $PSScriptRoot -Parent) $zipName
+    $releaseOutput = if ($OutputDirectory) { [IO.Path]::GetFullPath($OutputDirectory) } else { Split-Path $PSScriptRoot -Parent }
+    if (-not (Test-Path -LiteralPath $releaseOutput -PathType Container)) { throw 'Output directory must already exist.' }
+    $zipPath=Join-Path $releaseOutput $zipName
     if (Test-Path -LiteralPath $zipPath) {
-        Remove-Item -LiteralPath $zipPath -Force
+        throw "Archive already exists; use a new output directory: $zipPath"
     }
     Add-Type -AssemblyName System.IO.Compression
     Add-Type -AssemblyName System.IO.Compression.FileSystem

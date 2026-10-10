@@ -1,5 +1,5 @@
-name: Feature request
-description: Propose a scoped improvement to BULL
+name: Feature request / Предложение
+description: Scoped improvement / Конкретное улучшение BULL
 title: "[Feature]: "
 labels:
   - enhancement
@@ -8,49 +8,50 @@ body:
     attributes:
       value: |
         Start with the user problem and desired outcome. For open-ended ideas or methodology debates, use GitHub Discussions first.
+        Начните со сценария и результата. Общие идеи и методику сначала обсуждаем в Discussions.
   - type: dropdown
     id: component
     attributes:
-      label: Area
+      label: Area / Раздел
       options:
-        - LLM Client
-        - Benchmark Lab
-        - Agent Lab
-        - GPU Lab
-        - Server / remote access
-        - Installer / update
-        - Interface / accessibility
-        - Reports / visualization
-        - Documentation
-        - Other
+        - LLM Client / Чат
+        - Benchmark Lab / Тестирование
+        - Agent Lab / Agent Benchmark
+        - Test packs / Наборы и мастерская
+        - Connection / Удалённое подключение
+        - Installer / Установка и обновление
+        - Interface / Интерфейс и доступность
+        - Reports / Отчёты
+        - Documentation / Документация
+        - Other / Другое
     validations:
       required: true
   - type: textarea
     id: problem
     attributes:
-      label: Problem or user scenario
-      description: Describe the workflow and friction, not only the desired button.
+      label: Problem or user scenario / Проблема и сценарий
+      description: Explain the workflow, not only a button / Опишите задачу и затруднение, не только кнопку.
     validations:
       required: true
   - type: textarea
     id: proposal
     attributes:
-      label: Proposed behavior
+      label: Proposed behavior / Предлагаемое поведение
     validations:
       required: true
   - type: textarea
     id: alternatives
     attributes:
-      label: Alternatives and constraints
+      label: Alternatives and constraints / Альтернативы и ограничения
   - type: textarea
     id: success
     attributes:
-      label: How would we know it works?
-      description: Suggest an observable acceptance criterion.
+      label: Success criterion / Критерий приёмки
+      description: Suggest an observable result / Как проверить результат?
   - type: checkboxes
     id: compatibility
     attributes:
-      label: Compatibility review
+      label: Compatibility review / Совместимость
       options:
-        - label: I noted whether this affects benchmark prompts, scorers, runtime, schemas, historical results or security.
+        - label: I described prompt/scorer/runtime, schema, historical or security impact / Описано влияние на prompts, scorers, runtime, schemas, историю и безопасность.
           required: true

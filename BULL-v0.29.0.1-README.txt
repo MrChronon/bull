@@ -1,0 +1,73 @@
+BULL v0.29.0.1 — Benchmarking & Usage of Local Language Models
+====================================================
+
+ENGLISH
+-------
+
+Pack Library keeps the primary route focused on model comparison, chat,
+test settings, connection settings, and program settings. Home section 6,
+Additional, contains diagnostics, help, session status and experimental tools.
+After a run, the concise comparison,
+decision profiles, and quality/speed map are available in the terminal and the
+offline HTML report.
+
+Setup: language, BULL Red / BULL Matrix, base/user ZIP (local or HTTPS) or skip, full regression,
+existing connection or skip, then launch or exit. One exact pack per comparison,
+all or selected tasks. Storage: %LOCALAPPDATA%\BULL\BenchmarkPacks
+Author Workshop builds editable sources; private snapshots preserve resume.
+Loose tasks remain in UserTests. A .txt prompt receives runtime measurements and
+manual review without a fabricated quality score. A strict .yaml task uses only
+declared deterministic criteria.
+
+Install:       Setup.exe (Setup.cmd fallback); language, then BULL Red / BULL Matrix
+Application:   BULL.exe (BULL-v0.29.0.1.cmd compatibility entrypoint)
+Benchmark Lab: BULL-Benchmark-Lab-v0.29.0.1.cmd
+Agent Lab:     BULL-Agent-Lab-v0.29.0.1.cmd
+
+Documentation: Docs\en\README.md
+
+BULL.exe appears only after Setup completes; start with Setup.exe in a fresh ZIP.
+Pre-release edition, 11 October 2026; manual acceptance remains open.
+Current release gates/manual acceptance: Docs\RELEASE_READINESS.md
+
+РУССКИЙ
+-------
+
+Pack Library оставляет на основном маршруте сравнение моделей, чат,
+настройки тестов, соединения и программы. Пункт 6 «Дополнительно» содержит
+диагностику, справку, состояние сессии и экспериментальные инструменты.
+После прогона краткая сводка, профили
+выбора и карта качества/скорости доступны в терминале и автономном HTML.
+
+Установка: язык, BULL Red / BULL Matrix, базовый/авторский ZIP (файл/HTTPS) или пропуск,
+полная регрессия, существующее соединение или пропуск, запуск или выход. Один набор и точная версия
+на прогон, все либо выбранные тесты. Мастерская собирает редактируемые исходники,
+а приватный снимок сохраняет задания для resume после удаления набора.
+Общая папка: %LOCALAPPDATA%\BULL\BenchmarkPacks
+Свободные задачи остаются в UserTests. Для .txt измеряется runtime,
+но не создаётся выдуманный quality score. Строгий .yaml использует только явно
+заданные детерминированные критерии.
+
+Установка:     Setup.exe (запасной вход Setup.cmd); язык, затем BULL Red / BULL Matrix
+Приложение:    BULL.exe (совместимый вход BULL-v0.29.0.1.cmd)
+Benchmark Lab: BULL-Benchmark-Lab-v0.29.0.1.cmd
+Agent Lab:     BULL-Agent-Lab-v0.29.0.1.cmd
+
+Документация: Docs\ru\README.md
+
+BULL.exe появляется только после завершения Setup; в новом ZIP начинайте с Setup.exe.
+Предварительный релиз, 11 октября 2026; ручная приёмка ещё открыта.
+Проверки и незакрытая ручная приёмка: Docs\RELEASE_READINESS.md
+
+CHECKS / ПРОВЕРКА
+-----------------
+
+  Run-Tests.ps1
+  Test-Public-Release.ps1 -AuditReleaseCandidatesOnly
+
+Do not publish / Не публикуйте:
+  Chats, Runtime, Benchmarks, Exports, Workspace, private keys or SSH-ключи,
+  tokens, endpoints, and client_debug.log.
+
+BULL source code is licensed under MIT. Models, engines, and external benchmark
+packs keep their own licenses.

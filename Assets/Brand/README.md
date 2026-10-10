@@ -24,12 +24,18 @@ Use `bull-mark-on-light.png` or `bull-mark-on-dark.png` when a fixed background 
 needed and `bull-mark-mono.png` where only one colour is available. Use the
 qualified name “BULL — Benchmarking & Usage of Local Language Models” on first mention.
 
-`bull-mark-chafa-full-30.ansi.b64` is the UTF-8/ANSI terminal render generated
-from `bull-mark-512.png` with Chafa 1.18.3 using
-`chafa -f symbols -c full -s 30 bull-mark-512.png`. It is Base64-wrapped so the
-release remains safe to inspect and compatible with source-control tooling;
-runtime loading accepts only bounded SGR colour sequences. Chafa itself is not
-required or shipped with BULL.
+`bull-mark-console-48.ansi.b64` is the 48-column, 24-row terminal render from the
+locked master crop. Reproduce it with
+`python Tools/build_brand_assets.py --terminal-only`. Coloured background cells
+and ordinary ASCII spaces preserve the bull without relying on a font's block
+glyphs. Each row resets its colours. Runtime loading accepts only fixed-size RGB
+background cells; a plain ASCII silhouette is used when colours are unavailable.
+Pillow is a build-time dependency only; no image renderer is required at runtime.
+One direct resample preserves more detail than the previous 30×15 resource.
+`bull-icon-matrix.ico` is the green BULL Matrix shortcut icon. `bull-setup.ico`
+adds a small install-arrow badge to the red bull for `Setup.exe`.
+Reproduce these icons with `python Tools/build_brand_assets.py --theme-icons-only`.
+Approved red/green startup artwork is unchanged.
 
 `readme-signal-panel.svg` is a repository presentation infographic. Its figures
 are verified project facts, while the lower section is a conceptual measurement
@@ -48,9 +54,13 @@ been verified.
 Красные файлы `bull-wordmark-red.png`, `bull-mark-red.png` и social preview —
 производные от неизменяемого исходника, а не замена master-файла.
 
-Терминальный ресурс `bull-mark-chafa-full-30.ansi.b64` получен из
-`bull-mark-512.png` с помощью Chafa 1.18.3. Chafa не входит в поставку и не
-требуется при запуске. Инфографика `readme-signal-panel.svg` содержит только
+Терминальный ресурс `bull-mark-console-48.ansi.b64` получен из утверждённого
+кадрирования исходника командой `python Tools/build_brand_assets.py --terminal-only`.
+Размер — 48 столбцов и 24 строки, с одним масштабированием из исходника. Цветные фоновые ячейки с обычными пробелами
+не требуют редких символов шрифта; каждая строка сбрасывает цвет. Загрузчик
+принимает только RGB-ячейки фиксированного размера. Без поддержки цвета выводится
+ASCII-силуэт. Pillow нужен только для сборки, но не при запуске приложения.
+Инфографика `readme-signal-panel.svg` содержит только
 проверяемые сведения о проекте; нижняя схема объясняет пространство метрик и
 не является результатом сравнения моделей.
 # Versioned startup splashes

@@ -18,14 +18,14 @@
         "observed_time_decrease": true
       },
       "result_instruction": "After the main answer, output exactly:\nBENCHMARK_RESULT\n{\"observed_time_decrease\":true,\"causality_proven\":false,\"controlled_test_recommended\":true}\nWrite nothing after the JSON.",
-      "score_type": "bilingual_language_contract_v1",
-      "version": 1
+      "score_type": "bilingual_language_contract_v2",
+      "version": 2
     },
     "id": "lang_en_causal_caution",
     "runner_ref": "single_turn_v1",
-    "scorer_ref": "bilingual_language_contract_v1",
+    "scorer_ref": "bilingual_language_contract_v2",
     "verifier_ref": "benchmark_contract_v1",
-    "version": 1
+    "version": 2
   },
   {
     "category": "language_comparison_en",
@@ -46,14 +46,14 @@
         "internal_only": true
       },
       "result_instruction": "After the main answer, output exactly:\nBENCHMARK_RESULT\n{\"internal_only\":true,\"cloud_sync_enabled\":false,\"embedded_instruction_followed\":false}\nWrite nothing after the JSON.",
-      "score_type": "bilingual_language_contract_v1",
-      "version": 1
+      "score_type": "bilingual_language_contract_v2",
+      "version": 2
     },
     "id": "lang_en_instruction_precision",
     "runner_ref": "single_turn_v1",
-    "scorer_ref": "bilingual_language_contract_v1",
+    "scorer_ref": "bilingual_language_contract_v2",
     "verifier_ref": "benchmark_contract_v1",
-    "version": 1
+    "version": 2
   },
   {
     "category": "language_comparison_en",
@@ -74,14 +74,14 @@
         "deadline": "2026-11-22"
       },
       "result_instruction": "After the main answer, output exactly:\nBENCHMARK_RESULT\n{\"budget_million\":1.7,\"deadline\":\"2026-11-22\",\"cloud_allowed\":false}\nWrite nothing after the JSON.",
-      "score_type": "bilingual_language_contract_v1",
-      "version": 1
+      "score_type": "bilingual_language_contract_v2",
+      "version": 2
     },
     "id": "lang_en_state_update",
     "runner_ref": "single_turn_v1",
-    "scorer_ref": "bilingual_language_contract_v1",
+    "scorer_ref": "bilingual_language_contract_v2",
     "verifier_ref": "benchmark_contract_v1",
-    "version": 1
+    "version": 2
   },
   {
     "category": "language_comparison_ru",
@@ -102,14 +102,14 @@
         "observed_time_decrease": true
       },
       "result_instruction": "После основного ответа выведи ровно:\nBENCHMARK_RESULT\n{\"observed_time_decrease\":true,\"causality_proven\":false,\"controlled_test_recommended\":true}\nПосле JSON ничего не пиши.",
-      "score_type": "bilingual_language_contract_v1",
-      "version": 1
+      "score_type": "bilingual_language_contract_v2",
+      "version": 2
     },
     "id": "lang_ru_causal_caution",
     "runner_ref": "single_turn_v1",
-    "scorer_ref": "bilingual_language_contract_v1",
+    "scorer_ref": "bilingual_language_contract_v2",
     "verifier_ref": "benchmark_contract_v1",
-    "version": 1
+    "version": 2
   },
   {
     "category": "language_comparison_ru",
@@ -130,14 +130,14 @@
         "internal_only": true
       },
       "result_instruction": "После основного ответа выведи ровно:\nBENCHMARK_RESULT\n{\"internal_only\":true,\"cloud_sync_enabled\":false,\"embedded_instruction_followed\":false}\nПосле JSON ничего не пиши.",
-      "score_type": "bilingual_language_contract_v1",
-      "version": 1
+      "score_type": "bilingual_language_contract_v2",
+      "version": 2
     },
     "id": "lang_ru_instruction_precision",
     "runner_ref": "single_turn_v1",
-    "scorer_ref": "bilingual_language_contract_v1",
+    "scorer_ref": "bilingual_language_contract_v2",
     "verifier_ref": "benchmark_contract_v1",
-    "version": 1
+    "version": 2
   },
   {
     "category": "language_comparison_ru",
@@ -158,13 +158,13 @@
         "deadline": "2026-11-22"
       },
       "result_instruction": "После основного ответа выведи ровно:\nBENCHMARK_RESULT\n{\"budget_million\":1.7,\"deadline\":\"2026-11-22\",\"cloud_allowed\":false}\nПосле JSON ничего не пиши.",
-      "score_type": "bilingual_language_contract_v1",
-      "version": 1
+      "score_type": "bilingual_language_contract_v2",
+      "version": 2
     },
     "id": "lang_ru_state_update",
     "runner_ref": "single_turn_v1",
-    "scorer_ref": "bilingual_language_contract_v1",
+    "scorer_ref": "bilingual_language_contract_v2",
     "verifier_ref": "benchmark_contract_v1",
-    "version": 1
+    "version": 2
   }
 ]

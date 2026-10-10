@@ -1,5 +1,7 @@
 # Contributing to BULL
 
+[English](CONTRIBUTING.md) · [Русский — полная версия](CONTRIBUTING_RU.md)
+
 Thank you for helping improve BULL — Benchmark Lab. English and Russian are both
 welcome. The best contribution is a small, reproducible change with a clear
 measurement or user benefit.
@@ -28,6 +30,10 @@ Search existing Issues and Discussions before opening a new thread.
 
 ## Before submitting code
 
+Read [AGENTS.md](AGENTS.md), [AI context](Docs/AI_CONTEXT.yaml) and the current
+[user guide](Docs/USER_GUIDE.md). The bundle includes these portable project rules;
+no private parent-workspace instruction is required.
+
 1. Never add `Runtime`, `Chats`, `Benchmarks`, `Exports`, `Workspace`, models,
    keys, tokens, private addresses or personal paths.
 2. Do not change a benchmark prompt, its scorer and the runtime pipeline in one
@@ -50,6 +56,10 @@ For release or packaging changes, also run:
 ```powershell
 .\Build-Release.ps1
 ```
+
+Build to a new output directory when a previous ZIP already exists. Follow
+[release readiness](Docs/RELEASE_READINESS.md); passing offline gates does not
+close manual terminal/inference acceptance or authorize publication.
 
 ## Pull request description
 
@@ -81,6 +91,8 @@ datasets and benchmark packs require a compatible license and explicit
 provenance.
 
 ## Кратко на русском
+
+Полные правила: [CONTRIBUTING_RU.md](CONTRIBUTING_RU.md).
 
 - Для обсуждения методики используйте Discussions, для воспроизводимого дефекта — Issue.
 - Перед публикацией удалите keys, tokens, endpoints, usernames, личные пути,

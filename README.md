@@ -20,7 +20,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/MrChronon/bull/releases/latest/download/BULL-v0.28.0.7-Bundle.zip"><strong>Download BULL v0.28.0.7 for Windows</strong></a><br><br>
+  <a href="https://github.com/MrChronon/bull/releases/tag/v0.29.0.1"><strong>BULL v0.29.0.1 release and downloads</strong></a><br><br>
   <a href="#quick-start">Quick start</a> ·
   <a href="Docs/en/USER_GUIDE.md">User guide</a> ·
   <a href="Docs/ru/USER_GUIDE.md">Руководство</a> ·
@@ -30,6 +30,13 @@
 </p>
 
 ---
+
+**Current release: v0.29.0.1 — Pack Library (pre-release).**
+[Download the Windows bundle](https://github.com/MrChronon/bull/releases/download/v0.29.0.1/BULL-v0.29.0.1-Bundle.zip) ·
+[SHA-256 checksum](https://github.com/MrChronon/bull/releases/download/v0.29.0.1/BULL-v0.29.0.1-Bundle.sha256.txt).
+Extract into a new folder and start **Setup.exe**. Manual acceptance is still
+open; the “latest release” badge refers to the latest stable version, not this
+pre-release. See [verification and open acceptance](Docs/RELEASE_READINESS.md).
 
 > **BULL is not a hosted leaderboard.** It is an open, portable benchmark lab for
 > inspecting local model quality, stability, speed, recovery and runtime behavior
@@ -41,10 +48,17 @@ server**. Run chat, compare selected models, resume interrupted suites, inspect
 offline reports and move a tested profile into the working client.
 
 <p align="center">
-  <img src="Assets/Brand/readme-signal-panel.svg?v=0.28.0.7-clean401" alt="BULL evaluation signal panel: 401 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases, bilingual tracks, private and share-safe evidence, and separate metric spaces" width="100%">
+  <img src="Assets/Brand/readme-signal-panel.svg?v=0.29.0.1-followup668" alt="BULL Pack Library: 668 offline checks, four optional base ZIPs, one exact pack per run and separate metric spaces" width="100%">
 </p>
 
 ## Why BULL
+
+**v0.29 Pack Library:** install independent ZIP packs, keep them across application
+updates, compare all or selected tasks, and create your own versioned pack in
+[Author Workshop](Docs/en/AUTHOR_WORKSHOP.md). Setup offers base tests,
+your ZIP or skip. No particular pack is mandatory. See the
+[library guide](Docs/en/PACK_LIBRARY_GUIDE.md) and
+[cloud LLM author instructions](Docs/en/PACK_AUTHOR_LLM.md).
 
 | Evaluation problem | How BULL handles it |
 | --- | --- |
@@ -66,22 +80,25 @@ offline reports and move a tested profile into the working client.
   reported semantic and structural scores plus auditable critical failures;
 - **contract completion:** generation, structure, terminal JSON and exact schema
   are tracked as distinct facts;
-- **performance:** load duration, warm tokens/second, VRAM and GPU telemetry;
+- **performance:** load duration, warm tokens/second and CPU/RAM/GPU/VRAM on the
+  inference host; unavailable counters show `N/A`, not zero;
 - **language tracks:** separate Russian and English suites plus paired bilingual
   execution of the same semantic tasks;
 - **stability:** multi-seed dispersion, worst cases, uncertainty-aware Pareto
   status and category-level comparisons;
 - **system behavior:** recovery use, retries, fingerprints, resume provenance and
   tested-profile export;
-- **agent behavior:** a restricted Agent Lab MVP with independent verification;
-- **hardware experiments:** an experimental Windows + Ollama GPU Lab.
+- **agent behavior:** a restricted Agent Lab MVP with independent verification.
 
-After a run, BULL shows measured top-three places directly in the terminal for
+For general test packs, BULL shows measured top-three places directly in the terminal for
 Native quality, warm speed, observed VRAM and balance. These ranks remain
 separate from quality/task-gated recommendations. The self-contained HTML report
 adds numeric quality/speed and task/time charts, resource views, a test heatmap,
 parameter provenance and plain-language test descriptions. Nothing becomes a new
 benchmark score or universal ranking.
+Language comparisons instead use a dedicated RU/EN view with language compliance,
+script purity, separate native timing and matched-pair differences. Six language
+tasks do not establish general linguistic competence; see [reading results](Docs/en/RESULTS.md).
 
 For your own work, copy a template into [`UserTests`](UserTests). A `.txt` file
 runs the same prompt across selected models without fabricating quality. A
@@ -103,24 +120,49 @@ superiority from a single run.
 ### Requirements
 
 - Windows 11;
-- Python 3 and PowerShell;
-- Ollama or a compatible llama.cpp HTTP server;
-- at least one model installed in the selected backend.
+- Python 3.10+ and PowerShell;
+- for chat or new inference: Ollama or a compatible llama.cpp HTTP server and
+  at least one model installed in the selected backend.
+
+Setup can offer Python installation and a private verification environment with
+explicit confirmation. Models are installed separately. Native launchers are
+unsigned; review the checksum and source before running them.
 
 ### Install
 
-1. Download `BULL-v0.28.0.7-Bundle.zip` and its SHA-256 file from the
-   [latest release](https://github.com/MrChronon/bull/releases/latest).
+1. Obtain `BULL-v0.29.0.1-Bundle.zip` and `BULL-v0.29.0.1-Bundle.sha256.txt`.
+   After publication, both are attached to the [matching release](https://github.com/MrChronon/bull/releases/tag/v0.29.0.1).
+   GitHub's automatic “Source code” archive is not the verified install bundle.
 2. Verify the checksum, extract the archive and run
-   `Install-BULL-v0.28.0.7.cmd`.
-3. Choose `Client`, `Server` or `AllInOne`.
-4. Start `BULL-v0.28.0.7.cmd` for chat or
-   `BULL-Benchmark-Lab-v0.28.0.7.cmd` for evaluation.
+   `Setup.exe` (branded install-arrow icon; `Setup.cmd` fallback).
+3. Choose English or Russian, then **BULL Red** or **BULL Matrix**. Install standard packs, import a ZIP by HTTPS
+   link or local path, or skip tests.
+4. Wait for the full internal regression, then configure an existing LLM
+   connection or leave it for later.
+5. Choose Launch BULL or Exit installer. Open **Model testing → Compare a test
+   pack** to choose tasks, models and run settings.
+
+Home has five primary sections: Model testing, Chat with a model, Test settings,
+Connection settings and Program settings. Section 6, Additional, provides
+session status, diagnostics, help and Agent Benchmark without another
+submenu. Every launch reruns the essential
+18 integrity checks. Home shows integrity and connection only; pack readiness
+and read-only pack → task browsing appear in the two testing sections. Missing setup is
+shown as a warning; settings and saved reports remain available.
+Before installation the root contains only `Setup.exe`; `BULL.exe` is created
+after successful full verification and connection setup/skip.
+Normal startup uses `BULL.exe` or its installed shortcut. Theme changes update
+owned shortcut icons. Only BULL Red and BULL Matrix are offered.
 
 The interface opens without a running backend, so connection setup, help,
 diagnostics and saved reports remain available offline.
 
-## Local, remote and all-in-one
+Checksum verification, safe upgrades and removal are in the
+[installation guide](Docs/en/INSTALLATION.md). Do not copy an old configured
+bundle over the new one: packs persist separately, while chats, results and
+connections require a deliberate private backup.
+
+## Local and remote
 
 ```mermaid
 flowchart LR
@@ -138,10 +180,10 @@ flowchart LR
 - **Local:** client and models run on one Windows computer.
 - **Remote:** BULL reaches a separately administered Windows node through a
   pinned SSH tunnel.
-- **AllInOne:** install client and server roles on the same machine.
+The installer configures only the BULL client, not an LLM server.
 
 If `ssh bull-home` already works with your key, choose
-**Connections → SSH alias** and enter `bull-home`. See the
+**Connection settings → New server from SSH alias** and enter `bull-home`. See the
 [connection guide](Docs/en/CONNECTIONS.md). Never expose Ollama `11434` or
 llama.cpp `8080` directly to the Internet.
 
@@ -159,9 +201,9 @@ output, client assistance and recovery behavior in distinct metric spaces.
 .\Build-Release.ps1
 ```
 
-The current release passes **401/401 offline regressions**, including clean
-Python without site packages, forced `cp1251`, startup integration, manifest
-hashes and ZIP verification.
+The current release suite contains **668 offline regressions**. Release gates
+also cover clean Python without site packages, forced `cp1251`, startup
+integration, manifest hashes and ZIP verification.
 
 ## Help shape the benchmark
 
@@ -192,14 +234,36 @@ Public release gates exclude `Chats`, `Runtime`, `Benchmarks`, `Exports`,
 
 ## Project status
 
-`v0.28.0.7` is the **Clean Release** milestone. It combines the Ollama profile
-comparison fix with richer terminal and HTML analytics, live CPU/RAM/GPU/VRAM
-context, per-run checkpoints, Russian/English/bilingual tracks and a hardened
-public bundle. The release contains only BULL identifiers and paths; duplicate
-old splash assets and machine-local data are excluded. Existing expert features
-remain under advanced/experimental menus. See the
+`v0.29.0.1` is **Pack Library**: an optional persistent ZIP library, one exact
+pack per run, editable author sources and complete private snapshots for resume
+after pack updates or removal. It retains terminal/HTML comparisons and available
+CPU/RAM/GPU/VRAM telemetry. Prompts/references are preserved; the language pack
+1.0.1/scorer v2 correction is independently versioned and historical v1 results
+stay unchanged. Specialized RU/EN reporting does not assign a combined winner.
+The release passes 668 offline checks; terminal, exit and live inference acceptance
+remain separate. Linux is planned, not supported yet. Additional contains diagnostics,
+help and Agent Benchmark; GPU Lab is removed. See the
 [release notes](Docs/en/RELEASE_NOTES.md) and
 [documentation index](Docs/README.md).
+The [roadmap](Docs/BULL_TRANSITION_ROADMAP.md) separates completed features,
+open acceptance and future pack-report/language work. v0.29.0.1 is distributed
+as a pre-release for user testing, not a fully accepted stable version.
+The installation ZIP and public tag use the same hash-verified source snapshot.
+
+## Repository guide
+
+- [English documentation](Docs/en/README.md) · [Русская документация](Docs/ru/README.md)
+- [Changelog](CHANGELOG.md) · [English roadmap](Docs/en/ROADMAP.md) · [Русский roadmap](Docs/ru/ROADMAP.md)
+- [Contributing](CONTRIBUTING.md) · [Support](SUPPORT.md) · [Community rules](CODE_OF_CONDUCT.md)
+- [Vulnerability reporting](SECURITY.md) · [Citation metadata](CITATION.cff)
+- [Coding-agent instructions](AGENTS.md) · [LLM pack-author instructions](Docs/en/PACK_AUTHOR_LLM.md)
+- [Prepared bilingual GitHub Release text](GITHUB_RELEASE_v0.29.0.1.md) · [Maintainer release guide](Docs/en/RELEASING.md)
+
+The repository includes application source, native-launcher source, test harnesses,
+schemas, synthetic public fixtures and four optional base-pack archives. It does
+not include models, configured user data or private development history in the
+distributed ZIP. Linux/macOS, a marketplace and arbitrary executable pack extensions
+are not supported features of this version.
 
 ## License and naming
 

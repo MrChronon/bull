@@ -3,24 +3,21 @@
 from __future__ import annotations
 
 import hashlib
-import importlib.util
 import json
 import sys
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-CORE_PATH = ROOT / "bull_client_v0.28.0.7.py"
+SOURCE_PATH = ROOT / "Tests" / "Fixtures" / "engine_boundary_gold.json"
 PACK_ROOT = ROOT / "BenchmarkPacks" / "bull_chat_core"
 
 
-def _load_core():
-    spec = importlib.util.spec_from_file_location("bull_chat_core_pack_source", CORE_PATH)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"Cannot load compatibility core: {CORE_PATH}")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+def _load_source():
+    source = json.loads(SOURCE_PATH.read_text(encoding="utf-8"))
+    if source.get("schema") != "bull-engine-boundary-gold" or source.get("schema_version") != 1:
+        raise ValueError("Unsupported frozen CHAT source")
+    return source
 
 
 def _write_json(path: Path, value) -> None:
@@ -35,17 +32,19 @@ def _text_sha256(value: str) -> str:
 def main() -> int:
     sys.path.insert(0, str(ROOT))
     from Shared.bull_llm.evaluation.registry import (
-        RegistryPolicy,
         canonical_sha256,
         write_pack_lock,
     )
+    from Shared.bull_llm.evaluation.catalog import engine_registry_policy
 
-    core = _load_core()
-    builtins = core.builtin_benchmarks()
-    selected = tuple(core.CHAT_CORE_TESTS)
+    source = _load_source()
+    builtins = source["definitions"]
+    selected = tuple(source["chat_core_tests"])
     cases = []
     for case_id in selected:
         definition = builtins[case_id]
+        if canonical_sha256(definition) != source["fingerprints"][case_id]["definition_sha256"]:
+            raise ValueError("Frozen CHAT source changed: " + case_id)
         cases.append({
             "id": case_id,
             "version": int(definition["version"]),
@@ -127,12 +126,7 @@ def main() -> int:
         encoding="utf-8",
         newline="\n",
     )
-    policy = RegistryPolicy(
-        engine_version="0.24.0.0",
-        runner_refs=frozenset({"single_turn_v1"}),
-        scorer_refs=frozenset(row["scorer_ref"] for row in cases),
-        verifier_refs=frozenset({"benchmark_contract_v1"}),
-    )
+    policy = engine_registry_policy("0.24.0.0")
     write_pack_lock(PACK_ROOT, policy, "public")
     print(f"Built {PACK_ROOT} ({len(cases)} cases)")
     return 0

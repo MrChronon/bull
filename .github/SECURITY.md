@@ -1,19 +1,19 @@
 # Reporting a vulnerability / Сообщение об уязвимости
 
-Do not publish exploit details, private keys, tokens, private addresses,
-connection stores, or unreviewed logs in an ordinary Issue. Use GitHub Private
-Vulnerability Reporting when enabled. Otherwise contact the repository owner
-privately and initially share only the affected version, component, conditions,
-and impact. Never test against another person's server or data without explicit
-authorization.
+The canonical bilingual policy is [SECURITY.md](../SECURITY.md).
+Do not post exploits, keys, private data or unreviewed logs in public Issues.
+Use GitHub Private Vulnerability Reporting when enabled. If no private channel
+is available, ask the owner to enable one without disclosing technical exploit
+details publicly. Never test another person's systems without authorization.
+No private mailbox or response-time promise is advertised.
 
-Public security guidance: `Docs/en/SECURITY.md`.
+[Operational security guidance](../Docs/en/SECURITY.md).
 
 ## Русский
 
-Не публикуйте в обычном Issue эксплуатационные детали, private key, токены, частные адреса, connection store или необработанные логи. Используйте GitHub Private Vulnerability Reporting, если владелец репозитория включил его. Если приватный канал ещё не настроен, сначала свяжитесь с владельцем проекта непублично и передайте только краткое описание влияния.
-
-Укажите версию, компонент, условия воспроизведения и возможное влияние. Не проверяйте уязвимость на чужом сервере и не получайте доступ к чужим данным без явного разрешения.
-
-Публичные рекомендации по эксплуатации и архитектуре находятся в
-`Docs/ru/SECURITY.md`.
+Полная двуязычная политика: [SECURITY.md](../SECURITY.md).
+Не публикуйте exploit, ключи, приватные сведения и непроверенные логи в Issues.
+Используйте включённый Private Vulnerability Reporting; если его нет, попросите
+владельца включить приватный канал, не раскрывая технических деталей публично.
+Чужие системы проверяются только с разрешением. Адрес почты и сроки ответа
+не обещаются. [Безопасная эксплуатация](../Docs/ru/SECURITY.md).

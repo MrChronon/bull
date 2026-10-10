@@ -105,13 +105,12 @@ class HardeningTests(unittest.TestCase):
             self.assertIsNone(self.core._gpu_command([]))
             self.assertIsNone(self.core.remote_ram_telemetry())
 
-    def test_server_installer_whole_workflow_has_whatif_gate(self):
-        path = Path(self.core.__file__).parent / "Server/Install-BULL-Node.ps1"
-        script = path.read_text(encoding="utf-8-sig")
-        gate = script.index("if (-not $PSCmdlet.ShouldProcess('BULL node'")
-        self.assertLess(gate, script.index("\nAssert-Administrator\n"))
-        self.assertLess(gate, script.index("    Ensure-WindowsCapability 'OpenSSH.Server"))
-        self.assertIn("'*S-1-5-32-544:F'", script)
+    def test_client_installer_does_not_mutate_server_or_firewall(self):
+        root = Path(self.core.__file__).parent
+        script = (root / "Setup.ps1").read_text(encoding="utf-8-sig")
+        for retired in ('New-NetFirewallRule','Set-Service','OpenSSH.Server','RunAs','$Role'):
+            self.assertNotIn(retired,script)
+        self.assertFalse((root / "Server/Install-BULL-Node.ps1").exists())
 
     @unittest.skipUnless(os.name == "nt", "Windows release gate")
     def test_public_gate_fails_closed_on_unscanned_files_and_pkcs8(self):

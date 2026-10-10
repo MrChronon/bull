@@ -4,7 +4,7 @@
 
 | Models run on | BULL menu | Required setup |
 | --- | --- | --- |
-| This computer | Connection → Local Ollama | Start Ollama locally |
+| This computer | Connection settings → Local Ollama | Start Ollama locally |
 | Known server | Connection → Saved server | Select the saved entry |
 | Server with working OpenSSH alias | Connection → New server from SSH alias | `ssh ALIAS` works |
 | New server | Connection → New server manually | Address, user, key, verified fingerprint |
@@ -15,7 +15,7 @@ Failed connections preserve their settings.
 ## Local Ollama
 
 Start Ollama and choose **Local Ollama**. BULL uses loopback and does not open an
-SSH connection. AllInOne is the installer role for a client and models on one PC.
+SSH connection. Install models and the server separately from BULL.
 
 ## SSH alias
 
@@ -75,7 +75,7 @@ key from `authorized_keys`; deleting a BULL address-book entry does not revoke i
 
 ## Diagnostics
 
-**Connection → Help and diagnostics** can test the selected SSH server without
+**Connection settings → Check selected SSH server** tests the connection without
 starting inference. Typical failures:
 
 - timeout: address, external port, firewall, NAT, or VPN path;
@@ -86,4 +86,3 @@ starting inference. Typical failures:
 
 Connection errors shown in English never echo a legacy Russian backend message.
 The original technical detail is retained in `client_debug.log`.
-

@@ -1,8 +1,8 @@
-# BULL v0.28.0.7 — быстрый вход по SSH-алиасу
+# BULL v0.29.0.1 — быстрый вход по SSH-алиасу
 
 Этот сценарий подходит, если обычная команда `ssh bull-home` уже подключается к
 компьютеру с Ollama по ключу. После настройки в BULL достаточно открыть
-**Подключения → Подключиться по SSH-алиасу** и ввести `bull-home`.
+**Настройки соединения программы → Новый сервер по SSH-алиасу** и ввести `bull-home`.
 
 ## 1. Создать отдельный ключ на Client
 
@@ -27,14 +27,8 @@ ssh-add "$env:USERPROFILE\.ssh\bull_access"
 
 ## 2. Разрешить ключ на Server
 
-Для нового Windows-узла используйте установщик BULL от администратора:
-
-```powershell
-.\Install-BULL-v0.28.0.7.ps1 `
-  -Role Server `
-  -AuthorizedKeyPath C:\Transfer\bull_access.pub `
-  -PublicHost <SERVER-IP-OR-DNS>
-```
+Сервер подготовьте отдельно: BULL не устанавливает OpenSSH Server и модели.
+Настройку пользователя, ключей и firewall выполняет администратор сервера.
 
 Для уже настроенного OpenSSH добавьте содержимое `bull_access.pub` одной строкой
 в `C:\Users\<SERVER_USER>\.ssh\authorized_keys` и сохраните корректные ACL.

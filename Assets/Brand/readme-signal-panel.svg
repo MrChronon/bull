@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="620" viewBox="0 0 1280 620" role="img" aria-labelledby="title desc">
   <title id="title">BULL evaluation signal panel</title>
-  <desc id="desc">Project facts and a conceptual map of BULL evaluation coverage. The panel shows 401 offline regressions, 12 stable CHAT Core cases, 10 candidate RU Dialogue cases and nine separated metric spaces. It is not a model score chart.</desc>
+  <desc id="desc">BULL v0.29 Pack Library: 668 offline checks, four optional base ZIPs, immutable run snapshots and separate metric spaces. This is a product map, not a model score chart.</desc>
   <defs>
     <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#16090f"/>
@@ -39,16 +39,16 @@
       <rect x="640" y="154" width="274" height="132" rx="18" fill="#211017" stroke="#722a39"/>
       <rect x="932" y="154" width="292" height="132" rx="18" fill="#211017" stroke="#722a39"/>
 
-      <text x="80" y="217" fill="#f4f7f5" font-size="42" font-weight="750">401/401</text>
+      <text x="80" y="217" fill="#f4f7f5" font-size="42" font-weight="750">668/668</text>
       <text x="80" y="252" fill="#d899a3" font-size="14" font-weight="650" letter-spacing="2">OFFLINE REGRESSIONS</text>
       <circle cx="300" cy="188" r="8" fill="#ff3c52" filter="url(#glow)"/>
 
-      <text x="372" y="217" fill="#f4f7f5" font-size="42" font-weight="750">12</text>
-      <text x="372" y="252" fill="#d899a3" font-size="14" font-weight="650" letter-spacing="2">CHAT CORE CASES</text>
+      <text x="372" y="217" fill="#f4f7f5" font-size="42" font-weight="750">4</text>
+      <text x="372" y="252" fill="#d899a3" font-size="14" font-weight="650" letter-spacing="2">OPTIONAL BASE ZIPS</text>
       <circle cx="592" cy="188" r="8" fill="#ff8a94" filter="url(#glow)"/>
 
-      <text x="664" y="217" fill="#f4f7f5" font-size="42" font-weight="750">10</text>
-      <text x="664" y="252" fill="#d899a3" font-size="14" font-weight="650" letter-spacing="2">RU DIALOGUE CASES</text>
+      <text x="664" y="217" fill="#f4f7f5" font-size="42" font-weight="750">1</text>
+      <text x="664" y="252" fill="#d899a3" font-size="14" font-weight="650" letter-spacing="2">EXACT PACK PER RUN</text>
       <circle cx="884" cy="188" r="8" fill="#ff3c52" filter="url(#glow)"/>
 
       <text x="956" y="217" fill="#f4f7f5" font-size="42" font-weight="750">9</text>
@@ -95,7 +95,7 @@
       <circle cx="1163" cy="510" r="13" fill="#ff3c52" filter="url(#glow)"/>
     </g>
 
-    <text x="56" y="583" fill="#c9838d" font-size="13" letter-spacing="1.6">BULL · BENCHMARKING &amp; USAGE OF LOCAL LANGUAGE MODELS · v0.28.0.7</text>
+    <text x="56" y="583" fill="#c9838d" font-size="13" letter-spacing="1.6">BULL · BENCHMARKING &amp; USAGE OF LOCAL LANGUAGE MODELS · v0.29.0.1</text>
     <text x="1224" y="583" fill="#c9838d" font-size="13" text-anchor="end">Verified project facts · no model results shown</text>
   </g>
 </svg>

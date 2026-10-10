@@ -1,6 +1,7 @@
 """BULL scoring boundary.  It intentionally contains no runtime transport."""
 
 from .service import EvaluationResult, evaluate_native
+from .catalog import catalog_from_registry, definitions_from_packs, engine_registry_policy
 from .registry import (
     LoadedPack,
     PackCase,

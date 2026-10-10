@@ -1,0 +1,71 @@
+# Подготовка и публикация BULL
+
+[English](../en/RELEASING.md) · [Комплект репозитория](../GITHUB_REPOSITORY.md)
+
+Версия: **v0.29.0.1**, pre-release для пользовательской проверки, разрешённый
+владельцем. Последующие push, draft/tag, настройки GitHub и публикация требуют
+разрешения владельца; сама инструкция не является таким разрешением.
+
+## 1. Зафиксировать и проверить
+
+Прочитайте AGENTS, AI_CONTEXT, парные руководства и
+[статус приёмки](../RELEASE_READINESS.md). Исправьте версии/метаданные до сборки.
+Исторические наборы/scorers неизменны. Настроенная установка и приватная Git-история
+не являются источником публичного snapshot.
+
+```powershell
+.\Run-Tests.ps1
+.\Test-Public-Release.ps1 -AuditReleaseCandidatesOnly
+# Новая пустая папка; прежний архив не перезаписывается.
+New-Item -ItemType Directory -Path 'RELEASE_OUTPUT'
+.\Build-Release.ps1 -OutputDirectory 'RELEASE_OUTPUT'
+```
+
+Pipeline проверяет UTF-8/cp1251, launchers, PowerShell, startup, privacy
+исходников/staging, manifest и ZIP. Проверьте свежую распаковку в отдельном
+профиле: отсутствие корневого BULL.exe до Setup, завершение установки,
+launchers/ярлыки и полную диагностику. Документы ZIP должны побайтово совпасть
+с исходниками; внешний checksum — с готовым архивом.
+
+## 2. Честно записать приёмку
+
+Нужны первое/повторное отображение терминала, смена Red/Matrix, корректный выход
+и освобождение папки, чистая установка зависимостей и live chat/benchmark/resume
+на целевых local/SSH backends. Fixtures этого не удостоверяют. Пока проверки
+открыты, используйте candidate/pre-release, не «полностью проверенный stable».
+
+## 3. Публичный snapshot
+
+Используйте только финальную проверенную распаковку; сохраните `.github` и
+`.gitignore`. Историю существующего публичного репозитория сохраняйте, приватную
+`.git` не переносите. Проверьте [состав и About](../GITHUB_REPOSITORY.md).
+Сохраните `.gitattributes`: manifest требует точных байтов, без преобразования
+окончаний строк. Сверьте Git blobs в index/commit с каждой записью ZIP;
+чистый статус рабочей папки сам по себе не доказывает совпадение байтов.
+Владелец отдельно проверяет labels `bug`/`enhancement`, Issues/Discussions и
+работающий приватный канал уязвимостей. Не добавляйте секреты, QA/runtime-файлы;
+сохраните canonical logo и лицензию.
+
+## 4. Публикация с разрешением владельца
+
+Убедитесь, что tag свободен. Target — точный публичный commit, соответствующий
+ZIP, не произвольно движущаяся ветка. Создайте **draft**, вставьте
+[двуязычный текст](../../GITHUB_RELEASE_v0.29.0.1.md), приложите ZIP и checksum.
+При открытой приёмке — **pre-release**, не latest stable. Проверьте draft целиком.
+См. [официальную инструкцию GitHub](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository).
+
+SECURITY.md не включает private reporting. Это отдельная настройка:
+[инструкция GitHub](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/configure-vulnerability-reporting/configure-for-a-repository).
+При локальной подготовке включение этих функций не предполагается.
+
+Для реальной публикации согласованно обновите статус и дату CITATION,
+пересоберите финальный ZIP/checksum и проверьте assets в draft до публикации.
+Не заменяйте опубликованные bytes и не переносите публичный tag.
+Если публикация отложена, не заполняйте `date-released` выдуманной датой.
+
+## 5. Проверка после публикации
+
+Скачайте assets по двум version-specific ссылкам и проверьте SHA-256.
+Проверьте EN/RU README, картинки, документацию, формы Issues, license/security,
+tag/commit и установленное приложение. Сохраните URL и финальный SHA-256 локально.
+GitHub downloads не доказывает успешные установки, качество benchmark или usability.

@@ -1,8 +1,8 @@
-# BULL v0.28.0.7 — модель безопасности
+# BULL v0.29.0.1 — модель безопасности
 
 [Безопасность на русском](ru/SECURITY.md) · [Security in English](en/SECURITY.md)
 
-## Результат аудита v0.28.0.7
+## Результат аудита v0.29.0.1
 
 v0.27 сохраняет границу BULL Evidence. `*_evidence_private.json`
 содержит исходные records и считается приватным; `*_evidence_share_safe.json`
@@ -15,7 +15,7 @@ legacy artifacts создаёт новый файл и не переписыва
 числа тестов и критериев. Это не делает сами prompts доверенными и не превращает
 keyword checks в семантический verifier. `.txt` всегда требует ручной оценки.
 
-См. `AUDIT_v0.28.0.7.md`. Предыдущий hardening сохранил блокировку redirects
+См. `AUDIT_v0.29.0.1.md`. Предыдущий hardening сохранил блокировку redirects
 Ollama, ограничения HTTP bodies,
 неверное завершение stream, terminal controls при выводе модели, коллизии временных
 файлов и обходы privacy gate через непроверенные форматы/размеры. Server -WhatIf
@@ -111,18 +111,18 @@ IdentitiesOnly=yes
 
 Это не заменяет безопасную передачу connection JSON. Для особо чувствительной системы сравните fingerprint с Server по независимому каналу.
 
-## Server installer
+## Client installer
 
-Server installer требует администратора и публичный ключ разрешённого Client. Без `.pub` он завершается до включения OpenSSH. AllInOne без ключа работает только локально и не создаёт входящее SSH-правило. При удалённой установке Server глобально задаётся `AuthenticationMethods publickey`, а password и keyboard-interactive authentication отключаются для всех SSH-пользователей. Это намеренно влияет на существующие password-only SSH-сценарии машины. Затем installer:
+Установщик BULL настраивает только клиент: язык, наборы, проверка целостности
+и существующее соединение. Он не устанавливает сервер, не меняет `sshd_config`
+или firewall и не требует UAC. Python через winget предлагается отдельно.
 
-- открывает только TCP 22;
-- оставляет Ollama на `127.0.0.1:11434`;
-- использует Windows OpenSSH authorized keys;
-- для всех SSH-пользователей отключает password и keyboard-interactive authentication;
-- проверяет новый `sshd_config` до применения;
-- сохраняет одноразовый backup исходного config.
-
-Installer не меняет router/NAT и не авторизуется в overlay-сети от имени пользователя.
+ZIP загружается только по явному запросу через HTTPS, без credentials в URL.
+Переход на HTTP запрещён; размер архива ограничен 64 MiB, время и redirects
+ограничены. После загрузки выполняется тот же data-only ZIP preflight:
+проверка путей, ссылок, типов файлов, размера распаковки и digest.
+Никакой код из ZIP не загружается в программу. HTTPS не подтверждает качество
+заданий: автор и критерии требуют проверки пользователем.
 
 ## Internet access
 
@@ -206,7 +206,7 @@ allowlisted runner/scorer/verifier IDs, canonical content/gold hashes и lock.
 
 Offline rescore не записывает абсолютный путь исходного raw JSON в переносимые результаты: сохраняются basename и SHA-256. Сам raw JSON, score diff и summary всё равно могут раскрывать имена моделей, ответы и измерения, поэтому перед публикацией их нужно проверять вручную.
 
-## Экспериментальная GPU Lab
+## Удалённая экспериментальная GPU Lab
 
 GPU Lab v1 использует отдельную Ollama с child-only environment, loopback API и
 проверкой PID слушателя (на сервере и для локального SSH forwarding). Windows Job Object
@@ -214,7 +214,8 @@ GPU Lab v1 использует отдельную Ollama с child-only environm
 Это не OS-песочница для самой Ollama: указывайте только доверенный executable;
 она работает с правами выбранного Windows/SSH-пользователя. Драйвер и модели также
 должны быть доверенными. `result.private.json` и `gpu_lab_settings.private.json`
-приватны; release gate запрещает любые `*.private.json`. См. `GPU_LAB.md`.
+приватны; release gate запрещает любые `*.private.json`.
+Этот модуль больше не поставляется; описание выше — историческая граница.
 
 ## Incident response
 

@@ -1,0 +1,34 @@
+{
+  "schema": "bull-benchmark-pack-gold",
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "analytics_case",
+      "version": 3,
+      "definition_sha256": "845d6a5a70a9a3354f01e28a647cf0d5e84c79b25a40c5fe215c50234603ba0f",
+      "prompt_sha256": "419db0f40784556123e7984ba0d1f70694202a813d78d687ead5c43468cb6894",
+      "result_instruction_sha256": "836aa21efa6305e18f94d4ab64eb468f0cc0b8a19e91867abb74daaf7cf7f479"
+    },
+    {
+      "id": "funnel",
+      "version": 3,
+      "definition_sha256": "875ede5f7e78991d8b51f15542b4af53693fd1fe02a8602469e941d13a1506ea",
+      "prompt_sha256": "d522e089189d4278685bb385bd81f171c5d23038b4471803595fa30e923e1a19",
+      "result_instruction_sha256": "49da9e432a32bc32b2d1a3dc0d333c42db0a05b0bf1d47b8be64ecdeabffdff9"
+    },
+    {
+      "id": "python_debug",
+      "version": 1,
+      "definition_sha256": "522f47d9ab2eed7a1ee76cd754cd737bf37baa57bb7e870ca73fffd7ad384cca",
+      "prompt_sha256": "834f46700638ecd17245038cc3530e586b180b7b800c7bff96007f2dc43658da",
+      "result_instruction_sha256": "ce49834f80cef0322ac527342f6bc22cec16a60bc41c23d9294fbccb4ba4f161"
+    },
+    {
+      "id": "retention_d7",
+      "version": 5,
+      "definition_sha256": "9207ebaf6b70def7f724124d4ae7c079399e53f93da139c0b9d597fd7c07cdbe",
+      "prompt_sha256": "86b66c743b02dab99a36ceaeef0049b6318dcb9aa662283d77dbf399ed5dba18",
+      "result_instruction_sha256": "d9f934ca316d2cf636c99ea3e3072e5ee34d2dbec38e78d3b8c953347460f522"
+    }
+  ]
+}

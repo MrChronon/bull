@@ -1,11 +1,11 @@
 {
-  "compiled_sha256": "11e65db1ca588d9941a735105c9b9113cc0761371db7e0c19fe40cfae9bc82ee",
-  "content_sha256": "ccf7a6f23b1ddd92776e899333eff48a616c26999f1be682e0095465c0ecb120",
-  "gold_sha256": "4a1c20ec08dfffb18844ccef905b11ca8107e03eea47e8a2e72f21e1f58c718d",
-  "manifest_sha256": "f52593d0ac59c660755a83cf44741236599b1fb9639159a5965912591da5d4c0",
+  "compiled_sha256": "f92e45020c083af08c29406e6117dc3cd919112a3fbbb805757eb97700b7adcf",
+  "content_sha256": "f9ea17e4f0e999fcbf1d087bb91a31ef30e76cfa6db84d6d7f0d825ad9f4ddee",
+  "gold_sha256": "865b2e8fd6313c4b08cf8ae951ce23561486b499f91af91cfea61a59daaf3d26",
+  "manifest_sha256": "790409a9226e68536a277b4598cedfb5086489d970f20df352e3e4984cc36b65",
   "pack": {
     "id": "bull_language_comparison",
-    "version": "1.0.0"
+    "version": "1.0.1"
   },
   "schema": "bull-benchmark-pack-lock",
   "schema_version": 1

@@ -342,7 +342,7 @@ def show_ssh_key_guide(core):
     print(r'   .\Client\New-BULL-ClientKey.ps1')
     print(r'   Передавайте на сервер только bull_access.pub. Файл bull_access остаётся у вас.')
     print('\n2. Добавьте публичный ключ на сервер.')
-    print(r'   Проще всего: Install-BULL-v0.28.0.7.cmd → Server и укажите файл .pub.')
+    print('   Setup настраивает только клиент; публичный ключ добавляется на сервере отдельно.')
     print(r'   Для готового OpenSSH добавьте одну строку .pub в C:\Users\<SERVER_USER>\.ssh\authorized_keys.')
     print('\n3. Создайте или дополните файл:', terminal_text(str(config)))
     print('''
@@ -444,80 +444,9 @@ def import_old(core):
     return None
 
 
-def import_and_migration_menu(core):
-    while True:
-        core.ui_header('ИМПОРТ И ПЕРЕНОС', 'Главная / Подключение / Импорт',
-                       'Используйте только файлы из доверенного источника')
-        core.ui_menu_item('1', 'Импортировать Connection JSON',
-                          'Публичные параметры сервера + ваш приватный ключ')
-        core.ui_menu_item('2', 'Перенести подключение из старой версии',
-                          'Выбрать папку предыдущего билда BULL')
-        core.ui_menu_item('0', 'Назад')
-        value = core.read_user_input('Выбор › ').strip()
-        if value in ('', '0'):
-            return None
-        if value == '1':
-            path = ask(core, 'Connection JSON (из доверенного источника)', required=True).strip('"')
-            entry = core._validate_connection_bundle(read_document(path))
-            entry['identity_file'] = str(private_key_path(ask(core, 'Ваш приватный ключ', required=True)))
-            if confirm_install(core, entry):
-                return '__connection_changed__'
-        elif value == '2':
-            if import_old(core):
-                return '__connection_changed__'
-        else:
-            print('Выберите пункт 0–2.')
 
 
-def connection_help_menu(core):
-    while True:
-        core.ui_header('ПОМОЩЬ И ДИАГНОСТИКА', 'Главная / Подключение / Помощь',
-                       'Проверки выполняются только по вашему явному выбору')
-        core.ui_menu_item('1', 'Проверить выбранный SSH-сервер',
-                          'Проверяет SSH; модели не запускаются')
-        core.ui_menu_item('2', 'Как создать SSH-ключ и алиас',
-                          'Пошаговая инструкция без изменения системы')
-        core.ui_menu_item('3', 'Как подключаться через Интернет',
-                          'VPN, публичный SSH-порт и безопасная настройка роутера')
-        core.ui_menu_item('4', 'Забыть сохранённый сервер',
-                          'Удаляет только запись BULL; ключ и доступ на сервере остаются')
-        core.ui_menu_item('0', 'Назад')
-        value = core.read_user_input('Выбор › ').strip()
-        if value in ('', '0'):
-            return None
-        if value == '1':
-            if core.load_backend_settings().get('target_mode') != 'remote':
-                print('Выбран этот компьютер. SSH сейчас не используется и не проверяется.')
-            else:
-                ok, detail = core._test_ssh_endpoint(core.resolve_remote_endpoint(force=True), timeout=6)
-                if ok:
-                    print('SSH OK: ' + terminal_text(detail))
-                elif get_language() == 'en':
-                    core.append_client_debug('SSH_TEST_FAILED '+terminal_text(detail))
-                    print('SSH unavailable. Technical details were written to client_debug.log.')
-                else:
-                    print('SSH недоступен: ' + terminal_text(detail))
-            pause(core)
-        elif value == '2':
-            show_ssh_key_guide(core); pause(core)
-        elif value == '3':
-            core.show_internet_access_guide(); pause(core)
-        elif value == '4':
-            entry = pick_entry(core, saved_connections(core), 'Забыть сервер')
-            if entry and core.read_user_input('Введите DELETE для удаления только записи › ').strip() == 'DELETE':
-                (vault_dir() / (entry['id'] + '.json')).unlink(missing_ok=True)
-                print('Запись удалена из личной папки. Ключ и доступ на сервере не изменены.')
-                pause(core)
-        else:
-            print('Выберите пункт 0–4.')
-
-
-def advanced_menu(core):
-    """Compatibility entry point for callers from older UI tests and commands."""
-    return connection_help_menu(core)
-
-
-def connection_menu(core):
+def connection_menu(core, *, setup=False):
     while True:
         core.ui_header('ПОДКЛЮЧЕНИЕ К МОДЕЛЯМ', 'Главная / Подключение',
                        'Сначала выберите, где запущены модели')
@@ -535,11 +464,16 @@ def connection_menu(core):
         core.ui_menu_item('4', 'Новый сервер вручную',
                           'Адрес, SSH-порт, пользователь, ключ и fingerprint')
         core.ui_section('ИНСТРУМЕНТЫ')
-        core.ui_menu_item('5', 'Импорт или перенос',
-                          'Connection JSON или настройки из старой версии')
-        core.ui_menu_item('6', 'Помощь и диагностика',
-                          'Проверка SSH, настройка ключа и доступ через Интернет')
-        core.ui_menu_item('0', 'Назад')
+        en = get_language() == 'en'
+        core.ui_menu_item('5', 'Import Connection JSON' if en else 'Импортировать Connection JSON')
+        core.ui_menu_item('6', 'Migrate an old connection' if en else 'Перенести подключение из старой версии')
+        core.ui_menu_item('7', 'Check selected SSH server' if en else 'Проверить выбранный SSH-сервер',
+                          'No inference' if en else 'Без запуска моделей')
+        core.ui_menu_item('8', 'SSH key and alias guide' if en else 'Как создать SSH-ключ и алиас')
+        core.ui_menu_item('9', 'Internet connection guide' if en else 'Как подключаться через Интернет')
+        core.ui_menu_item('10', 'Forget a saved server' if en else 'Забыть сохранённый сервер')
+        core.ui_menu_item('11', 'Engine settings (advanced)' if en else 'Настройки движка (расширенные)', 'Ollama / llama.cpp')
+        core.ui_menu_item('0', ('Configure later' if en else 'Настроить позже') if setup else ('Back' if en else 'Назад'))
         try:
             value = core.read_user_input('Выбор › ').strip()
             if value in ('', '0'): return None
@@ -560,12 +494,38 @@ def connection_menu(core):
                 result = new_ssh_connection(core)
                 if result: return result
             elif value == '5':
-                result = import_and_migration_menu(core)
-                if result: return result
+                path = ask(core, 'Connection JSON (из доверенного источника)', required=True).strip('"')
+                entry = core._validate_connection_bundle(read_document(path))
+                entry['identity_file'] = str(private_key_path(ask(core, 'Ваш приватный ключ', required=True)))
+                if confirm_install(core, entry): return '__connection_changed__'
             elif value == '6':
-                result = connection_help_menu(core)
-                if result: return result
-            else: print('Выберите пункт 0–6.')
+                if import_old(core): return '__connection_changed__'
+            elif value == '7':
+                if core.load_backend_settings().get('target_mode') != 'remote':
+                    core.ui_print('This computer is selected; SSH is not used.' if en else 'Выбран этот компьютер; SSH не используется.')
+                else:
+                    ok, detail = core._test_ssh_endpoint(core.resolve_remote_endpoint(force=True), timeout=6)
+                    (core.green if ok else core.yellow)()
+                    if en:
+                        if not ok: core.append_client_debug('SSH_TEST_FAILED ' + terminal_text(detail))
+                        core.ui_print('SSH OK' if ok else 'SSH unavailable; see client_debug.log.')
+                    else: core.ui_print(('SSH OK: ' if ok else 'SSH недоступен: ') + terminal_text(detail))
+                    core.white()
+                pause(core)
+            elif value == '8': show_ssh_key_guide(core); pause(core)
+            elif value == '9': core.show_internet_access_guide(); pause(core)
+            elif value == '10':
+                entry = pick_entry(core, saved_connections(core), 'Забыть сервер')
+                prompt = 'Type DELETE to remove only the record > ' if en else 'Введите DELETE для удаления только записи > '
+                if entry and core.read_user_input(prompt).strip() == 'DELETE':
+                    (vault_dir() / (entry['id'] + '.json')).unlink(missing_ok=True)
+                    core.ui_print('Only the record was removed; key and server access are unchanged.' if en else
+                                  'Удалена только запись; ключ и доступ на сервере не изменены.')
+                    pause(core)
+            elif value == '11':
+                result = core.backend_runtime_menu()
+                if result:return result
+            else: core.ui_print('Choose an option 0–11.' if en else 'Выберите пункт 0–11.')
         except Cancelled:
             print('Отменено без сохранения.')
         except (OSError, ValueError, TypeError, KeyError, subprocess.SubprocessError) as exc:

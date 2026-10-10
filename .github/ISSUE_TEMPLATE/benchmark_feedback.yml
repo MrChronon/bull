@@ -1,5 +1,5 @@
-name: Benchmark methodology feedback
-description: Report a scorer blind spot, ambiguous case or reproducibility concern
+name: Benchmark feedback / Методика тестов
+description: Scoring or reproducibility concern / Дефект оценки, задания или сопоставимости
 title: "[Benchmark]: "
 labels:
   - enhancement
@@ -9,60 +9,61 @@ body:
       value: |
         Use this form for a concrete benchmark defect. Use Discussions for broad proposals.
         Share only sanitized excerpts you have the right to publish.
+        Для конкретного дефекта оценки; широкие идеи — в Discussions. Только обезличенные примеры с правом публикации.
   - type: dropdown
     id: feedback_type
     attributes:
-      label: Feedback type
+      label: Feedback type / Тип замечания
       options:
-        - False positive
-        - False negative
-        - Ambiguous prompt or contract
-        - Scorer robustness
-        - Statistical methodology
-        - Order / warm-up / performance methodology
-        - Resume / recovery attribution
-        - Benchmark taxonomy gap
-        - Pack format or provenance
+        - False positive / Ложный успех
+        - False negative / Ложный отказ
+        - Ambiguous task / Неоднозначное задание
+        - Scorer robustness / Устойчивость оценки
+        - Statistics / Статистическая методика
+        - Performance / Порядок и измерение скорости
+        - Resume and recovery / Восстановление и атрибуция
+        - Taxonomy / Покрытие навыков
+        - Pack format / Формат и provenance
     validations:
       required: true
   - type: input
     id: case
     attributes:
-      label: Pack, case and scorer version
+      label: Pack, case and scorer version / Набор, задание и версия scorer
       placeholder: bull_chat_core@1.0.0 / groundedness_adversarial / scorer v2
     validations:
       required: true
   - type: textarea
     id: observation
     attributes:
-      label: Observed problem
-      description: Explain what the benchmark reported and why that interpretation may be wrong.
+      label: Observed problem / Наблюдаемая проблема
+      description: What was reported and why it may be wrong / Что показал тест и почему это может быть неверно?
     validations:
       required: true
   - type: textarea
     id: minimal_example
     attributes:
-      label: Minimal sanitized example
-      description: Include only the smallest excerpt needed to reproduce the concern.
+      label: Minimal sanitized example / Минимальный обезличенный пример
+      description: Smallest reproducible excerpt / Только необходимый фрагмент.
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
-      label: Expected evaluation behavior
+      label: Expected evaluation / Ожидаемая оценка
     validations:
       required: true
   - type: textarea
     id: impact
     attributes:
-      label: Comparability and false-positive risk
-      description: Which historical results or other cases could be affected by a change?
+      label: Comparability and false-positive risk / Сопоставимость и риск ошибок
+      description: Historical results/cases affected / Какие старые результаты или задания затронуты?
   - type: checkboxes
     id: integrity
     attributes:
-      label: Evidence check
+      label: Evidence check / Проверка примера
       options:
-        - label: I removed private prompts, model responses, endpoints, usernames and personal paths unless they are essential and safe to publish.
+        - label: Private content was removed; retained excerpts are safe and authorized / Приватное удалено; оставшиеся примеры безопасны и разрешены к публикации.
           required: true
-        - label: I distinguished native model output from client-assisted recovery.
+        - label: Native output and recovery are separate / Native-ответ и помощь клиента разделены.
           required: true

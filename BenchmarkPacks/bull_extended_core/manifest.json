@@ -1,0 +1,40 @@
+{
+  "schema": "bull-benchmark-pack-manifest",
+  "schema_version": 1,
+  "id": "bull_extended_core",
+  "version": "1.0.0",
+  "title": "BULL Extended Core",
+  "description": "Existing analytics and code tasks as independently versioned data. Code execution requires the engine permission gate.",
+  "status": "stable",
+  "visibility": "public",
+  "engine": {
+    "minimum_version": "0.28.0.7"
+  },
+  "license": {
+    "id": "MIT",
+    "name": "MIT License",
+    "file": "LICENSE.txt"
+  },
+  "provenance": {
+    "source": "BULL v0.28.0.7 frozen task contracts",
+    "migration": "data-only extraction",
+    "prompts_changed": false,
+    "scorers_changed": false
+  },
+  "taxonomy": [
+    "analytics_reasoning",
+    "code_analytics",
+    "code_data",
+    "code_python"
+  ],
+  "content": {
+    "cases_file": "cases.json",
+    "sha256": "173b8e40f3d8a4158d638875603b0c7557f2ac6b084da1608481626f79aba5e5",
+    "case_count": 4
+  },
+  "gold": {
+    "file": "gold.json",
+    "sha256": "077090db1accf10972b9e1460285d91ebe3579f72b61d901b614e10cef1f5b59"
+  },
+  "documentation": "README.md"
+}

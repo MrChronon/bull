@@ -33,7 +33,7 @@ from copy import deepcopy
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
-CLIENT=ROOT/'bull_client_v0.28.0.7.py'
+CLIENT=ROOT/'bull_client_v0.29.0.1.py'
 SCORER_V3_FIXTURE=ROOT/'Tests'/'Fixtures'/'benchmark_scorer_v3.json'
 RU_LANGUAGE_STRESS_V176_FIXTURE=ROOT/'Tests'/'Fixtures'/'ru_language_stress_sanitized_v3.json'
 
@@ -44,8 +44,26 @@ spec.loader.exec_module(mod)
 # coverage lives in Tests/ux_regression.py and opts in explicitly.
 mod.set_language('ru')
 
+# Legacy assertions intentionally receive an explicit reference catalog. The
+# application itself must never discover these bundled source directories.
+# Individual tests can still replace the factory with an empty/custom registry.
+PRODUCTION_LOAD_BENCHMARKS=mod.load_benchmarks
+PRODUCTION_PACK_REGISTRY=mod.benchmark_pack_registry
+def reference_registry(built=None):
+    return mod.PackRegistry([ROOT/'BenchmarkPacks'],[],mod.benchmark_registry_policy())
+def reference_benchmarks():
+    registered,_=mod._registry_benchmarks()
+    for name,item in mod.load_user_benchmarks().items():
+        if name in registered:
+            raise mod.PackValidationError('USER_CASE_CONFLICT','user task conflicts with reference fixture: '+name)
+        registered[name]=item
+    return registered
+mod.benchmark_pack_registry=reference_registry
+mod.load_benchmarks=reference_benchmarks
+mod.benchmark_pack_selection_menu=lambda **kwargs:True
+
 passed=[]
-STARTUP_CHECK_TOTAL=401
+STARTUP_CHECK_TOTAL=668
 print('BULL_STARTUP_TOTAL\t'+str(STARTUP_CHECK_TOTAL),flush=True)
 
 def test(name,fn):
@@ -961,8 +979,8 @@ def test_startup_home_menu_routes():
         eq(_with_inputs(['1'],lambda:mod.startup_home_menu('0.32.14','18/18')),'benchmark')
         eq(_with_inputs(['2','2'],lambda:mod.startup_home_menu('0.32.14','18/18')),'load')
         eq(_with_inputs(['agent'],lambda:mod.startup_home_menu('0.32.14','18/18')),'agent')
-        eq(_with_inputs(['3'],lambda:mod.startup_home_menu('0.32.14','18/18')),'connections')
-        eq(_with_inputs(['4','3'],lambda:mod.startup_home_menu('0.32.14','18/18')),'/dashboard')
+        eq(_with_inputs(['4'],lambda:mod.startup_home_menu('0.32.14','18/18')),'connections')
+        eq(_with_inputs(['6','1'],lambda:mod.startup_home_menu('0.32.14','18/18')),'/dashboard')
         eq(_with_inputs(['/ui'],lambda:mod.startup_home_menu('0.32.14','18/18')),'/ui')
         eq(_with_inputs(['0'],lambda:mod.startup_home_menu('0.32.14','18/18')),'exit')
     finally:
@@ -987,7 +1005,7 @@ def test_startup_benchmark_wizard_commands():
         },
     }
     try:
-        cmd,home=_with_inputs(['3'],mod.startup_benchmark_wizard)
+        cmd,home=_with_inputs(['4'],mod.startup_benchmark_wizard)
         eq(cmd,'/bench resume')
         assert home is True
 
@@ -1181,7 +1199,7 @@ def test_benchmark_result_menu_answers_stays_on_screen():
     old_input=mod.read_user_input
     old_show=mod.show_benchmark_answers
     old_color=mod._COLOR_ENABLED
-    seq=iter(['5','0'])
+    seq=iter(['5','','0'])
     seen=[]
     mod._COLOR_ENABLED=False
     mod.read_user_input=lambda prompt='':next(seq)
@@ -1255,7 +1273,7 @@ def test_benchmark_result_menu_opens_visual_report_and_stays():
     old_input=mod.read_user_input
     old_open=mod.open_benchmark_visual_report
     old_color=mod._COLOR_ENABLED
-    seq=iter(['3','0']); seen=[]
+    seq=iter(['3','','0']); seen=[]
     mod._COLOR_ENABLED=False
     mod.read_user_input=lambda prompt='':next(seq)
     mod.open_benchmark_visual_report=lambda path:seen.append(Path(path)) or True
@@ -2646,19 +2664,19 @@ def _with_fake_inputs(values,fn):
 
 
 def test_advanced_bench_slash_bench_stays_inside_lab():
-    result=_with_fake_inputs(['8','/bench','1'],mod.benchmark_advanced_menu)
-    eq(result,('/bench list',False))
+    result=_with_fake_inputs(['/bench','1'],mod.benchmark_advanced_menu)
+    eq(result,('/bench list',True))
 
 
 def test_startup_advanced_never_returns_none_command_mode():
-    result=_with_fake_inputs(['5','8','/bench','1'],mod.startup_benchmark_wizard)
-    eq(result,('/bench list',False))
+    result=_with_fake_inputs(['arbitrary chat text','0'],mod.startup_benchmark_wizard)
+    eq(result,('/home',False))
     assert result[0] is not None
 
 
 def test_advanced_rejects_arbitrary_chat_text():
-    result=_with_fake_inputs(['8','привет модели','1'],mod.benchmark_advanced_menu)
-    eq(result,('/bench list',False))
+    result=_with_fake_inputs(['привет модели','1'],mod.benchmark_advanced_menu)
+    eq(result,('/bench list',True))
 
 
 
@@ -3274,14 +3292,14 @@ def test_release_gate_reverifies_manifest_and_new_docs():
         'Docs\\BACKEND_SETUP.md',
         'Docs\\CODE_AUDIT.md',
         'Docs\\SECURITY.md',
-        'Docs\\RELEASE_NOTES_0.28.0.7.md',
+        'Docs\\RELEASE_NOTES_0.29.0.1.md',
     ):
         assert doc in build
     assert 'Manifest hash mismatch before packaging' in build
     assert 'Staged manifest hash mismatch' in build
     assert '$allowedVersioned' in build
-    assert 'v0.28.0.7' in build
-    assert 'Apps\\benchmark_lab_v0_28_0_7.py' in build
+    assert 'v0.29.0.1' in build
+    assert 'Apps\\benchmark_lab_v0_29_0_1.py' in build
     assert 'Shared\\bull_llm\\runtime\\__init__.py' in build
     assert 'Shared\\bull_llm\\schemas.py' in build
     assert '$rootExcludedDirs' in build and '$anywhereExcludedDirs' in build
@@ -3360,9 +3378,9 @@ def test_benchmark_wizard_multi_model_route_prompts_selector():
     old_read=mod.read_user_input
     try:
         mod._startup_choose_test=lambda:'analytics_case'
-        seq=iter(['5','3'])
+        seq=iter(['3'])
         mod.read_user_input=lambda prompt='':next(seq)
-        cmd,ret=mod.startup_benchmark_wizard()
+        cmd,ret=mod.benchmark_advanced_menu()
         eq(cmd,'/bench compare analytics_case')
         assert ret is True
         assert ' all ' not in (' '+cmd+' ')
@@ -3880,10 +3898,10 @@ def test_tested_profile_artifact_and_client_import():
 
 def test_v174_application_boundaries_and_shared_contracts():
     required=[
-        ROOT/'Apps'/'benchmark_lab_v0_28_0_7.py',ROOT/'Apps'/'bull_client_app_v0_28_0_7.py',
+        ROOT/'Apps'/'benchmark_lab_v0_29_0_1.py',ROOT/'Apps'/'bull_client_app_v0_29_0_1.py',
         ROOT/'Apps'/'_bootstrap.py',ROOT/'Shared'/'bull_llm'/'schemas.py',
         ROOT/'Shared'/'bull_llm'/'profiles.py',ROOT/'Shared'/'bull_llm'/'telemetry.py',
-        ROOT/'Shared'/'bull_llm'/'backends.py',ROOT/'BULL-Benchmark-Lab-v0.28.0.7.cmd',
+        ROOT/'Shared'/'bull_llm'/'backends.py',ROOT/'BULL-Benchmark-Lab-v0.29.0.1.cmd',
     ]
     assert all(path.is_file() for path in required),[str(x) for x in required if not x.is_file()]
     sys.path.insert(0,str(ROOT))
@@ -3894,22 +3912,22 @@ def test_v174_application_boundaries_and_shared_contracts():
         eq(schemas.TESTED_PROFILE_SCHEMA_VERSION,1)
     finally:
         if sys.path and sys.path[0]==str(ROOT): sys.path.pop(0)
-    lab=(ROOT/'Apps'/'benchmark_lab_v0_28_0_7.py').read_text(encoding='utf-8')
-    client=(ROOT/'Apps'/'bull_client_app_v0_28_0_7.py').read_text(encoding='utf-8')
+    lab=(ROOT/'Apps'/'benchmark_lab_v0_29_0_1.py').read_text(encoding='utf-8')
+    client=(ROOT/'Apps'/'bull_client_app_v0_29_0_1.py').read_text(encoding='utf-8')
     assert "BULL_START_SURFACE']='benchmark'" in lab
     assert "BULL_START_SURFACE']='home'" in client
 
 
 def test_icon_shortcut_and_release_assets():
-    ico=ROOT/'BULL-v0.28.0.7.ico'
+    ico=ROOT/'BULL-v0.29.0.1.ico'
     data=ico.read_bytes()
     assert data[:4]==b'\x00\x00\x01\x00'
     eq(int.from_bytes(data[4:6],'little'),7)
-    shortcut=(ROOT/'Install-BULL-v0.28.0.7-Shortcut.ps1').read_text(encoding='utf-8-sig')
-    launcher=(ROOT/'BULL-v0.28.0.7.cmd').read_text(encoding='utf-8-sig')
+    shortcut=(ROOT/'Tools/Update-BULL-Shortcuts.ps1').read_text(encoding='utf-8-sig')
+    launcher=(ROOT/'BULL-v0.29.0.1.cmd').read_text(encoding='utf-8-sig')
     assert 'IconLocation' in shortcut and 'GetFolderPath("Programs")' in shortcut
-    assert 'Install-BULL-v0.28.0.7-Shortcut.ps1' in launcher
-    assert (ROOT/'Install-BULL-v0.28.0.7.cmd').is_file()
+    assert 'BULL.exe' in launcher
+    assert (ROOT/'Setup.exe').is_file()
     asset_builder=(ROOT/'Tools'/'build_brand_assets.py').read_text(encoding='utf-8')
     assert 'contain(red_mark_source, (256, 256), padding=16).save(' in asset_builder
 
@@ -3918,14 +3936,13 @@ def test_windows_powershell_launcher_is_ascii_parse_safe():
     # Windows PowerShell 5.1 decodes a BOM-less .ps1 as the active ANSI code
     # page. Keep the tiny entry launcher ASCII-only so parsing cannot fail
     # before it enables UTF-8 for Python and child processes.
-    launcher=ROOT/'BULL-v0.28.0.7.ps1'
+    launcher=ROOT/'BULL-v0.29.0.1.ps1'
     raw=launcher.read_bytes()
     assert raw and all(byte < 128 for byte in raw), 'launcher must remain ASCII-safe for powershell.exe 5.1'
 
     for rel in (
-        'Install-BULL-v0.28.0.7.ps1',
-        'Install-BULL-v0.28.0.7-Shortcut.ps1',
-        'Server/Install-BULL-Node.ps1',
+        'Setup.ps1',
+        'Tools/Update-BULL-Shortcuts.ps1',
         'Server/Test-BULL-RemoteReadiness.ps1',
         'Client/New-BULL-ClientKey.ps1',
     ):
@@ -4333,9 +4350,10 @@ def test_matrix_benchmark_menu_copy_and_advanced_navigation_are_consistent():
             cmd,home=_with_inputs(['0'],mod.startup_benchmark_wizard)
         eq((cmd,home),('/home',False))
         text=out.getvalue()
-        assert 'Мои задачи и промпты' in text
-        assert 'Стандартное сравнение' in text and 'Восстановить и продолжить' in text
-        assert 'Посмотреть результаты' in text and 'Дополнительные тесты' in text
+        assert 'Задача из UserTests' in text and 'Мой промпт' in text
+        assert 'Сравнить по набору тестов' in text and 'Восстановить и продолжить' in text
+        assert 'Библиотека наборов тестов' not in text
+        assert 'Посмотреть результаты' in text and 'Языковые треки' in text
         assert 'Agent Benchmark' not in text and 'GPU Lab' not in text
         eq(_with_fake_inputs(['0'],mod.benchmark_advanced_menu),('__benchmark_menu__',False))
         eq(_with_fake_inputs(['h'],mod.benchmark_advanced_menu),('/home',False))
@@ -4372,7 +4390,7 @@ def test_main_reaches_home_when_backend_is_offline():
         'white','gray','yellow','green','set_console_title','clear_console','newfile',
         'run_startup_regression','initialize_backend_from_settings','connect_active_backend',
         'version','startup_home_menu','installed_models','set_active_model','maybe_save',
-        'save_session',
+        'save_session','benchmark_pack_selection_menu',
     )
     old={name:getattr(mod,name) for name in names}; old_sleep=mod.time.sleep
     noop=lambda *args,**kwargs:None
@@ -4383,6 +4401,7 @@ def test_main_reaches_home_when_backend_is_offline():
         mod.newfile=lambda mode:Path('offline-startup-test.json')
         mod.run_startup_regression=lambda **kwargs:{'ok':True,'summary':'208/208','output':''}
         mod.initialize_backend_from_settings=noop
+        mod.benchmark_pack_selection_menu=noop
         mod.connect_active_backend=lambda *a,**k:(_ for _ in ()).throw(RuntimeError('offline test'))
         mod.version=lambda timeout=2:None
         mod.startup_home_menu=lambda backend_version,regression_summary:'exit'
@@ -4432,14 +4451,14 @@ def test_benchmark_runtime_guard_keeps_reports_available_offline():
     mod.checkpoint_resume_menu_state=lambda:('Resume','Незавершённых запусков нет','IDLE')
     try:
         result=_with_inputs(
-            ['1','4','0'],
+            ['5'],
             lambda:mod.startup_benchmark_wizard(
                 runtime_guard=lambda purpose:guards.append(purpose) or False
             )
         )
-        eq(result,('/home',False))
-        eq(guards,['benchmark'])
-        eq(reports,['opened'])
+        eq(result,('/bench report',False))
+        eq(guards,[])
+        eq(reports,[])
     finally:
         mod.clear_console=old_clear; mod.time.sleep=old_sleep
         mod.benchmark_report_browser=old_report; mod.checkpoint_resume_menu_state=old_resume
@@ -4565,44 +4584,24 @@ def test_v18_connection_bundle_fails_closed_on_secret_or_missing_key():
         shutil.rmtree(root,ignore_errors=True)
 
 
-def test_v18_platform_installer_roles_and_release_secret_gate():
-    installer=ROOT/'Install-BULL-v0.28.0.7.ps1'
-    node=ROOT/'Server'/'Install-BULL-Node.ps1'
-    template=ROOT/'Server'/'connection.template.json'
-    assert installer.is_file() and node.is_file() and template.is_file()
-    text=installer.read_text(encoding='utf-8')
-    for role in ('Client','Server','AllInOne'):
-        assert role in text
-    assert "Role -eq 'Server'" in text and 'AuthorizedKeyPath' in text
-    assert "nodeArgs += '-LocalOnly'" in text
-    node_text=node.read_text(encoding='utf-8')
-    assert 'OpenSSH.Server~~~~0.0.1.0' in node_text
-    assert 'OpenSSH-Server-In-TCP' in node_text
-    assert "if (-not $LocalOnly -and -not $AuthorizedKeyPath)" in node_text
-    assert "if (-not $LocalOnly)" in node_text
-    for directive in ('PasswordAuthentication no','KbdInteractiveAuthentication no','AuthenticationMethods publickey'):
-        assert directive in node_text
-    assert not re.search(r'New-NetFirewallRule[^\n]+LocalPort\s+(11434|8080)',node_text,re.I)
+def test_client_installer_and_release_secret_gate():
+    installer=ROOT/'Setup.ps1'
+    assert installer.is_file() and (ROOT/'Tools/install_bull.py').is_file()
+    text=installer.read_text(encoding='utf-8-sig')
+    for retired in ('$Role','AllInOne','RunAs','Install-BULL-Node'):
+        assert retired not in text
+    assert 'Language' in text and 'install_bull.py' in text
+    assert not (ROOT/'Server/Install-BULL-Node.ps1').exists()
     build=(ROOT/'Build-Release.ps1').read_text(encoding='utf-8')
     for marker in ('OPENSSH|RSA|EC|DSA','*.llm-access*','connection*.private.json'):
         assert marker in build
 
 
-def test_wan_installer_propagates_route_port_and_keeps_inference_private():
-    installer=(ROOT/'Install-BULL-v0.28.0.7.ps1').read_text(encoding='utf-8')
-    node=(ROOT/'Server'/'Install-BULL-Node.ps1').read_text(encoding='utf-8')
-    readiness_path=ROOT/'Server'/'Test-BULL-RemoteReadiness.ps1'
-    assert readiness_path.is_file()
-    readiness=readiness_path.read_text(encoding='utf-8')
-    guide=(ROOT/'Docs'/'REMOTE_ACCESS.md').read_text(encoding='utf-8')
-    for marker in ('[ValidateSet(\'lan\',\'overlay\',\'direct\')][string]$Route',
-                   '[ValidateRange(1,65535)][int]$EndpointPort'):
-        assert marker in installer
-    assert "$nodeArgs += @('-Route',$Route,'-EndpointPort',$EndpointPort,'-SshUser',$SshUser)" in installer
-    assert "route = $Route" in node and "port = $EndpointPort" in node
+def test_wan_readiness_keeps_inference_private():
+    readiness=(ROOT/'Server/Test-BULL-RemoteReadiness.ps1').read_text(encoding='utf-8-sig')
+    guide=(ROOT/'Docs/REMOTE_ACCESS.md').read_text(encoding='utf-8')
     assert "LocalPort 22" in guide and "11434" in guide and "8080" in guide
     assert 'не поддерживает автоматическое изменение настроек роутера' in guide
-    assert not re.search(r'New-NetFirewallRule[^\n]+LocalPort\s+(11434|8080)',node,re.I)
     for marker in ('passwordauthentication no','kbdinteractiveauthentication no',
                    'authenticationmethods publickey','Inference port $port','NOT READY'):
         assert marker.casefold() in readiness.casefold()
@@ -5303,11 +5302,15 @@ def test_visual_report_is_offline_graphical_and_excludes_raw_answers():
 
 
 def test_public_release_readiness_assets_and_gate_exist():
-    for rel in ('README.md','.gitignore','Docs/PUBLIC_RELEASE_CHECKLIST.md','Docs/RELEASE_NOTES_0.28.0.7.md','Test-Public-Release.ps1'):
+    for rel in ('README.md','.gitignore','.gitattributes','Docs/PUBLIC_RELEASE_CHECKLIST.md','Docs/RELEASE_NOTES_0.29.0.1.md','Test-Public-Release.ps1'):
         assert (ROOT/rel).is_file(),rel
     build=(ROOT/'Build-Release.ps1').read_text(encoding='utf-8-sig')
     audit=(ROOT/'Test-Public-Release.ps1').read_text(encoding='utf-8-sig')
     assert 'Test-Public-Release.ps1' in build
+    attribute_rules=[line.strip() for line in (ROOT/'.gitattributes').read_text(encoding='utf-8').splitlines()
+                     if line.strip() and not line.lstrip().startswith('#')]
+    eq(attribute_rules,['* -text'])
+    assert 'unsupported Git byte-preservation policy' in audit
     for marker in ('PRIVATE KEY','C:\\\\Users\\\\','gh[pousr]_','hf_','AKIA'):
         assert marker in audit,marker
     docs='\n'.join(
@@ -5321,6 +5324,25 @@ def test_public_release_readiness_assets_and_gate_exist():
         assert mod.latest_resumable_checkpoint() is None
         mod.load_benchmarks()
         assert not (root/'Benchmarks').exists(),'read-only checkpoint discovery created a runtime directory'
+        if os.name=='nt' and shutil.which('powershell.exe'):
+            import subprocess
+            policy_root=root/'policy'; policy_root.mkdir()
+            shutil.copyfile(ROOT/'backend_settings.json',policy_root/'backend_settings.json')
+            attributes=policy_root/'.gitattributes'
+            for content,expected_success in (('# exact bytes\n* -text\n',True),
+                                              ('* text=auto\n',False)):
+                attributes.write_text(content,encoding='utf-8')
+                result=subprocess.run(['powershell.exe','-NoLogo','-NoProfile','-NonInteractive',
+                    '-ExecutionPolicy','Bypass','-File',str(ROOT/'Test-Public-Release.ps1'),
+                    '-Root',str(policy_root)],capture_output=True,timeout=30)
+                eq(result.returncode==0,expected_success)
+            attributes.write_text('* -text\n',encoding='utf-8')
+            nested=policy_root/'nested'; nested.mkdir()
+            (nested/'.gitattributes').write_text('* -text\n',encoding='utf-8')
+            result=subprocess.run(['powershell.exe','-NoLogo','-NoProfile','-NonInteractive',
+                '-ExecutionPolicy','Bypass','-File',str(ROOT/'Test-Public-Release.ps1'),
+                '-Root',str(policy_root)],capture_output=True,timeout=30)
+            assert result.returncode!=0,'nested Git attributes bypassed the exact root allowlist'
     finally:
         mod.appdir=old_appdir; shutil.rmtree(root,ignore_errors=True)
 
@@ -5532,8 +5554,8 @@ test('v18 public defaults are local + identity-free',test_v18_public_defaults_ar
 test('v18 local Ollama never opens SSH',test_v18_local_ollama_connect_never_opens_ssh)
 test('v18 connection bundle isolates endpoint + key',test_v18_connection_bundle_keeps_endpoint_and_key_out_of_public_config)
 test('v18 connection bundle fails closed',test_v18_connection_bundle_fails_closed_on_secret_or_missing_key)
-test('v18 installer roles + release secret gate',test_v18_platform_installer_roles_and_release_secret_gate)
-test('WAN installer passes route/port and keeps inference private',test_wan_installer_propagates_route_port_and_keeps_inference_private)
+test('client installer + release secret gate',test_client_installer_and_release_secret_gate)
+test('WAN readiness keeps inference private',test_wan_readiness_keeps_inference_private)
 test('WAN SSH keepalive + clear Internet UI',test_wan_ssh_transport_has_keepalive_and_clear_internet_ui)
 test('UI theme defaults to BULL Red + migrates legacy brand atomically',test_ui_theme_defaults_to_bull_red_and_migrates_legacy_brand_atomically)
 test('appearance menu changes theme + returns',test_appearance_menu_changes_theme_and_returns)
@@ -5547,6 +5569,31 @@ startup_suite('Benchmark Registry contract checks')
 from Tests.registry_regression import run_suite as run_registry_suite
 registry_test_count=run_registry_suite(mod)
 passed.extend(f'Benchmark Registry {i+1}' for i in range(registry_test_count))
+startup_suite_complete()
+startup_suite('Engine Boundary contract checks')
+from Tests.engine_boundary_regression import run_suite as run_engine_boundary_suite
+engine_boundary_test_count=run_engine_boundary_suite(mod)
+passed.extend(f'Engine Boundary {i+1}' for i in range(engine_boundary_test_count))
+startup_suite_complete()
+startup_suite('Pack Library contract checks')
+from Tests.pack_library_regression import run_suite as run_pack_library_suite
+pack_library_test_count=run_pack_library_suite()
+passed.extend(f'Pack Library {i+1}' for i in range(pack_library_test_count))
+startup_suite_complete()
+startup_suite('Pack selection and offline onboarding checks')
+from Tests.pack_selection_regression import run_suite as run_pack_selection_suite
+pack_selection_count=run_pack_selection_suite(mod,PRODUCTION_LOAD_BENCHMARKS,PRODUCTION_PACK_REGISTRY)
+passed.extend(f'Pack selection {i+1}' for i in range(pack_selection_count))
+startup_suite_complete()
+startup_suite('Author workshop checks')
+from Tests.author_workshop_regression import run_suite as run_author_workshop_suite
+author_workshop_count=run_author_workshop_suite()
+passed.extend(f'Author workshop {i+1}' for i in range(author_workshop_count))
+startup_suite_complete()
+startup_suite('Pack snapshot evidence')
+from Tests.pack_evidence_regression import run_suite as run_pack_evidence_suite
+pack_evidence_count=run_pack_evidence_suite()
+passed.extend(f'Pack evidence {i+1}' for i in range(pack_evidence_count))
 startup_suite_complete()
 startup_suite('Agent Benchmark contract checks')
 from Tests.agent_benchmark_regression import run_suite as run_agent_suite
@@ -5569,11 +5616,6 @@ startup_suite('User experience checks')
 from Tests.ux_regression import run_suite as run_ux_suite
 ux_test_count=run_ux_suite(mod)
 passed.extend(f'UX {i+1}' for i in range(ux_test_count))
-startup_suite_complete()
-startup_suite('GPU Lab contract checks')
-from Tests.gpu_lab_regression import run_suite as run_gpu_suite
-gpu_test_count=run_gpu_suite()
-passed.extend(f'GPU Lab {i+1}' for i in range(gpu_test_count))
 startup_suite_complete()
 startup_suite('BULL Core bridge checks')
 from Tests.bridge_regression import run_suite as run_bridge_suite
@@ -5609,6 +5651,50 @@ from Tests.user_tests_regression import run_suite as run_user_tests_suite
 user_tests_count=run_user_tests_suite()
 passed.extend(f'User Tests {i+1}' for i in range(user_tests_count))
 startup_suite_complete()
+startup_suite('Pack Library usability and Windows persistence checks')
+from Tests.usability_patch_regression import run_suite as run_usability_suite
+usability_count=run_usability_suite(mod)
+passed.extend(f'Usability patch {i+1}' for i in range(usability_count))
+startup_suite_complete()
+from Tests.setup_regression import run_suite as run_setup_suite
+print('BULL_STARTUP_CHECK\tSequential installer and shallow navigation',flush=True)
+for index in range(run_setup_suite(mod)):passed.append('client_setup_'+str(index))
+print('BULL_STARTUP_COMPLETE\t'+str(len(passed)),flush=True)
+
+from Tests.pack_download_regression import run_suite as run_download_suite
+print('BULL_STARTUP_CHECK\tBounded HTTPS pack download',flush=True)
+for index in range(run_download_suite()):passed.append('pack_download_'+str(index))
+print('BULL_STARTUP_COMPLETE\t'+str(len(passed)),flush=True)
+
+from Tests.theme_setup_regression import run_suite as run_theme_setup_suite
+print('BULL_STARTUP_CHECK\tBULL Red / BULL Matrix and Setup',flush=True)
+for index in range(run_theme_setup_suite(mod)):passed.append('theme_setup_'+str(index))
+print('BULL_STARTUP_COMPLETE\t'+str(len(passed)),flush=True)
+
+from Tests.followup_ui_regression import run_suite as run_followup_ui_suite
+startup_suite('Follow-up UI and offline author workflow')
+passed.extend(f'Follow-up UI {i+1}' for i in range(run_followup_ui_suite(mod)))
+startup_suite_complete()
+from Tests.language_route_regression import run_suite as run_language_route_suite
+startup_suite('Installed language-pack binding')
+passed.extend(f'Language route {i+1}' for i in range(run_language_route_suite(mod)))
+startup_suite_complete()
+
+from Tests.runtime_followup_regression import run_suite as run_runtime_followup_suite
+startup_suite('Owned process cleanup and delayed client launcher')
+passed.extend(f'Runtime follow-up {i+1}' for i in range(run_runtime_followup_suite(mod)))
+startup_suite_complete()
+
+from Tests.bilingual_scorer_regression import run_suite as run_bilingual_scorer_suite
+startup_suite('Bilingual scorer revision 2, frozen prompts and v1 compatibility')
+passed.extend(f'Bilingual scorer {i+1}' for i in range(run_bilingual_scorer_suite(mod)))
+startup_suite_complete()
+
+from Tests.bilingual_report_regression import run_suite as run_bilingual_report_suite
+startup_suite('Specialized bilingual results and matched-pair metrics')
+passed.extend(f'Bilingual report {i+1}' for i in range(run_bilingual_report_suite(mod)))
+startup_suite_complete()
+
 if len(passed)!=STARTUP_CHECK_TOTAL:
     raise AssertionError(f'startup check total mismatch: {len(passed)} != {STARTUP_CHECK_TOTAL}')
 print(f'PASS {len(passed)}/{len(passed)}')

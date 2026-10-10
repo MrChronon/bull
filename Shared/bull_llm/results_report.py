@@ -393,7 +393,7 @@ def _comparison_overview(rows, points, badge, colors, language):
     ) + '</p></section>'
 
 
-def render_report(model_rows, detail_rows, *, version='', language='en', generated='', evidence_summary=None):
+def render_report(model_rows, detail_rows, *, version='', language='en', generated='', evidence_summary=None, run_scope=None, bilingual=None):
     """Render an autonomous HTML document from existing summaries only."""
     language = 'ru' if language == 'ru' else 'en'
     t = lambda en, ru: choose(language, en, ru)
@@ -416,11 +416,28 @@ def render_report(model_rows, detail_rows, *, version='', language='en', generat
              '<div class="kpis">' + ''.join(f'<div><strong>{value}</strong><span>{label}</span></div>' for value, label in
                  ((len(rows), t('models', 'моделей')), (len({r.get('benchmark') for r in details}), t('tests', 'тестов')),
                   (counts, t('recorded runs', 'сохранённых запусков')), (failed, t('execution errors', 'ошибок выполнения')))) + '</div></header>']
+    if run_scope:
+        body += ['<aside class="notice"><strong>' + h(run_scope.get('identity', '')) + '</strong> · ' +
+                 h(run_scope.get('title', '')) + '<br>' +
+                 h(run_scope.get('selected_cases', '')) + '/' + h(run_scope.get('total_cases', '')) + ' · ' +
+                 t('Explicit test selection', 'Явный выбор тестов') + '<br>' +
+                 (t('SUBSET — not a full-pack benchmark result.', 'ЧАСТЬ НАБОРА — не оценка полного набора.')
+                  if run_scope.get('coverage') == 'subset' else t('Full pack coverage', 'Полное покрытие набора')) + '</aside>']
+        body += ['<details><summary>' + t('Pack provenance', 'Происхождение набора') + '</summary><p>' +
+                 t('Manifest SHA-256: ', 'Manifest SHA-256: ') + h(run_scope.get('manifest_sha256', '')) +
+                 '<br>Compiled SHA-256: ' + h(run_scope.get('compiled_sha256', '')) + '</p><p>' +
+                 t('These checksums identify content, not author authenticity or reference correctness.',
+                   'Хеши определяют содержимое, но не подтверждают автора или правильность эталонов.') + '</p></details>']
     nav = [('rankings', t('Top 3', 'Топ-3')), ('compare', t('At a glance', 'Главное')),
            ('charts', t('Quality & speed', 'Качество и скорость')),
            ('resources', t('Resources', 'Ресурсы')), ('tests', t('Tests', 'Тесты')),
            ('settings', t('Settings', 'Параметры')), ('details', t('Full data', 'Все данные'))]
+    if bilingual:nav=[('bilingual',t('RU/EN comparison','Сравнение RU/EN'))]
     body += ['<nav aria-label="Report">' + ''.join(f'<a href="#{key}">{label}</a>' for key, label in nav) + '</nav>']
+    if bilingual:
+        body += [_bilingual_section(bilingual,language),'<details><summary>'+t(
+            'Supplemental aggregate metrics — not a bilingual ranking',
+            'Дополнительные общие метрики — не билингвальный рейтинг')+'</summary>']
     if not decision['comparable']:
         body += ['<aside class="notice">' + t('Unequal test/seed coverage, errors or a parameter sweep: ranks describe recorded results only. Recommendations are withheld.',
                   'Разное покрытие тестов/seeds, ошибки или перебор настроек: места описывают только записанные результаты. Рекомендации не выдаются.') + '</aside>']
@@ -582,8 +599,44 @@ def render_report(model_rows, detail_rows, *, version='', language='en', generat
         ('HTML contains metrics only, no prompts or raw answers. Model and test labels may still be sensitive; review before sharing.', 'HTML содержит метрики, но не промпты и ответы. Имена моделей и тестов могут быть чувствительными — просмотрите их перед отправкой.'),
     ):
         body += ['<li>'+t(en,ru)+'</li>']
-    body += ['</ul></section><footer>BULL — Benchmarking &amp; Usage of Local Language Models · '+h(generated)+'<br>'+t('Offline report · no JavaScript, CDN or external requests', 'Автономный отчёт · без JavaScript, CDN и внешних запросов')+'</footer>']
+    body += ['</ul></section>'+('</details>' if bilingual else '')+'<footer>BULL — Benchmarking &amp; Usage of Local Language Models · '+h(generated)+'<br>'+t('Offline report · no JavaScript, CDN or external requests', 'Автономный отчёт · без JavaScript, CDN и внешних запросов')+'</footer>']
     return '<!doctype html>\n<html lang="'+language+'"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BULL · Results</title><style>'+STYLE+'</style></head><body><main>'+''.join(body)+'</main></body></html>'
+
+
+def _bilingual_section(rows,language):
+    t=lambda en,ru:choose(language,en,ru)
+    out=['<section id="bilingual"><div class="eyebrow">BULL / LANGUAGE COMPARISON</div><h2>'+t(
+        'RU and EN: separate evidence','RU и EN: отдельные результаты')+'</h2><p class="lead">'+t(
+        'No combined language winner. Scores reflect this pack’s deterministic checks, not general language competence. JSON compliance is not a semantic evaluation.',
+        'Общего победителя по языкам нет. Баллы отражают автоматические критерии этого набора, а не общую языковую компетентность. Правильный JSON не доказывает качество смысла.')+'</p>']
+    if any(row.get('legacy_language_scorer') for row in rows):
+        out+=['<aside class="notice">'+t(
+            'Historical scorer v1: foreign-script insertions could pass. Stored results are shown unchanged; use pack 1.0.1 for the corrected checks.',
+            'Исторический оценщик v1 мог пропускать вставки на другом языке. Сохранённые баллы не изменены; исправленная проверка доступна в наборе 1.0.1.')+'</aside>']
+    headings=(t('Track','Трек'),t('Runs / errors','Запуски / ошибки'),t('Native checks','Критерии Native'),
+              t('Correct language','Нужный язык'),t('No switching','Без переключений'),
+              t('Native time, s','Время Native, с'),'warm tok/s',t('Seed range','Диапазон seed'))
+    for row in rows:
+        out+=['<article class="model-card"><h3>'+h(row['model'])+'</h3><div class="table-wrap"><table><thead><tr>'+''.join('<th>'+h(s)+'</th>' for s in headings)+'</tr></thead><tbody>']
+        for track in ('ru','en'):
+            values=row['tracks'][track]
+            cells=(track.upper(),str(values['valid'])+'/'+str(values['observed'])+' · '+str(values['errors']),
+                   pct(values['score'])+' (n='+str(values['scored'])+')',
+                   pct(values['language_ok'])+' (n='+str(values['language_checked'])+')',pct(values['purity_ok']),
+                   fmt(values['native_seconds']),fmt(values['warm_tok_s'])+' (n='+str(values['warm_samples'])+')',
+                   pct(values['seed_min'])+'–'+pct(values['seed_max'])+' (n='+str(values['seeds'])+')')
+            out+=['<tr>'+''.join('<td>'+h(cell)+'</td>' for cell in cells)+'</tr>']
+        out+=['</tbody></table></div><p><strong>'+t('Matched RU/EN pairs: ','Сопоставленные пары RU/EN: ')+str(row['matched_pairs'])+'</strong> · '+t('ambiguous: ','неоднозначных: ')+str(row['ambiguous_pairs'])+'</p><p>'+t(
+            'Paired Native difference RU − EN: ','Парная разница Native RU − EN: ')+fmt(
+                row['score_delta']*100 if row['score_delta'] is not None else None,' pp')+' (n='+str(row['score_pairs'])+') · '+t(
+            'Native time difference RU − EN: ','Разница времени Native RU − EN: ')+fmt(row['native_seconds_delta'],' s')+'</p><p>'+t(
+            'All checks pass: both / RU only / EN only / neither: ',
+            'Все критерии выполнены: оба / только RU / только EN / ни один: ')+
+            ' / '.join(str(row[key]) for key in ('both_pass','ru_only_pass','en_only_pass','neither_pass'))+'</p></article>']
+    out+=['<p class="micro">'+t(
+        'Pairs match model digest, pack/scorer version, seed/run and effective configuration. Ambiguous attempts and unmatched rows are excluded from paired differences. Time and quality are model-native only; recovery is separate below. tok/s is tokenizer-dependent. Seed ranges are descriptive, not confidence intervals.',
+        'Пары сопоставлены по модели/digest, версии набора/оценщика, seed/run и параметрам. Неоднозначные попытки и строки без пары исключены из парных разностей. Время и качество здесь только model-native; recovery показан отдельно ниже. tok/s зависит от токенизатора. Диапазон seed описательный, не доверительный интервал.')+'</p></section>']
+    return ''.join(out)
 
 
 def _uncertainty_plots(details, language):

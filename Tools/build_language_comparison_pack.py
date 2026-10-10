@@ -27,11 +27,11 @@ def _case(case_id, track, pair_id, description, prompt, reference):
     language = "ru" if track == "ru" else "en"
     result = json.dumps(reference, ensure_ascii=False, separators=(",", ":"))
     definition = {
-        "version": 1,
+        "version": 2,
         "category": "language_comparison_" + track,
         "language_track": track,
         "bilingual_pair_id": pair_id,
-        "score_type": "bilingual_language_contract_v1",
+        "score_type": "bilingual_language_contract_v2",
         "expected_language": language,
         "description": description,
         "prompt": prompt,
@@ -49,10 +49,10 @@ def _case(case_id, track, pair_id, description, prompt, reference):
     }
     return {
         "id": case_id,
-        "version": 1,
+        "version": 2,
         "category": definition["category"],
         "runner_ref": "single_turn_v1",
-        "scorer_ref": "bilingual_language_contract_v1",
+        "scorer_ref": "bilingual_language_contract_v2",
         "verifier_ref": "benchmark_contract_v1",
         "definition": definition,
     }
@@ -119,10 +119,10 @@ def main() -> int:
     }
     manifest = {
         "schema": "bull-benchmark-pack-manifest", "schema_version": 1,
-        "id": "bull_language_comparison", "version": "1.0.0",
+        "id": "bull_language_comparison", "version": "1.0.1",
         "title": "BULL Language Comparison", "status": "candidate", "visibility": "public",
         "description": "Paired Russian and English prompts with equivalent contracts for language-specific quality and speed measurements.",
-        "engine": {"minimum_version": "0.28.0.7"},
+        "engine": {"minimum_version": "0.29.0.1"},
         "license": {"id": "MIT", "name": "MIT License", "file": "LICENSE.txt"},
         "provenance": {"source": "BULL public paired language track", "generator": "Tools/build_language_comparison_pack.py", "contains_personal_data": False},
         "taxonomy": sorted({row["category"] for row in cases}),
@@ -136,14 +136,15 @@ def main() -> int:
     _write_json(PACK_ROOT / "manifest.json", manifest)
     (PACK_ROOT / "LICENSE.txt").write_text("MIT License\n\nCopyright (c) BULL Contributors\n", encoding="utf-8", newline="\n")
     (PACK_ROOT / "README.md").write_text(
-        "# BULL Language Comparison 1.0.0\n\n"
+        "# BULL Language Comparison 1.0.1\n\n"
         "This candidate pack separates Russian and English prompt tracks. Each bilingual pair has the same task intent, structured result contract, context budget, and output budget. Compare the recorded native score, task completion, warm throughput, and wall time by language; do not combine the tracks into one model score.\n\n"
+        "Scorer revision 2 penalizes foreign-script insertions in prose; JSON keys are excluded. Prompts and reference answers are unchanged from 1.0.0. These deterministic checks are not a comprehensive semantic evaluation. Existing installed 1.0.0 packs and results are never rewritten.\n\n"
         "The pack contains no executable code. Its scorer ID is resolved by BULL's engine-owned allowlist.\n",
         encoding="utf-8", newline="\n",
     )
     policy = RegistryPolicy(
-        engine_version="0.28.0.7", runner_refs=frozenset({"single_turn_v1"}),
-        scorer_refs=frozenset({"bilingual_language_contract_v1"}),
+        engine_version="0.29.0.1", runner_refs=frozenset({"single_turn_v1"}),
+        scorer_refs=frozenset({"bilingual_language_contract_v2"}),
         verifier_refs=frozenset({"benchmark_contract_v1"}),
     )
     write_pack_lock(PACK_ROOT, policy, "public")

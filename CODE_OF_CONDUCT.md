@@ -1,5 +1,7 @@
 # BULL Community Code of Conduct
 
+[English](CODE_OF_CONDUCT.md) · [Русский](CODE_OF_CONDUCT_RU.md)
+
 ## Our standard
 
 BULL welcomes technical disagreement and rigorous criticism. We expect everyone
@@ -27,7 +29,7 @@ community.
 
 Use GitHub's built-in **Report content** flow for abuse or harassment. Do not
 publish personal details in an Issue. Security vulnerabilities follow
-[the security policy](.github/SECURITY.md), not the public conduct process.
+[the security policy](SECURITY.md), not the public conduct process.
 
 ## Attribution
 

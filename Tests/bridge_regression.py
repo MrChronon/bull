@@ -83,10 +83,12 @@ class BridgeTests(unittest.TestCase):
 
     def test_release_has_only_branded_launchers(self):
         for target in (
-            "BULL-v0.28.0.7.cmd",
-            "BULL-Benchmark-Lab-v0.28.0.7.cmd",
-            "BULL-Agent-Lab-v0.28.0.7.cmd",
-            "Install-BULL-v0.28.0.7.cmd",
+            "BULL-v0.29.0.1.cmd",
+            "BULL-Benchmark-Lab-v0.29.0.1.cmd",
+            "BULL-Agent-Lab-v0.29.0.1.cmd",
+            "Setup.exe",
+            "Setup.cmd",
+            "Setup/BULL.launcher.bin",
         ):
             self.assertTrue((ROOT / target).is_file(), target)
         retired_marker = "-".join(("local", "llm"))
@@ -97,15 +99,25 @@ class BridgeTests(unittest.TestCase):
     def test_client_installer_creates_isolated_shortcuts(self):
         with tempfile.TemporaryDirectory(prefix="bull-installer-") as temporary:
             root = Path(temporary)
+            from shutil import copyfile
+            client = root/'InstalledClient'
+            for source,target in (
+                ('Tools/Update-BULL-Shortcuts.ps1','Tools/Update-BULL-Shortcuts.ps1'),
+                ('Assets/Brand/bull-icon-matrix.ico','Assets/Brand/bull-icon-matrix.ico'),
+                ('BULL-v0.29.0.1.ico','BULL-v0.29.0.1.ico'),
+                ('Setup/BULL.launcher.bin','BULL.exe'),
+            ):
+                destination=client/target; destination.parent.mkdir(parents=True,exist_ok=True)
+                copyfile(ROOT/source,destination)
             desktop = root / "Desktop"
             programs = root / "Programs"
             result = subprocess.run(
                 [
                     "powershell.exe", "-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass",
-                    "-File", str(ROOT / "Install-BULL-v0.28.0.7.ps1"),
-                    "-Role", "Client", "-NonInteractive",
-                    "-ShortcutDesktop", str(desktop),
-                    "-ShortcutPrograms", str(programs),
+                    "-File", str(client / "Tools/Update-BULL-Shortcuts.ps1"), "-Quiet",
+                    "-DesktopDirectory", str(desktop),
+                    "-ProgramsDirectory", str(programs),
+                    "-ShortcutStatePath", str(root / 'shortcut_state.json'),
                 ],
                 cwd=ROOT,
                 capture_output=True,
@@ -114,6 +126,48 @@ class BridgeTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, (result.stdout + result.stderr).decode(errors="replace"))
             self.assertTrue((desktop / "BULL.lnk").is_file())
             self.assertTrue((programs / "BULL.lnk").is_file())
+            # Inspect the real shell links, then change their icon without
+            # changing target/working directory. Nothing touches the real Desktop.
+            reader = root / 'read_link.ps1'
+            reader.write_text('param([string]$Path)\n$w=New-Object -ComObject WScript.Shell\n'
+                              '$s=$w.CreateShortcut($Path)\n'
+                              '@{target=$s.TargetPath;icon=$s.IconLocation;working=$s.WorkingDirectory} | ConvertTo-Json\n', encoding='ascii')
+            env = {key:value for key,value in os.environ.items() if key.casefold() != 'psmodulepath'}
+            def read_link(path):
+                response = subprocess.run(['powershell.exe','-NoProfile','-ExecutionPolicy','Bypass',
+                                           '-File',str(reader),'-Path',str(path)],env=env,capture_output=True,timeout=20)
+                self.assertEqual(response.returncode,0,response.stderr.decode(errors='replace'))
+                return json.loads(response.stdout.decode('utf-8-sig'))
+            for theme, suffix in [('matrix_bright','bull-icon-matrix.ico,0'),('bull_red','BULL-v0.29.0.1.ico,0')]:
+                response = subprocess.run(['powershell.exe','-NoProfile','-ExecutionPolicy','Bypass',
+                    '-File',str(client/'Tools/Update-BULL-Shortcuts.ps1'),'-Quiet','-UpdateExistingOnly',
+                    '-Theme',theme,'-ShortcutStatePath',str(root/'shortcut_state.json')],
+                    env=env,capture_output=True,timeout=30)
+                self.assertEqual(response.returncode,0,response.stderr.decode(errors='replace'))
+                for directory in (desktop, programs):
+                    link = read_link(directory/'BULL.lnk')
+                    self.assertEqual(Path(link['target']),client/'BULL.exe')
+                    self.assertEqual(Path(link['working']),client)
+                    self.assertTrue(link['icon'].endswith(suffix),link['icon'])
+            # A same-named foreign shortcut, or an unowned empty working
+            # directory, must never be changed by the theme updater.
+            writer = root / 'foreign_link.ps1'
+            writer.write_text('param([string]$Path,[string]$Target,[string]$Working)\n'
+                              '$w=New-Object -ComObject WScript.Shell\n$s=$w.CreateShortcut($Path)\n'
+                              '$s.TargetPath=$Target\n$s.WorkingDirectory=$Working\n'
+                              '$s.IconLocation="shell32.dll,1"\n$s.Save()\n', encoding='ascii')
+            for target, working in [(str(root/'other.exe'),str(root)), (str(client/'BULL.exe'),'')]:
+                response = subprocess.run(['powershell.exe','-NoProfile','-ExecutionPolicy','Bypass',
+                    '-File',str(writer),'-Path',str(desktop/'BULL.lnk'),'-Target',target,'-Working',working],
+                    env=env,capture_output=True,timeout=20)
+                self.assertEqual(response.returncode,0,response.stderr.decode(errors='replace'))
+                previous = read_link(desktop/'BULL.lnk')
+                response = subprocess.run(['powershell.exe','-NoProfile','-ExecutionPolicy','Bypass',
+                    '-File',str(client/'Tools/Update-BULL-Shortcuts.ps1'),'-Quiet','-UpdateExistingOnly',
+                    '-Theme','matrix_bright','-ShortcutStatePath',str(root/'shortcut_state.json')],
+                    env=env,capture_output=True,timeout=30)
+                self.assertEqual(response.returncode,0,response.stderr.decode(errors='replace'))
+                self.assertEqual(read_link(desktop/'BULL.lnk'),previous)
 
     def test_brand_assets_are_local_safe_and_have_expected_sizes(self):
         brand = ROOT / "Assets" / "Brand"
@@ -128,7 +182,7 @@ class BridgeTests(unittest.TestCase):
                     "favicon.png": (32, 32), "github-social-preview.png": (1280, 640)}
         for name, size in expected.items():
             self.assertEqual(_png_size(brand / name), size)
-        _assert_ico(ROOT / "BULL-v0.28.0.7.ico")
+        _assert_ico(ROOT / "BULL-v0.29.0.1.ico")
         lock = json.loads((brand / "brand-lock.json").read_text(encoding="utf-8"))
         master = brand / lock["source_file"]
         self.assertEqual(hashlib.sha256(master.read_bytes()).hexdigest(), lock["source_sha256"])
@@ -136,12 +190,12 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(lock["derivation"], "crop_resize_only_no_redraw")
 
     def test_bridge_release_identity_and_measurement_freeze_are_documented(self):
-        core = (ROOT / "bull_client_v0.28.0.7.py").read_text(encoding="utf-8")
+        core = (ROOT / "bull_client_v0.29.0.1.py").read_text(encoding="utf-8")
         self.assertIn("APP_NAME='BULL — Benchmark Lab'", core)
-        self.assertIn("APP_VERSION='v0.28.0.7'", core)
+        self.assertIn("APP_VERSION='v0.29.0.1'", core)
         self.assertIn("'СОСТОЯНИЕ BULL'", core)
         self.assertNotIn("'LOCAL' + ' LLM DASHBOARD'", core)
-        notes = (ROOT / "Docs" / "RELEASE_NOTES_0.28.0.7.md").read_text(encoding="utf-8")
+        notes = (ROOT / "Docs" / "RELEASE_NOTES_0.29.0.1.md").read_text(encoding="utf-8")
         for phrase in ("Built-in benchmark prompts", "scorers", "runtime"):
             self.assertIn(phrase, notes)
 

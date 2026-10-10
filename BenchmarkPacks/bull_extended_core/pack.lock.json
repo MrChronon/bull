@@ -1,0 +1,12 @@
+{
+  "schema": "bull-benchmark-pack-lock",
+  "schema_version": 1,
+  "pack": {
+    "id": "bull_extended_core",
+    "version": "1.0.0"
+  },
+  "manifest_sha256": "7f387f9b0ce8d3c76dda8df6eb5f8cc43e1ca3e849517c3d8d4d67e2a07f8a1a",
+  "content_sha256": "173b8e40f3d8a4158d638875603b0c7557f2ac6b084da1608481626f79aba5e5",
+  "gold_sha256": "077090db1accf10972b9e1460285d91ebe3579f72b61d901b614e10cef1f5b59",
+  "compiled_sha256": "e3db1dbe3477dc488dea75d42bdb81fbca7eefef55ffb92983cb7f3005c25bda"
+}

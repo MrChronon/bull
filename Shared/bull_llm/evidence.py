@@ -194,6 +194,12 @@ def build_provenance(
         "fingerprints": fingerprints,
         "execution_order_sha256": stable_fingerprint(execution_order),
     }
+    snapshot = spec.get("pack_run_snapshot")
+    if snapshot:
+        from .evaluation.catalog import engine_registry_policy
+        from .evaluation.pack_evidence import snapshot_catalog, public_scope
+        snapshot_catalog(snapshot, spec.get("pack_selection"), engine_registry_policy(engine_version))
+        block["pack_run_scope"] = public_scope(snapshot)
     if migration:
         block["migration"] = _clone(migration)
     block["provenance_sha256"] = stable_fingerprint(block)
@@ -391,16 +397,19 @@ def _analytics(model_metrics: Sequence[Mapping[str, Any]], case_metrics: Sequenc
 
 
 def build_private_record_document(
-    records: Sequence[Mapping[str, Any]], provenance: Mapping[str, Any]
+    records: Sequence[Mapping[str, Any]], provenance: Mapping[str, Any], *, pack_snapshot=None
 ) -> dict[str, Any]:
     validate_provenance(provenance)
-    return {
+    document = {
         "schema": RECORD_SCHEMA,
         "schema_version": RECORD_SCHEMA_VERSION,
         "artifact_classification": "private",
         "provenance": _clone(provenance),
         "records": _clone(list(records)),
     }
+    if pack_snapshot is not None:
+        document["pack_run_snapshot"] = _clone(pack_snapshot)
+    return document
 
 
 def build_share_safe_summary_document(
@@ -519,7 +528,7 @@ def save_evidence_artifacts(
     provenance = build_provenance(
         records, spec=spec, engine_version=engine_version, source_sha256=source_hash
     )
-    private_document = build_private_record_document(records, provenance)
+    private_document = build_private_record_document(records, provenance, pack_snapshot=(spec or {}).get("pack_run_snapshot"))
     share_document = build_share_safe_summary_document(model_rows, case_rows, provenance)
     private_path, share_path = evidence_paths(source)
     _write_atomic_json(private_path, private_document)

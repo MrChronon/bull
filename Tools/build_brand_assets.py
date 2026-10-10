@@ -5,6 +5,9 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
+import re
+import shutil
+import sys
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
@@ -14,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 BRAND = ROOT / "Assets" / "Brand"
 MASTER = BRAND / "bull-logo-canonical.png"
 LOCK = BRAND / "brand-lock.json"
-VERSION = "v0.28.0.7"
+VERSION = "v0.29.0.1"
 EXPECTED_SHA256 = "60d91a700b9cd91ad3fd6ad598287a8e2cccd067f2ab0ed7515dd52af44b2269"
 RELEASE_RED = (255, 60, 82)
 
@@ -74,11 +77,54 @@ def svg_wrapper(png_name: str, width: int, height: int, *, label: str) -> str:
     )
 
 
+def build_terminal_mark() -> None:
+    """Sharper 48 x 24 ASCII-space cells; one resample from the locked crop."""
+    if sha256(MASTER) != EXPECTED_SHA256:
+        raise RuntimeError('Canonical logo changed')
+    with Image.open(MASTER) as opened:
+        mark = opened.convert('RGBA').crop((1336, 248, 1731, 643))
+    background = Image.new('RGBA', mark.size, '#000000')
+    background.alpha_composite(mark)
+    # Console cells are approximately twice as tall as they are wide. Sampling
+    # half as many rows preserves the square silhouette without special glyphs.
+    pixels = background.convert('RGB').resize((48, 24), Image.Resampling.LANCZOS)
+    rows = []
+    for y in range(24):
+        row = '\x1b[0m'
+        for x in range(48):
+            red, green, blue = pixels.getpixel((x, y))
+            row += f'\x1b[48;2;{red};{green};{blue}m '
+        rows.append(row + '\x1b[0m')
+    payload = ('\n'.join(rows) + '\n').encode('ascii')
+    (BRAND / 'bull-mark-console-48.ansi.b64').write_text(
+        base64.b64encode(payload).decode('ascii') + '\n', encoding='ascii')
+
+
+def build_theme_icons() -> None:
+    """Canonical geometry plus a small install arrow; no redraw of the bull."""
+    if sha256(MASTER) != EXPECTED_SHA256:
+        raise RuntimeError('Canonical logo changed')
+    with Image.open(MASTER) as opened:
+        source = opened.convert('RGBA').crop((1336, 248, 1731, 643))
+    sizes = [(16,16),(24,24),(32,32),(48,48),(64,64),(128,128),(256,256)]
+    green = recolour_brand_pixels(source, (54, 255, 115))
+    contain(green, (256,256), padding=16).save(BRAND/'bull-icon-matrix.ico', sizes=sizes)
+    setup = contain(recolour_brand_pixels(source, RELEASE_RED), (256,256), padding=16)
+    draw = ImageDraw.Draw(setup)
+    draw.rounded_rectangle((160,158,248,248),radius=15,fill='#111820',outline='#F4F7F5',width=4)
+    draw.line((204,172,204,218),fill='#F4F7F5',width=10)
+    draw.line((188,205,204,222,220,205),fill='#F4F7F5',width=8)
+    draw.line((184,234,224,234),fill='#F4F7F5',width=6)
+    setup.save(BRAND/'bull-setup.ico',sizes=sizes)
+
+
 def main() -> None:
     BRAND.mkdir(parents=True, exist_ok=True)
     actual = sha256(MASTER)
     if actual != EXPECTED_SHA256:
         raise RuntimeError(f"Canonical logo changed: {actual}")
+    build_terminal_mark()
+    build_theme_icons()
 
     with Image.open(MASTER) as opened:
         master = opened.convert("RGBA")
@@ -158,31 +204,31 @@ def main() -> None:
         blend = y / 639
         draw.line((0, y, 1280, y), fill=(21 + round(8 * blend), 9, 14 + round(7 * blend), 255))
     for x in range(0, 1281, 40):
-        draw.line((x, 0, x, 640), fill=(255, 96, 112, 15))
+        draw.line((x, 0, x, 640), fill=(39, 16, 25, 255))
     for y in range(0, 641, 40):
-        draw.line((0, y, 1280, y), fill=(255, 96, 112, 15))
+        draw.line((0, y, 1280, y), fill=(39, 16, 25, 255))
     draw.rounded_rectangle((24, 24, 1256, 616), radius=30, outline=(128, 35, 50, 230), width=2)
     draw.ellipse((40, 112, 476, 548), fill=(53, 10, 20, 255),
                  outline=(255, 60, 82, 150), width=3)
     social_mark = contain(red_mark_source, (430, 430), padding=22)
     social.alpha_composite(social_mark, (42, 105))
 
-    title_font = ui_font(58, bold=True)
+    title_font = ui_font(46, bold=True)
     label_font = ui_font(18, bold=True)
     body_font = ui_font(25)
     stat_font = ui_font(17, bold=True)
     x = 505
     draw.text((x, 112), "BULL", font=title_font, fill="#FF3C52")
     bull_width = draw.textbbox((0, 0), "BULL", font=title_font)[2]
-    draw.text((x + bull_width + 24, 112), "SIMPLE EXPERIENCE", font=title_font, fill="#F4F7F5")
-    draw.text((x, 190), "v0.28.0.7  ·  LOCAL MODEL COMPARISON",
+    draw.text((x + bull_width + 24, 112), "PACK LIBRARY", font=title_font, fill="#F4F7F5")
+    draw.text((x, 190), f"{VERSION}  ·  YOUR TASKS. YOUR MODELS.",
               font=label_font, fill="#D8919A")
     draw.line((x, 232, 1200, 232), fill="#FF6B7A", width=3)
 
     cards = (
-        ("COMPARE YOUR MODELS", "Quality · speed · stability · memory"),
-        ("BRING YOUR OWN TASKS", "TXT prompts · deterministic YAML contracts"),
-        ("DECIDE IN BULL", "Terminal summary · offline HTML · resume"),
+        ("CHOOSE YOUR TEST PACK", "Optional ZIPs · persistent shared library"),
+        ("BUILD TASKS FOR YOUR WORK", "Editable sources · positive / negative checks"),
+        ("RESUME WITH THE SAME TASKS", "Captured definitions · offline HTML reports"),
     )
     card_y = 262
     for title, detail in cards:
@@ -194,10 +240,17 @@ def main() -> None:
         card_y += 88
 
     draw.line((62, 565, 1218, 565), fill=(255, 107, 122, 110), width=2)
-    draw.text((62, 582), "400/400 REGRESSIONS", font=stat_font, fill="#FF3C52")
+    harness = (ROOT / "Tests" / "benchmark_regression.py").read_text(encoding="utf-8")
+    checks = int(re.search(r"STARTUP_CHECK_TOTAL=(\d+)", harness).group(1))
+    draw.text((62, 582), f"{checks}/{checks} OFFLINE CHECKS", font=stat_font, fill="#FF3C52")
     draw.text((330, 582), "OLLAMA  ·  LLAMA.CPP  ·  WINDOWS  ·  MIT",
               font=stat_font, fill="#D8919A")
     social.save(BRAND / "github-social-preview.png", optimize=True)
+
+    # Approved launch artwork is version-neutral; Tk supplies the current version
+    # and live checks. Copying avoids a fresh redraw on every patch release.
+    shutil.copyfile(BRAND / "startup-hero.png", BRAND / f"splash-{VERSION}.png")
+    shutil.copyfile(BRAND / "startup-hero-matrix.png", BRAND / f"splash-matrix-{VERSION}.png")
 
     lock = {
         "schema": "bull-brand-lock",
@@ -218,4 +271,11 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    if sys.argv[1:] == ['--terminal-only']:
+        build_terminal_mark()
+    elif sys.argv[1:] == ['--theme-icons-only']:
+        build_theme_icons()
+    elif not sys.argv[1:]:
+        main()
+    else:
+        raise SystemExit('Usage: build_brand_assets.py [--terminal-only | --theme-icons-only]')

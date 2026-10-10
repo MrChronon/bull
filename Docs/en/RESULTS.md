@@ -4,7 +4,9 @@
 
 The live line shows the current phase, elapsed time and approximate token rate.
 The token budget is a limit, not the percentage of the task completed. CPU, RAM,
-GPU and VRAM appear when the active inference host provides the sensors. The line
+GPU and VRAM belong to the active inference host. Each counter shows a measured
+value or `N/A` with its unavailable reason; missing GPU/VRAM is not hidden behind
+a CPU/RAM-only message. Unknown readings are never zero. The line
 fits the terminal width; narrow windows abbreviate sensors to G/V/C/R.
 
 After each saved run, BULL prints its Native score, Final score if different,
@@ -15,11 +17,15 @@ This is provisional: it does not rank models while test coverage is unequal.
 
 ## After a comparison
 
-The concise terminal view starts with top-three **places**, followed by model
+The generic terminal view for ordinary packs starts with top-three **places**, followed by model
 IDs, a numeric quality–speed map and a compact resource/completion summary.
 Long names wrap below the chart rather than changing its width. The result menu
 offers the HTML report, export files, custom priorities, answers and a separate
 **Detailed terminal metrics** view. No report requires an active model server.
+
+RU/EN uses the separate presentation below. After opening HTML or answers,
+BULL waits for the user's return; the next menu draw clears the old menu
+without changing saved results.
 
 ### Measured places and recommendations are different
 
@@ -53,7 +59,7 @@ Different recorded test/seed coverage, failed execution records or parameter
 sweeps disable recommendations. Descriptive measurements remain visible. Identical
 coverage alone does not prove identical hardware, output length or background load.
 
-## HTML report
+## Generic HTML report
 
 The report follows the selected application language (English or Russian) and
 works offline without JavaScript, a CDN or remote assets.
@@ -82,6 +88,53 @@ interval. SD is variability; a 95% interval is uncertainty around an estimate.
 **GEN** means generation ended; **TASK** means required structure/schema was
 satisfied. Neither proves semantic correctness. Final system quality, recovery
 and transport errors remain separate from Native quality.
+
+## RU/EN language report
+
+**Model testing → Language tracks** first selects an installed compatible pack
+and its exact version, then models. Russian, English and paired modes use that
+pack's tasks, not a hidden built-in catalog. UI language does not change test language.
+
+The terminal summary and first HTML section separate RU and EN:
+
+- **Native checks:** mean stored deterministic score and scored-answer count `n`,
+  not expert semantic quality.
+- **Correct language:** passing fraction among answers with a recorded language check.
+- **No switching:** passing fraction for prose purity. The terminal JSON is
+  excluded from language detection, so English JSON keys are not penalized.
+- **Native time:** mean primary-answer wall time before recovery, in seconds.
+  **Warm tok/s:** measured warm runs only, with observation count. Throughput
+  depends on the tokenizer and is not translation quality.
+- **Seed range:** minimum–maximum of per-seed mean scores and seed count;
+  descriptive variability, not a confidence interval.
+- **Coverage:** observed runs, errors and exact matched-pair count. `N/A` means
+  missing evidence, not failure or zero.
+
+A pair has exactly one RU and one EN answer for the same model, backend, digest,
+pack/scorer identity, seed/run, recorded generation settings and runtime
+fingerprint. Ambiguous attempts and unmatched answers are excluded from paired
+differences. Check pair counts before interpreting a difference.
+
+**Score difference RU − EN** uses percentage points: positive means higher RU
+scores in these pairs. **Time difference RU − EN** uses seconds: positive means
+longer Russian answers. Four outcomes show all checks passing in both languages /
+RU only / EN only / neither. Full success here requires full score, language,
+prose purity and Native task completion; it still does not prove domain truth.
+
+There is no combined language winner. Supplemental aggregate HTML tables are
+collapsed and explicitly not a bilingual ranking. Native and client assistance
+remain separate measurements.
+
+The current base pack **bull_language_comparison@1.0.1** uses scorer v2, penalizing
+foreign-script prose. Prompts, references and budgets are frozen from 1.0.0.
+Historical v1 could miss these insertions: old reports carry a caveat but scores
+are not recalculated. Install/select the new version explicitly; it never silently
+replaces the active version. Corrected measurements require a new 1.0.1 run.
+
+These six tasks test a limited contract. Even 100% for every model does not
+establish equal general language competence; semantics and style need human
+review. A general report-template mechanism for other nonstandard packs is not
+implemented yet; it is on the [roadmap](../BULL_TRANSITION_ROADMAP.md).
 
 ## Sharing and old results
 

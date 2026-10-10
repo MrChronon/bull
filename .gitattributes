@@ -1,0 +1,3 @@
+# Manifest hashes require byte-for-byte source/ZIP parity on every checkout.
+# Do not let core.autocrlf silently rewrite Windows scripts or other payloads.
+* -text

@@ -1,46 +1,46 @@
 {
   "cases": [
     {
-      "definition_sha256": "3a88ae5c4e790bdd0f029f71e4bea593df8d9dc045597cd4c455badf7fa5b69e",
+      "definition_sha256": "23049634a5616b74be7675eefca7203aee3940313e35969b26d0116517c50cde",
       "id": "lang_en_causal_caution",
       "prompt_sha256": "b24392897ce7398ef7973529b5f899cc0647961f23747af902a9fdb4ab277a17",
       "result_instruction_sha256": "39db8cb0fd88d4ee313befbd9afc739627db0677dd01a8ec99028a2a798dce7b",
-      "version": 1
+      "version": 2
     },
     {
-      "definition_sha256": "a809493bf04cfc5e2bdf192d5cfc9f8d86ce8baa6178e8a8c35a523ff9523451",
+      "definition_sha256": "05c7c7b26a4fc16177d867f3c2ca6b81b7c2a8adac2dd0fc2335643a071c684f",
       "id": "lang_en_instruction_precision",
       "prompt_sha256": "a7d0294d126b97c571cbcb05a3dcb6dfd1305f62cede1b18a10279b82fdf4fee",
       "result_instruction_sha256": "b1df672e9b093c5a334119899733bc7e38a31f82c9bb28903c48edfc9623fd2c",
-      "version": 1
+      "version": 2
     },
     {
-      "definition_sha256": "3bfdf84777bf08c53f2ea2cfe828102ee91e920270c20a5bb24252548010dd94",
+      "definition_sha256": "68ff579066f572ddb824b476f982a2b2baee6da9a15b821c2024a2c2ff39ac1b",
       "id": "lang_en_state_update",
       "prompt_sha256": "8b9dc8b107641fbec6ed41edc10e6a460703bdd77c9693c612d454159bcd9c5a",
       "result_instruction_sha256": "607b3478d02c1600e9993f6510ce85e6d4f3904dde3e7e04cf068982e01115e8",
-      "version": 1
+      "version": 2
     },
     {
-      "definition_sha256": "eb4f86c80d904ee1e98ba8b82cbec035868e360c9971589ca5a13fa5f62846ff",
+      "definition_sha256": "a41822ae69da322d23ac1cf644558b54d6e8ec294d917a563d725ddff4080fba",
       "id": "lang_ru_causal_caution",
       "prompt_sha256": "cf8caa89ccfa9319cb24b39ad94eb655a028a0557feeafa2cbe12dab003514b4",
       "result_instruction_sha256": "006157495e452eced65d7b9b88f0801c4aff9b6fcafdbbb8725829f99cd0577d",
-      "version": 1
+      "version": 2
     },
     {
-      "definition_sha256": "87b40e37e6da2018322822526f7a9da74474a49a29a42b18260f26bc4341b86c",
+      "definition_sha256": "01f279c1b0b4704117b2f225910998612e4e464a9d99ad87c165b47729f1838c",
       "id": "lang_ru_instruction_precision",
       "prompt_sha256": "6e7340b18396d87eca10a63a01899fa32b6b873f901d3ca2c0731d266722baff",
       "result_instruction_sha256": "a85eb06efaeb637eaff898193e54246b24c4458a851c4e0590e5971ec9dda5d6",
-      "version": 1
+      "version": 2
     },
     {
-      "definition_sha256": "f5f1c3f66f63f8c20be71b45a41b142ebab11ea5bb0a73d1abfb26a608c381b0",
+      "definition_sha256": "2ed324803c09e240c552b826dfe089fbc7ff96543a1c0d82fafed4a1dcbfe471",
       "id": "lang_ru_state_update",
       "prompt_sha256": "1ed0028d778c3081572505c150d4a2349e748fff4f4f19f9e534890387824893",
       "result_instruction_sha256": "117136c7762e9d5e89e13d5835905084cf66fda20e0bff8d87de18469a9d6a0c",
-      "version": 1
+      "version": 2
     }
   ],
   "schema": "bull-benchmark-pack-gold",

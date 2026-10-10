@@ -1,9 +1,18 @@
 # Runtime data: never publish
+/BULL.exe
+/.venv/
+/venv/
+/.codex/
+/.agents/
 /Chats/
 /Benchmarks/
 /Exports/
 /Workspace/
 /Runtime/
+/Workspaces/
+/PackExports/
+/Installed/
+/Trash/
 __pycache__/
 *.py[cod]
 client_debug.log
@@ -26,5 +35,7 @@ connection*.private.json
 
 # Local release artifacts
 *.zip
+!/BasePacks/*.zip
+!/Tests/Fixtures/bull_language_comparison@1.0.0.zip
 *.sha256.txt
 

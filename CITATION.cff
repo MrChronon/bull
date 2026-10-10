@@ -6,8 +6,9 @@ authors:
   - name: "BULL Contributors"
 repository-code: "https://github.com/MrChronon/bull"
 url: "https://github.com/MrChronon/bull"
-version: "0.28.0.7"
-date-released: "2026-10-07"
+version: "0.29.0.1"
+# Publication date in the maintainer's Europe/Moscow time zone; pre-release.
+date-released: "2026-10-11"
 license: MIT
 keywords:
   - local language models

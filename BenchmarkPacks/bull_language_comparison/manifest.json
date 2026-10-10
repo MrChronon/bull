@@ -2,16 +2,16 @@
   "content": {
     "case_count": 6,
     "cases_file": "cases.json",
-    "sha256": "ccf7a6f23b1ddd92776e899333eff48a616c26999f1be682e0095465c0ecb120"
+    "sha256": "f9ea17e4f0e999fcbf1d087bb91a31ef30e76cfa6db84d6d7f0d825ad9f4ddee"
   },
   "description": "Paired Russian and English prompts with equivalent contracts for language-specific quality and speed measurements.",
   "documentation": "README.md",
   "engine": {
-    "minimum_version": "0.28.0.7"
+    "minimum_version": "0.29.0.1"
   },
   "gold": {
     "file": "gold.json",
-    "sha256": "4a1c20ec08dfffb18844ccef905b11ca8107e03eea47e8a2e72f21e1f58c718d"
+    "sha256": "865b2e8fd6313c4b08cf8ae951ce23561486b499f91af91cfea61a59daaf3d26"
   },
   "id": "bull_language_comparison",
   "license": {
@@ -32,6 +32,6 @@
     "language_comparison_ru"
   ],
   "title": "BULL Language Comparison",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "visibility": "public"
 }
